@@ -26,7 +26,7 @@ const DEMO_CODES = {
 let currentCode = null;
 let selectedGame = null;
 let userBalance = 0;
-const API = "backendsite-production-6bcb.up.railway.app"; // Backend URL'ini buraya yaz — örn: https://mygame.railway.app
+const API = "https://backendsite-production-6bcb.up.railway.app";
 
 // =============================================
 // OVERLAY YÖNETİMİ
