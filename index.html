@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameVault | Dijital Oyun Mağazası</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- OVERLAY: Kod Giriş Ekranı -->
+<div id="code-overlay" class="overlay active">
+  <div class="overlay-box">
+    <div class="overlay-logo">🎮 GameVault</div>
+    <h2>Erişim Kodu Gir</h2>
+    <p>Satın aldığın erişim kodunu girerek oyunlarına ulaş.</p>
+    <div class="input-group">
+      <input type="text" id="access-code-input" placeholder="XXXX-XXXXXXXXXXXXXXXXXXXX" maxlength="30">
+      <button onclick="submitCode()">Devam Et →</button>
+    </div>
+    <div id="code-error" class="error-msg"></div>
+    <div class="overlay-footer">Kodunu mu unuttun? Satıcı ile iletişime geç.</div>
+  </div>
+</div>
+
+<!-- OVERLAY: Oyun Seçim Ekranı -->
+<div id="game-overlay" class="overlay">
+  <div class="overlay-box wide">
+    <div class="overlay-logo">🎮 GameVault</div>
+    <h2>Oyununu Seç</h2>
+    <p id="balance-info">Bakiyen: <span id="balance-display">1</span> oyun hakkı</p>
+    <div id="game-select-grid" class="game-select-grid"></div>
+    <div id="game-error" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- OVERLAY: Steam Kodu Ekranı -->
+<div id="steam-overlay" class="overlay">
+  <div class="overlay-box">
+    <div class="overlay-logo">🎮 GameVault</div>
+    <div class="steam-icon">♨️</div>
+    <h2 id="selected-game-name">Elden Ring</h2>
+    <p>Steam doğrulama kodun hazırlanıyor...</p>
+    <div id="steam-code-box" class="steam-code-box">
+      <div class="loader" id="steam-loader"></div>
+      <div id="steam-code-display" class="steam-code" style="display:none;"></div>
+    </div>
+    <div id="steam-instructions" style="display:none;">
+      <ol class="instructions">
+        <li>Steam'i aç ve <strong>Hesap</strong> menüsüne git</li>
+        <li><strong>Hesap Detayları</strong> → <strong>Oyun ve Yazılım Ekle</strong></li>
+        <li>Yukarıdaki kodu gir ve onayla</li>
+      </ol>
+    </div>
+    <button id="get-code-btn" class="btn-steam" onclick="requestSteamCode()">🔑 Steam Kodunu Al</button>
+    <button id="copy-btn" class="btn-copy" style="display:none;" onclick="copyCode()">📋 Kodu Kopyala</button>
+    <div id="steam-error" class="error-msg"></div>
+    <div class="overlay-footer" style="margin-top:1.5rem;">Sorun mu var? <a href="#">Destek al</a></div>
+  </div>
+</div>
+
+<!-- ANA SAYFA -->
+<nav>
+  <div class="logo">🎮 GameVault</div>
+  <div class="nav-links">
+    <a href="#" class="active">Oyunlar</a>
+    <a href="#">Fırsatlar</a>
+    <a href="#">Destek</a>
+  </div>
+  <button class="btn-enter" onclick="showOverlay('code-overlay')">🔑 Kodu Gir</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">EN İYİ FİYATLAR</div>
+    <h1>Dijital Oyunlar,<br><span>Anında Teslim.</span></h1>
+    <p>Güvenli ödeme, Steam'e anında aktarım. Binlerce oyun, tek platform.</p>
+    <button class="hero-btn" onclick="showOverlay('code-overlay')">Kodunu Gir & Başla</button>
+  </div>
+  <div class="hero-visual">
+    <div class="floating-card c1">🌌 Stellar Odyssey<div class="fc-price">₺249</div></div>
+    <div class="floating-card c2">⚔️ Dragon's Lair IV<div class="fc-price">₺189</div></div>
+    <div class="floating-card c3">🤖 Cyber Revolt<div class="fc-price">₺159</div></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section-header">
+    <div class="section-title">🔥 Popüler Oyunlar</div>
+    <button class="btn-code-small" onclick="showOverlay('code-overlay')">Kodu Gir →</button>
+  </div>
+  <div class="games-grid" id="main-grid"></div>
+</div>
+
+<footer>
+  <div class="footer-logo">🎮 GameVault</div>
+  <div class="footer-links">
+    <a href="#">Hakkımızda</a>
+    <a href="#">Gizlilik</a>
+    <a href="#">Kullanım Koşulları</a>
+    <a href="#">İletişim</a>
+  </div>
+  <div class="footer-copy">© 2025 GameVault. Tüm hakları saklıdır.</div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
