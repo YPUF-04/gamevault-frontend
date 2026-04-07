@@ -1,246 +1,239 @@
 // =============================================
-// OYUN LİSTESİ — Buraya kendi oyunlarını ekle
+// STATE & CONFIG
 // =============================================
-const GAMES = [
-  { id: "elden-ring",        name: "Elden Ring",         emoji: "⚔️",  platform: "PC / Steam", rating: "★★★★★ 4.9", price: "₺899",  old: "₺1.799", badge: "hot" },
-  { id: "gta5",              name: "GTA V",               emoji: "🚗",  platform: "PC / Steam", rating: "★★★★★ 4.8", price: "₺329",  old: "₺499",   badge: "sale" },
-  { id: "cyberpunk",         name: "Cyberpunk 2077",      emoji: "🤖",  platform: "PC / Steam", rating: "★★★★☆ 4.6", price: "₺649",  old: "₺1.299", badge: "sale" },
-  { id: "red-dead",          name: "Red Dead Redemption 2", emoji: "🤠", platform: "PC / Steam", rating: "★★★★★ 4.9", price: "₺549",  old: "",       badge: "" },
-  { id: "hogwarts",          name: "Hogwarts Legacy",     emoji: "🪄",  platform: "PC / Steam", rating: "★★★★☆ 4.5", price: "₺799",  old: "₺1.599", badge: "hot" },
-  { id: "god-of-war",        name: "God of War",          emoji: "🪓",  platform: "PC / Steam", rating: "★★★★★ 4.9", price: "₺499",  old: "",       badge: "new" },
-  { id: "star-wars",         name: "Jedi Survivor",       emoji: "⚡",  platform: "PC / Steam", rating: "★★★★☆ 4.4", price: "₺749",  old: "₺999",   badge: "" },
-  { id: "witcher3",          name: "The Witcher 3",        emoji: "🐺",  platform: "PC / Steam", rating: "★★★★★ 4.9", price: "₺249",  old: "₺499",   badge: "sale" },
-];
-
-// =============================================
-// KODLAR — Yönetim panelinden ekle (backend'de)
-// =============================================
-// Burada örnek; asıl kodlar backend'den gelir
-const DEMO_CODES = {
-  "DEMO-XXXX-TEST-0001": { balance: 1, used: false },
-};
-
-// =============================================
-// STATE
-// =============================================
+let GAMES = []; // Sunucudan yüklenecek oyun listesi
 let currentCode = null;
 let selectedGame = null;
 let userBalance = 0;
-const API = "https://backendsite-production-6bcb.up.railway.app";
+
+// KRİTİK: Kendi backend URL'ini başına https:// ekleyerek yaz
+const API = "https://backendsite-production-6bcb.up.railway.app"; 
 
 // =============================================
-// OVERLAY YÖNETİMİ
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAKLAR
 // =============================================
-function showOverlay(id) {
-  document.querySelectorAll(".overlay").forEach(o => o.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+document.addEventListener("DOMContentLoaded", () => {
+    loadGamesFromServer(); // Oyunları veritabanından çek
+    
+    // Enter tuşu ile kod gönderme desteği
+    const codeInput = document.getElementById("access-code-input");
+    if (codeInput) {
+        codeInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") submitCode();
+        });
+    }
+});
+
+// =============================================
+// OYUNLARI SUNUCUDAN YÜKLE
+// =============================================
+async function loadGamesFromServer() {
+    try {
+        const res = await fetch(`${API}/api/games`);
+        const data = await res.json();
+        if (data.success) {
+            GAMES = data.games; // Backend'den gelen oyunları listeye ata
+            renderMainGrid();   // Ana sayfadaki kartları oluştur
+        }
+    } catch (e) {
+        console.error("Oyunlar sunucudan çekilemedi:", e);
+    }
 }
 
 // =============================================
-// ANA SAYFA — OYUN KARTLARI
+// ANA SAYFA GRID YAPISI (DİNAMİK)
 // =============================================
 function renderMainGrid() {
-  const grid = document.getElementById("main-grid");
-  grid.innerHTML = GAMES.map(g => `
-    <div class="game-card" onclick="showOverlay('code-overlay')">
-      <div class="game-thumb">${g.emoji}</div>
-      ${g.badge ? `<div class="badge b-${g.badge}">${g.badge === 'hot' ? '🔥 HOT' : g.badge === 'new' ? '✨ YENİ' : '🏷️ İNDİRİM'}</div>` : ""}
-      <div class="game-body">
-        <div class="game-platform">${g.platform}</div>
-        <div class="game-name">${g.name}</div>
-        <div class="game-rating">${g.rating}</div>
-        <div class="game-bottom">
-          <div>
-            <div class="game-price">${g.price}</div>
-            ${g.old ? `<div class="game-old">${g.old}</div>` : ""}
-          </div>
+    const grid = document.getElementById("main-grid");
+    if (!grid) return;
+
+    if (GAMES.length === 0) {
+        grid.innerHTML = "<p style='color:gray; padding:20px;'>Henüz oyun eklenmemiş.</p>";
+        return;
+    }
+
+    grid.innerHTML = GAMES.map(g => `
+        <div class="game-card" onclick="showOverlay('code-overlay')">
+            <div class="game-thumb">${g.emoji || '🎮'}</div>
+            <div class="game-body">
+                <div class="game-platform">${g.platform || 'PC / Steam'}</div>
+                <div class="game-name">${g.name}</div>
+                <div class="game-bottom">
+                    <div class="game-price">${g.price || 'Hesap'}</div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  `).join("");
+    `).join("");
 }
 
 // =============================================
-// KOD DOĞRULAMA
+// KOD DOĞRULAMA (Kullanıcının girdiği erişim kodu)
 // =============================================
 async function submitCode() {
-  const input = document.getElementById("access-code-input");
-  const errEl = document.getElementById("code-error");
-  const code = input.value.trim().toUpperCase();
-  errEl.textContent = "";
+    const input = document.getElementById("access-code-input");
+    const errEl = document.getElementById("code-error");
+    const code = input.value.trim().toUpperCase();
+    errEl.textContent = "";
 
-  if (!code) {
-    errEl.textContent = "Lütfen bir kod gir.";
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/api/validate-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      currentCode = code;
-      userBalance = data.balance;
-      showGameSelect();
-    } else {
-      errEl.textContent = data.message || "Geçersiz veya kullanılmış kod.";
+    if (!code) {
+        errEl.textContent = "Lütfen bir kod gir.";
+        return;
     }
-  } catch (e) {
-    errEl.textContent = "Sunucuya bağlanılamadı. Lütfen tekrar dene.";
-  }
+
+    try {
+        const res = await fetch(`${API}/api/validate-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            currentCode = code;
+            userBalance = data.balance;
+            showGameSelect(); // Oyun seçim ekranına geç
+        } else {
+            errEl.textContent = data.message || "Geçersiz veya kullanılmış kod.";
+        }
+    } catch (e) {
+        errEl.textContent = "Sunucuya bağlanılamadı. İnternetinizi kontrol edin.";
+    }
 }
 
 // =============================================
 // OYUN SEÇİM EKRANI
 // =============================================
 function showGameSelect() {
-  document.getElementById("balance-display").textContent = userBalance;
-  const grid = document.getElementById("game-select-grid");
-  grid.innerHTML = GAMES.map(g => `
-    <div class="gs-card" onclick="selectGame('${g.id}')">
-      <div class="gs-emoji">${g.emoji}</div>
-      <div class="gs-name">${g.name}</div>
-      <div class="gs-platform">${g.platform}</div>
-    </div>
-  `).join("");
-  showOverlay("game-overlay");
+    document.getElementById("balance-display").textContent = userBalance;
+    const grid = document.getElementById("game-select-grid");
+    
+    grid.innerHTML = GAMES.map(g => `
+        <div class="gs-card" onclick="selectGame('${g.id}')">
+            <div class="gs-emoji">${g.emoji || '🎮'}</div>
+            <div class="gs-name">${g.name}</div>
+            <div class="gs-platform">Anında Teslimat</div>
+        </div>
+    `).join("");
+    
+    showOverlay("game-overlay");
 }
 
 // =============================================
 // OYUN SEÇME & ONAY
 // =============================================
 function selectGame(gameId) {
-  const game = GAMES.find(g => g.id === gameId);
-  if (!game) return;
-  selectedGame = game;
+    const game = GAMES.find(g => g.id === gameId);
+    if (!game) return;
+    selectedGame = game;
 
-  // Onay kutusu göster
-  let confirm = document.getElementById("gs-confirm-box");
-  if (!confirm) {
-    confirm = document.createElement("div");
-    confirm.id = "gs-confirm-box";
-    confirm.className = "gs-confirm";
-    document.getElementById("game-overlay").querySelector(".overlay-box").appendChild(confirm);
-  }
-  confirm.innerHTML = `
-    <h3>${game.emoji} ${game.name}</h3>
-    <p>Bu oyunu seçmek istediğine emin misin? Bakiyenden 1 hak düşecek.</p>
-    <div class="confirm-btns">
-      <button class="btn-yes" onclick="confirmGame()">✅ Evet, seç</button>
-      <button class="btn-no" onclick="closeConfirm()">İptal</button>
-    </div>
-  `;
-  confirm.classList.add("active");
+    let confirm = document.getElementById("gs-confirm-box");
+    if (!confirm) {
+        confirm = document.createElement("div");
+        confirm.id = "gs-confirm-box";
+        confirm.className = "gs-confirm";
+        document.getElementById("game-overlay").querySelector(".overlay-box").appendChild(confirm);
+    }
+    
+    confirm.innerHTML = `
+        <h3>${game.name}</h3>
+        <p>Bu hesabı almak istediğine emin misin?</p>
+        <div class="confirm-btns">
+            <button class="btn-yes" onclick="confirmGame()">✅ Evet</button>
+            <button class="btn-no" onclick="closeConfirm()">İptal</button>
+        </div>
+    `;
+    confirm.classList.add("active");
 }
 
 function closeConfirm() {
-  const c = document.getElementById("gs-confirm-box");
-  if (c) c.classList.remove("active");
+    const c = document.getElementById("gs-confirm-box");
+    if (c) c.classList.remove("active");
 }
 
 async function confirmGame() {
-  if (!selectedGame || !currentCode) return;
+    if (!selectedGame || !currentCode) return;
 
-  try {
-    const res = await fetch(`${API}/api/select-game`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: currentCode, gameId: selectedGame.id })
-    });
-    const data = await res.json();
+    try {
+        const res = await fetch(`${API}/api/select-game`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: currentCode, gameId: selectedGame.id })
+        });
+        const data = await res.json();
 
-    if (data.success) {
-      showSteamScreen();
-    } else {
-      document.getElementById("game-error").textContent = data.message || "Bir hata oluştu.";
+        if (data.success) {
+            showSteamScreen(); // Steam bilgileri ekranına git
+        } else {
+            alert(data.message);
+        }
+    } catch (e) {
+        alert("Sunucu hatası.");
     }
-  } catch (e) {
-    document.getElementById("game-error").textContent = "Sunucuya bağlanılamadı.";
-  }
 }
 
 // =============================================
-// STEAM KOD EKRANI
+// STEAM BİLGİLERİ VE KOD ÇEKME EKRANI
 // =============================================
 function showSteamScreen() {
-  document.getElementById("selected-game-name").textContent = `${selectedGame.emoji} ${selectedGame.name}`;
-  document.getElementById("steam-loader").style.display = "none";
-  document.getElementById("steam-code-display").style.display = "none";
-  document.getElementById("steam-instructions").style.display = "none";
-  document.getElementById("get-code-btn").style.display = "block";
-  document.getElementById("copy-btn").style.display = "none";
-  document.getElementById("steam-error").textContent = "";
-  showOverlay("steam-overlay");
+    document.getElementById("selected-game-name").textContent = selectedGame.name;
+    document.getElementById("steam-loader").style.display = "none";
+    document.getElementById("steam-code-display").style.display = "none";
+    document.getElementById("get-code-btn").style.display = "block";
+    document.getElementById("steam-error").textContent = "";
+    showOverlay("steam-overlay");
 }
 
 async function requestSteamCode() {
-  const btn = document.getElementById("get-code-btn");
-  const loader = document.getElementById("steam-loader");
-  const codeDisplay = document.getElementById("steam-code-display");
-  const instructions = document.getElementById("steam-instructions");
-  const copyBtn = document.getElementById("copy-btn");
-  const errEl = document.getElementById("steam-error");
+    const btn = document.getElementById("get-code-btn");
+    const loader = document.getElementById("steam-loader");
+    const codeDisplay = document.getElementById("steam-code-display");
+    const errEl = document.getElementById("steam-error");
 
-  btn.style.display = "none";
-  loader.style.display = "block";
-  errEl.textContent = "";
+    btn.style.display = "none";
+    loader.style.display = "block";
+    errEl.textContent = "";
 
-  try {
-    const res = await fetch(`${API}/api/get-steam-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: currentCode, gameId: selectedGame.id })
-    });
-    const data = await res.json();
+    try {
+        const res = await fetch(`${API}/api/get-steam-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: currentCode, gameId: selectedGame.id })
+        });
+        const data = await res.json();
 
-    loader.style.display = "none";
+        loader.style.display = "none";
 
-    if (data.success && data.steamCode) {
-      codeDisplay.textContent = data.steamCode;
-      codeDisplay.style.display = "block";
-      instructions.style.display = "block";
-      copyBtn.style.display = "block";
-    } else {
-      errEl.textContent = data.message || "Steam kodu alınamadı. Lütfen tekrar dene.";
-      btn.style.display = "block";
+        if (data.success) {
+            // Steam hesap bilgilerini ve kodu göster
+            codeDisplay.innerHTML = `
+                <div style="background: #1e2640; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; font-size: 14px;">
+                    <p><strong>Steam Kullanıcı:</strong> <span style="color:#4f8ef7">${data.steamUser}</span></p>
+                    <p><strong>Steam Şifre:</strong> <span style="color:#4f8ef7">${data.steamPass}</span></p>
+                </div>
+                <div style="font-size: 28px; color: #43e97b; letter-spacing: 5px; font-weight: bold;">
+                    ${data.steamCode}
+                </div>
+            `;
+            codeDisplay.style.display = "block";
+            document.getElementById("steam-instructions").style.display = "block";
+        } else {
+            errEl.textContent = data.message || "Kod alınamadı.";
+            btn.style.display = "block";
+        }
+    } catch (e) {
+        loader.style.display = "none";
+        errEl.textContent = "Bağlantı hatası.";
+        btn.style.display = "block";
     }
-  } catch (e) {
-    loader.style.display = "none";
-    errEl.textContent = "Sunucuya bağlanılamadı. Tekrar dene.";
-    btn.style.display = "block";
-  }
+}
+
+// =============================================
+// YARDIMCI FONKSİYONLAR
+// =============================================
+function showOverlay(id) {
+    document.querySelectorAll(".overlay").forEach(o => o.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
 }
 
 function copyCode() {
-  const code = document.getElementById("steam-code-display").textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById("copy-btn");
-    btn.textContent = "✅ Kopyalandı!";
-    setTimeout(() => btn.textContent = "📋 Kodu Kopyala", 2000);
-  });
-}
-
-// =============================================
-// ENTER ile kod gönder
-// =============================================
-document.addEventListener("DOMContentLoaded", () => {
-  renderMainGrid();
-  document.getElementById("access-code-input").addEventListener("keydown", e => {
-    if (e.key === "Enter") submitCode();
-  });
-});
-if (data.success) {
-    // Ekranda Steam bilgilerini göster
-    document.getElementById("steam-code-display").innerHTML = `
-        <div style="font-size:14px; color:#fff; margin-bottom:10px;">
-            <b>Kullanıcı:</b> ${data.steamUser}<br>
-            <b>Şifre:</b> ${data.steamPass}
-        </div>
-        <div style="color:#43e97b; font-size:24px;">Kod: ${data.steamCode}</div>
-    `;
-    document.getElementById("steam-code-display").style.display = "block";
-}
+    // S
