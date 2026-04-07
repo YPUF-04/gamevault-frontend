@@ -233,3 +233,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") submitCode();
   });
 });
+if (data.success) {
+    // Ekranda Steam bilgilerini göster
+    document.getElementById("steam-code-display").innerHTML = `
+        <div style="font-size:14px; color:#fff; margin-bottom:10px;">
+            <b>Kullanıcı:</b> ${data.steamUser}<br>
+            <b>Şifre:</b> ${data.steamPass}
+        </div>
+        <div style="color:#43e97b; font-size:24px;">Kod: ${data.steamCode}</div>
+    `;
+    document.getElementById("steam-code-display").style.display = "block";
+}
