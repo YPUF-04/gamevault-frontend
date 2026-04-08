@@ -110,13 +110,25 @@ function generateCaptcha() {
     if (a) a.value = "";
 }
 
-function checkPasswordStrength() {
-    const val  = document.getElementById("reg-password").value;
-    const fill = document.getElementById("pass-strength-fill");
-    const lbl  = document.getElementById("pass-strength-label");
-    const {pct, text, color} = getStrength(val);
-    fill.style.width = pct + "%"; fill.style.background = color;
-    lbl.textContent = val.length ? text : ""; lbl.style.color = color;
+function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length > 6) strength++;
+    if (password.match(/[A-Z]/)) strength++;
+    if (password.match(/[0-9]/)) strength++;
+    
+    const bar = document.getElementById("pass-strength-fill");
+    bar.className = ""; // reset
+    if (strength === 1) bar.classList.add("strength-weak");
+    else if (strength === 2) bar.classList.add("strength-medium");
+    else if (strength === 3) bar.classList.add("strength-strong");
+}
+// Bot doğrulaması (Kayıt ekranı için basit matematik)
+let captchaResult = 0;
+function generateCaptcha() {
+    const a = Math.floor(Math.random() * 10);
+    const b = Math.floor(Math.random() * 10);
+    captchaResult = a + b;
+    document.getElementById("captcha-text").textContent = `${a} + ${b} = ?`;
 }
 function checkCPStrength() {
     const val  = document.getElementById("cp-new-pass").value;
