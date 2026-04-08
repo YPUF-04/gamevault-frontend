@@ -4,194 +4,102 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GameVault | Dijital Oyun Mağazası</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- TOAST BİLDİRİMLER -->
-<div id="toast-container"></div>
-
-<!-- SATIN ALMA BİLDİRİMİ (sol alt) -->
-<div id="purchase-notification" class="purchase-notif"></div>
-
-<!-- ===================== OVERLAY: Giriş / Kayıt ===================== -->
-<div id="auth-overlay" class="overlay">
+<!-- OVERLAY: Kod Giriş Ekranı -->
+<div id="code-overlay" class="overlay active">
   <div class="overlay-box">
-    <div class="overlay-logo">⬡ GameVault</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
+    <div class="overlay-logo">🎮 GameVault</div>
+    <h2>Erişim Kodu Gir</h2>
+    <p>Satın aldığın erişim kodunu girerek oyunlarına ulaş.</p>
+    <div class="input-group">
+      <input type="text" id="access-code-input" placeholder="XXXX-XXXXXXXXXXXXXXXXXXXX" maxlength="30">
+      <button onclick="submitCode()">Devam Et →</button>
     </div>
-    <div id="login-form">
-      <div class="field-group">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="login-username" placeholder="kullaniciadiniz">
-      </div>
-      <div class="field-group">
-        <label>Şifre</label>
-        <input type="password" id="login-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="login()">Giriş Yap</button>
-      <div id="login-error" class="error-msg"></div>
-    </div>
-    <div id="register-form" style="display:none;">
-      <div class="field-group">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="reg-username" placeholder="benzersiz bir ad seç">
-      </div>
-      <div class="field-group">
-        <label>Şifre</label>
-        <input type="password" id="reg-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="register()">Kayıt Ol</button>
-      <div id="reg-error" class="error-msg"></div>
-    </div>
+    <div id="code-error" class="error-msg"></div>
+    <div class="overlay-footer">Kodunu mu unuttun? Satıcı ile iletişime geç.</div>
   </div>
 </div>
 
-<!-- ===================== OVERLAY: Kod Yükle ===================== -->
-<div id="code-overlay" class="overlay">
-  <div class="overlay-box">
-    <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <h2>Kodu Yükle</h2>
-    <p>Satın aldığın erişim kodunu girerek bakiyeni yükle.</p>
-    <div class="field-group">
-      <label>Erişim Kodu</label>
-      <input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" maxlength="35">
-    </div>
-    <button class="btn-primary" onclick="redeemCode()">Bakiyeyi Yükle</button>
-    <div id="redeem-error" class="error-msg"></div>
-  </div>
-</div>
-
-<!-- ===================== OVERLAY: Oyun Seç ===================== -->
+<!-- OVERLAY: Oyun Seçim Ekranı -->
 <div id="game-overlay" class="overlay">
   <div class="overlay-box wide">
-    <button class="overlay-close" onclick="closeOverlay('game-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <h2>Oyun Seç</h2>
-    <p>Bakiyen: <span id="balance-display-modal" class="accent-text">0</span> oyun hakkı</p>
+    <div class="overlay-logo">🎮 GameVault</div>
+    <h2>Oyununu Seç</h2>
+    <p id="balance-info">Bakiyen: <span id="balance-display">1</span> oyun hakkı</p>
     <div id="game-select-grid" class="game-select-grid"></div>
-    <div id="confirm-box" class="confirm-box" style="display:none;">
-      <h3 id="confirm-game-name">Oyun Adı</h3>
-      <p>Bu oyunu almak üzeresiniz. Onaylıyor musunuz?</p>
-      <div class="confirm-btns">
-        <button class="btn-yes" onclick="confirmPurchase()">✓ Evet, Al</button>
-        <button class="btn-no" onclick="closeConfirm()">İptal</button>
-      </div>
-    </div>
+    <div id="game-error" class="error-msg"></div>
   </div>
 </div>
 
-<!-- ===================== OVERLAY: Satın Alma Detayı / 2FA ===================== -->
-<div id="purchase-overlay" class="overlay">
+<!-- OVERLAY: Steam Kodu Ekranı -->
+<div id="steam-overlay" class="overlay">
   <div class="overlay-box">
-    <button class="overlay-close" onclick="closeOverlay('purchase-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <div class="steam-icon">♨</div>
-    <h2 id="po-game-name">Oyun Adı</h2>
-
-    <div class="account-info-box">
-      <div class="acc-row"><span class="acc-label">Kullanıcı</span><span class="acc-val" id="po-steam-user">—</span></div>
-      <div class="acc-row"><span class="acc-label">Şifre</span><span class="acc-val" id="po-steam-pass">—</span></div>
+    <div class="overlay-logo">🎮 GameVault</div>
+    <div class="steam-icon">♨️</div>
+    <h2 id="selected-game-name">Elden Ring</h2>
+    <p>Steam doğrulama kodun hazırlanıyor...</p>
+    <div id="steam-code-box" class="steam-code-box">
+      <div class="loader" id="steam-loader"></div>
+      <div id="steam-code-display" class="steam-code" style="display:none;"></div>
     </div>
-
-    <div class="code-request-area">
-      <div id="po-code-display" class="steam-code-display" style="display:none;"></div>
-      <div id="po-loader" class="loader" style="display:none;"></div>
-      <div id="po-requests-info" class="requests-info"></div>
-      <button id="po-get-code-btn" class="btn-primary" onclick="requestSteamCode()">🔑 Steam Doğrulama Kodu Al</button>
-    </div>
-
-    <div id="steam-instructions" class="instructions" style="display:none;">
-      <p class="instr-title">Nasıl kullanılır?</p>
-      <ol>
-        <li>Steam'i aç, hesaba giriş yap (kullanıcı + şifre yukarıda)</li>
-        <li>Steam Guard doğrulama kodu isteyecek</li>
-        <li>Yukarıdaki kodu gir</li>
+    <div id="steam-instructions" style="display:none;">
+      <ol class="instructions">
+        <li>Steam'i aç ve <strong>Hesap</strong> menüsüne git</li>
+        <li><strong>Hesap Detayları</strong> → <strong>Oyun ve Yazılım Ekle</strong></li>
+        <li>Yukarıdaki kodu gir ve onayla</li>
       </ol>
     </div>
-
-    <div id="po-error" class="error-msg"></div>
+    <button id="get-code-btn" class="btn-steam" onclick="requestSteamCode()">🔑 Steam Kodunu Al</button>
+    <button id="copy-btn" class="btn-copy" style="display:none;" onclick="copyCode()">📋 Kodu Kopyala</button>
+    <div id="steam-error" class="error-msg"></div>
+    <div class="overlay-footer" style="margin-top:1.5rem;">Sorun mu var? <a href="#">Destek al</a></div>
   </div>
 </div>
 
-<!-- ===================== OVERLAY: Hesabım / Geçmiş ===================== -->
-<div id="account-overlay" class="overlay">
-  <div class="overlay-box wide">
-    <button class="overlay-close" onclick="closeOverlay('account-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <h2>Hesabım</h2>
-    <div class="account-header-info">
-      <div class="acc-avatar" id="acc-avatar-letter">U</div>
-      <div>
-        <div class="acc-username" id="acc-display-username">—</div>
-        <div class="acc-balance">Bakiye: <span id="acc-display-balance">0</span> oyun hakkı</div>
-      </div>
-    </div>
-    <h3 class="section-label">Satın Aldığım Oyunlar</h3>
-    <div id="purchases-list" class="purchases-list">
-      <div class="empty-state">Henüz satın alım yok.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== NAV ===================== -->
-<nav id="main-nav">
-  <div class="logo">⬡ GameVault</div>
+<!-- ANA SAYFA -->
+<nav>
+  <div class="logo">🎮 GameVault</div>
   <div class="nav-links">
-    <a href="#games" class="active">Oyunlar</a>
-    <a href="#" onclick="showOverlay('code-overlay')">Kodu Yükle</a>
+    <a href="#" class="active">Oyunlar</a>
+    <a href="#">Fırsatlar</a>
     <a href="#">Destek</a>
   </div>
-  <div class="nav-right" id="nav-auth-area">
-    <button class="btn-nav-login" onclick="showOverlay('auth-overlay')">Giriş Yap</button>
-    <button class="btn-nav-register" onclick="switchAuthTab('register'); showOverlay('auth-overlay')">Kayıt Ol</button>
-  </div>
-  <div class="nav-right nav-user-area" id="nav-user-area" style="display:none;">
-    <div class="nav-balance">⬡ <span id="nav-balance">0</span></div>
-    <button class="btn-nav-account" onclick="openAccount()">👤 <span id="nav-username">—</span></button>
-    <button class="btn-nav-logout" onclick="logout()">Çıkış</button>
-  </div>
+  <button class="btn-enter" onclick="showOverlay('code-overlay')">🔑 Kodu Gir</button>
 </nav>
 
-<!-- ===================== HERO ===================== -->
-<section class="hero">
-  <div class="hero-bg"></div>
+<div class="hero">
   <div class="hero-content">
-    <div class="hero-badge">⚡ ANLIK TESLİMAT</div>
+    <div class="hero-badge">EN İYİ FİYATLAR</div>
     <h1>Dijital Oyunlar,<br><span>Anında Teslim.</span></h1>
-    <p>Güvenli ödeme, Steam'e anında aktarım.<br>Binlerce oyun, tek platform.</p>
-    <div class="hero-btns">
-      <button class="hero-btn-primary" onclick="scrollToGames()">Oyunları Keşfet</button>
-      <button class="hero-btn-secondary" onclick="handleCodeBtn()">🔑 Kod Yükle</button>
-    </div>
+    <p>Güvenli ödeme, Steam'e anında aktarım. Binlerce oyun, tek platform.</p>
+    <button class="hero-btn" onclick="showOverlay('code-overlay')">Kodunu Gir & Başla</button>
   </div>
   <div class="hero-visual">
-    <div class="floating-card fc1">🌌 Stellar Odyssey<div class="fc-price">₺249</div></div>
-    <div class="floating-card fc2">⚔️ Dragon's Lair IV<div class="fc-price">₺189</div></div>
-    <div class="floating-card fc3">🤖 Cyber Revolt<div class="fc-price">₺159</div></div>
+    <div class="floating-card c1">🌌 Stellar Odyssey<div class="fc-price">₺249</div></div>
+    <div class="floating-card c2">⚔️ Dragon's Lair IV<div class="fc-price">₺189</div></div>
+    <div class="floating-card c3">🤖 Cyber Revolt<div class="fc-price">₺159</div></div>
   </div>
-</section>
+</div>
 
-<!-- ===================== OYUNLAR ===================== -->
-<section class="container" id="games">
+<div class="container">
   <div class="section-header">
-    <div class="section-title">🔥 Oyun Kütüphanesi</div>
-    <button class="btn-outline" onclick="handleCodeBtn()">Kodu Yükle →</button>
+    <div class="section-title">🔥 Popüler Oyunlar</div>
+    <button class="btn-code-small" onclick="showOverlay('code-overlay')">Kodu Gir →</button>
   </div>
-  <div class="games-grid" id="main-grid">
-    <div class="loading-state">Oyunlar yükleniyor...</div>
-  </div>
-</section>
+  <div class="games-grid" id="main-grid"></div>
+</div>
 
-<!-- ===================== FOOTER ===================== -->
 <footer>
-  <div class="footer-logo">⬡ GameVault</div>
+  <div class="footer-logo">🎮 GameVault</div>
   <div class="footer-links">
-    <a href="#">Hakkımızda</a><a href="#">Gizlilik</a><a href="#">Koşullar</a><a href="#">İletişim</a>
+    <a href="#">Hakkımızda</a>
+    <a href="#">Gizlilik</a>
+    <a href="#">Kullanım Koşulları</a>
+    <a href="#">İletişim</a>
   </div>
   <div class="footer-copy">© 2025 GameVault. Tüm hakları saklıdır.</div>
 </footer>
