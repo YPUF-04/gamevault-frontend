@@ -12,13 +12,19 @@
 <!-- TOAST -->
 <div id="toast-container"></div>
 
-<!-- SATIN ALMA BİLDİRİMİ -->
+<!-- SATIN ALMA BİLDİRİMİ (sol alt) -->
 <div id="purchase-notification" class="purchase-notif"></div>
+
+<!-- LİDERBOARD (sol alt köşe — sabit) -->
+<div id="leaderboard-widget" class="leader-widget">
+  <div class="leader-widget-title">🏆 Top Alıcılar</div>
+  <div id="leader-widget-list"></div>
+</div>
 
 <!-- ============================================================
      OVERLAY: GİRİŞ / KAYIT
 ============================================================ -->
-<div id="auth-overlay" class="overlay active">
+<div id="auth-overlay" class="overlay">
   <div class="overlay-box">
     <div class="overlay-logo">♦ AşkımÇokPardon</div>
     <div class="auth-tabs">
@@ -42,7 +48,7 @@
       <button class="btn-primary" onclick="login()">Giriş Yap</button>
       <div id="login-error" class="error-msg"></div>
       <div class="auth-footer-link">
-        <button class="link-btn" onclick="openChangePassword()">Şifremi Unuttum</button>
+        <button class="link-btn" onclick="openForgotPassword()">Şifremi Unuttum</button>
       </div>
     </div>
 
@@ -76,7 +82,7 @@
           </div>
           <div id="pass2-match" class="field-hint"></div>
         </div>
-        <!-- hCaptcha yerine basit honeypot + math captcha -->
+        <!-- Matematik Captcha -->
         <div class="captcha-box" id="captcha-area">
           <span id="captcha-question"></span>
           <input type="number" id="captcha-answer" placeholder="Cevap">
@@ -100,47 +106,83 @@
 </div>
 
 <!-- ============================================================
-     OVERLAY: ŞİFRE DEĞİŞTİR
+     OVERLAY: ŞİFREMİ UNUTTUM (sadece bu kısım OTP ile)
+============================================================ -->
+<div id="forgot-pass-overlay" class="overlay">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeOverlay('forgot-pass-overlay')">✕</button>
+    <div class="overlay-logo">♦ AşkımÇokPardon</div>
+    <h2>Şifremi Unuttum</h2>
+    <div id="fp-step1">
+      <p style="color:var(--text2);font-size:14px;margin-bottom:1rem;">Kullanıcı adınızı girin, mail adresinize doğrulama kodu göndereceğiz.</p>
+      <div class="field-group">
+        <label>Kullanıcı Adı</label>
+        <input type="text" id="fp-username" placeholder="kullaniciadiniz">
+      </div>
+      <button class="btn-primary" onclick="sendForgotOTP()">Kod Gönder</button>
+      <div id="fp-error" class="error-msg"></div>
+    </div>
+    <div id="fp-step2" style="display:none;">
+      <p id="fp-mail-info" class="otp-info">📧 Mail adresinize kod gönderildi.</p>
+      <div class="field-group">
+        <label>Doğrulama Kodu</label>
+        <input type="text" id="fp-otp" placeholder="123456" maxlength="6" style="letter-spacing:6px;font-size:20px;text-align:center;">
+      </div>
+      <div class="field-group">
+        <label>Yeni Şifre</label>
+        <div class="pass-wrap">
+          <input type="password" id="fp-new-pass" placeholder="Yeni şifreniz" oninput="checkFPStrength()">
+          <button class="eye-btn" onclick="togglePass('fp-new-pass',this)">👁</button>
+        </div>
+        <div id="fp-strength" class="pass-strength-bar"><div id="fp-strength-fill"></div></div>
+        <div id="fp-strength-label" class="pass-strength-label"></div>
+      </div>
+      <div class="field-group">
+        <label>Yeni Şifre (tekrar)</label>
+        <div class="pass-wrap">
+          <input type="password" id="fp-new-pass2" placeholder="Tekrar girin">
+          <button class="eye-btn" onclick="togglePass('fp-new-pass2',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="completeForgotPassword()">Şifreyi Değiştir</button>
+      <div id="fp-step2-error" class="error-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     OVERLAY: ŞİFRE DEĞİŞTİR (giriş yapılıyken — mevcut şifre ile)
 ============================================================ -->
 <div id="change-pass-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('change-pass-overlay')">✕</button>
     <div class="overlay-logo">♦ AşkımÇokPardon</div>
     <h2>Şifre Değiştir</h2>
-    <div id="cp-step1">
-      <p style="color:var(--text2);font-size:14px;margin-bottom:1rem;">Kullanıcı adınızı girin, mail adresinize kod göndereceğiz.</p>
-      <div class="field-group">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="cp-username" placeholder="kullaniciadiniz">
+    <div class="field-group">
+      <label>Mevcut Şifre</label>
+      <div class="pass-wrap">
+        <input type="password" id="cp-current" placeholder="Mevcut şifreniz">
+        <button class="eye-btn" onclick="togglePass('cp-current',this)">👁</button>
       </div>
-      <button class="btn-primary" onclick="sendPasswordOTP()">Kod Gönder</button>
-      <div id="cp-error" class="error-msg"></div>
     </div>
-    <div id="cp-step2" style="display:none;">
-      <p id="cp-mail-info" class="otp-info">📧 Mail adresinize kod gönderildi.</p>
-      <div class="field-group">
-        <label>Doğrulama Kodu</label>
-        <input type="text" id="cp-otp" placeholder="123456" maxlength="6" style="letter-spacing:6px;font-size:20px;text-align:center;">
+    <div class="field-group">
+      <label>Yeni Şifre</label>
+      <div class="pass-wrap">
+        <input type="password" id="cp-new-pass" placeholder="Yeni şifreniz" oninput="checkCPStrength()">
+        <button class="eye-btn" onclick="togglePass('cp-new-pass',this)">👁</button>
       </div>
-      <div class="field-group">
-        <label>Yeni Şifre</label>
-        <div class="pass-wrap">
-          <input type="password" id="cp-new-pass" placeholder="Yeni şifreniz" oninput="checkCPStrength()">
-          <button class="eye-btn" onclick="togglePass('cp-new-pass',this)">👁</button>
-        </div>
-        <div id="cp-strength" class="pass-strength-bar"><div id="cp-strength-fill"></div></div>
-        <div id="cp-strength-label" class="pass-strength-label"></div>
-      </div>
-      <div class="field-group">
-        <label>Yeni Şifre (tekrar)</label>
-        <div class="pass-wrap">
-          <input type="password" id="cp-new-pass2" placeholder="Tekrar girin">
-          <button class="eye-btn" onclick="togglePass('cp-new-pass2',this)">👁</button>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="changePassword()">Şifreyi Değiştir</button>
-      <div id="cp-step2-error" class="error-msg"></div>
+      <div id="cp-strength" class="pass-strength-bar"><div id="cp-strength-fill"></div></div>
+      <div id="cp-strength-label" class="pass-strength-label"></div>
     </div>
+    <div class="field-group">
+      <label>Yeni Şifre (tekrar)</label>
+      <div class="pass-wrap">
+        <input type="password" id="cp-new-pass2" placeholder="Tekrar girin">
+        <button class="eye-btn" onclick="togglePass('cp-new-pass2',this)">👁</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="changePasswordDirect()">Şifreyi Değiştir</button>
+    <div id="cp-error" class="error-msg"></div>
   </div>
 </div>
 
@@ -276,7 +318,7 @@
         <input type="text" id="suggestion-game" placeholder="Oyun adını yaz...">
       </div>
       <div class="field-group">
-        <label>Eklemek İster misin? (opsiyonel)</label>
+        <label>Not (opsiyonel)</label>
         <textarea id="suggestion-note" rows="3" placeholder="Neden istediğini kısaca anlat..." style="width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;"></textarea>
       </div>
       <button class="btn-primary" onclick="sendSuggestion()">Öneriyi Gönder</button>
@@ -292,7 +334,7 @@
   <div class="logo">♦ AşkımÇokPardon</div>
   <div class="nav-links">
     <a href="#" onclick="scrollToTop()">Ana Sayfa</a>
-    <a href="#games-section">Oyunlar</a>
+    <a href="#games-section" onclick="handleGamesNavClick(event)">Oyunlar</a>
     <a href="#features-section">Özellikler</a>
     <a href="#" onclick="openSupport()">Destek</a>
   </div>
@@ -361,7 +403,7 @@
     <div class="section-title">🔥 Oyun Kütüphanesi</div>
     <button class="btn-outline" onclick="handleCodeBtn()">Kodu Yükle →</button>
   </div>
-  <p class="section-sub">Oyunları görmek için <strong>giriş yapmanız</strong> gerekmektedir.</p>
+  <p class="section-sub" id="games-sub">Oyunları görmek için <strong>giriş yapmanız</strong> gerekmektedir.</p>
   <div class="games-grid" id="main-grid">
     <div class="games-locked-overlay" id="games-locked">
       <div class="lock-icon">🔒</div>
