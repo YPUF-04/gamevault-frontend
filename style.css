@@ -57,8 +57,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pass-wrap input{padding-right:44px;}
 .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--text2);padding:0;}
 .field-hint{font-size:12px;margin-top:4px;min-height:16px;}
-.pass-strength-bar{height:4px;background:var(--border);border-radius:4px;margin-top:6px;overflow:hidden;}
-.pass-strength-bar div{height:100%;border-radius:4px;transition:width .4s,background .4s;width:0%;}
+.pass-strength-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.pass-strength-bar div {
+  height: 100%;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+.strength-weak { background: var(--red); width: 33%; }
+.strength-medium { background: var(--yellow); width: 66%; }
+.strength-strong { background: var(--green); width: 100%; }
 .pass-strength-label{font-size:11px;margin-top:4px;font-weight:700;}
 .captcha-box{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);}
 .captcha-box input{flex:1;max-width:80px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:15px;font-weight:700;text-align:center;}
