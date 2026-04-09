@@ -146,23 +146,17 @@ function gameCardHTML(g) {
 }
 
 // =============================================
-// TÜM OYUNLAR OVERLAY (nav'dan açılır)
+// SMOOTH SCROLL TO GAMES (effectli geçiş)
 // =============================================
-function openAllGames() {
-  if (!currentUser) { showOverlay("auth-overlay"); return; }
-  document.getElementById("all-games-balance").textContent = currentUser.balance;
-  const grid = document.getElementById("all-games-grid");
-  grid.innerHTML = GAMES.map(g => `
-    <div class="gs-card" onclick="handleGameClick('${g.id}'); closeOverlay('all-games-overlay');">
-      ${g.image
-        ? `<div class="gs-img" style="background-image:url('${API}${g.image}')"></div>`
-        : `<div class="gs-emoji">${g.emoji || '🎮'}</div>`
-      }
-      <div class="gs-name">${g.name}</div>
-      <div class="gs-platform">${g.platform || 'PC / Steam'}</div>
-    </div>
-  `).join("");
-  showOverlay("all-games-overlay");
+function smoothScrollToGames(e) {
+  if (e) e.preventDefault();
+  const gamesSection = document.getElementById("games");
+  if (!gamesSection) return;
+  gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // =============================================
@@ -241,11 +235,13 @@ async function login() {
 
 async function register() {
   const username = document.getElementById("reg-username").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
   const password = document.getElementById("reg-password").value.trim();
   const password2 = document.getElementById("reg-password2").value.trim();
   const errEl = document.getElementById("reg-error");
   errEl.style.color = "var(--red)";
-  if (!username || !password || !password2) { errEl.textContent = "Tüm alanları doldur."; return; }
+  if (!username || !email || !password || !password2) { errEl.textContent = "Tüm alanları doldur."; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = "Geçerli bir e-posta gir."; return; }
   if (password.length < 4) { errEl.textContent = "Şifre en az 4 karakter olmalı."; return; }
   if (password !== password2) { errEl.textContent = "Şifreler eşleşmiyor."; return; }
   errEl.style.color = "var(--text2)";
@@ -254,7 +250,7 @@ async function register() {
     const res = await fetch(`${API}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, email, password })
     });
     const data = await res.json();
     if (data.success) {
@@ -337,7 +333,6 @@ function handleGameClick(gameId) {
   if (!game) return;
   selectedGameForPurchase = game;
 
-  // Onay overlay'ini doldur
   const imgEl = document.getElementById("bco-game-image");
   if (game.image) {
     imgEl.style.backgroundImage = `url('${API}${game.image}')`;
@@ -489,7 +484,7 @@ function openSupportFromPurchase() {
   selectSupportTypeByVal("extra_code");
   document.getElementById("support-message").value = `Oyun: ${gameName}\nPurchase ID: ${currentPurchaseId}\n\n5 hak bitti, ekstra kod talep ediyorum.`;
   closeOverlay("purchase-overlay");
-  showOverlay("support-overlay");
+  openSupport();
 }
 
 // =============================================
@@ -536,7 +531,7 @@ async function loadPurchaseHistory() {
 }
 
 // =============================================
-// DESTEK — güzel tip seçimi
+// DESTEK — kullanıcının oyunlarını da göster
 // =============================================
 function selectSupportType(btn, val) {
   document.querySelectorAll(".support-type-btn").forEach(b => b.classList.remove("active"));
@@ -551,12 +546,65 @@ function selectSupportTypeByVal(val) {
   document.getElementById("support-type").value = val;
 }
 
-function openSupport() {
+async function openSupport() {
   if (!currentUser) { showOverlay("auth-overlay"); return; }
   document.getElementById("support-message").value = "";
   document.getElementById("support-error").textContent = "";
   selectSupportTypeByVal("steam_code");
   showOverlay("support-overlay");
+  loadSupportData();
+}
+
+async function loadSupportData() {
+  // Kullanıcının aldığı oyunları yükle
+  try {
+    const res = await fetch(`${API}/api/my-purchases?username=${encodeURIComponent(currentUser.username)}`);
+    const data = await res.json();
+    const section = document.getElementById("support-purchases-section");
+    const listEl = document.getElementById("support-purchases-list");
+    if (data.success && data.purchases && data.purchases.length) {
+      section.style.display = "block";
+      listEl.innerHTML = data.purchases.map(p => `
+        <div class="support-purchase-item">
+          <span class="spi-emoji">${p.gameEmoji || '🎮'}</span>
+          <span class="spi-name">${p.gameName}</span>
+          <span class="spi-requests">${p.steamCodeRequests||0}/5 hak</span>
+        </div>
+      `).join("");
+    } else {
+      section.style.display = "none";
+    }
+  } catch(e) {
+    document.getElementById("support-purchases-section").style.display = "none";
+  }
+
+  // Önceki yanıtları yükle (eğer API varsa)
+  try {
+    const res = await fetch(`${API}/api/my-support?username=${encodeURIComponent(currentUser.username)}`);
+    const data = await res.json();
+    const section = document.getElementById("support-replies-section");
+    const listEl = document.getElementById("support-replies-list");
+    if (data.success && data.tickets && data.tickets.length) {
+      const withReplies = data.tickets.filter(t => t.adminReply);
+      if (withReplies.length) {
+        section.style.display = "block";
+        listEl.innerHTML = withReplies.map(t => `
+          <div class="support-reply-item">
+            <div class="support-reply-meta">
+              <span class="support-reply-admin">GameVault Destek</span> • ${formatDate(t.repliedAt || t.createdAt)}
+            </div>
+            <div class="support-reply-text">${t.adminReply}</div>
+          </div>
+        `).join("");
+      } else {
+        section.style.display = "none";
+      }
+    } else {
+      section.style.display = "none";
+    }
+  } catch(e) {
+    document.getElementById("support-replies-section").style.display = "none";
+  }
 }
 
 async function sendSupportRequest() {
@@ -578,7 +626,7 @@ async function sendSupportRequest() {
       errEl.style.color = "var(--green)";
       errEl.textContent = "✓ Talebiniz alındı! En kısa sürede dönüş yapılacak.";
       document.getElementById("support-message").value = "";
-      setTimeout(() => closeOverlay("support-overlay"), 2000);
+      setTimeout(() => { errEl.textContent = ""; }, 4000);
     } else {
       errEl.style.color = "var(--red)";
       errEl.textContent = data.message;
@@ -593,16 +641,6 @@ async function sendSupportRequest() {
 // SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
 // =============================================
 async function showRecentPurchaseNotifs() {
-  // Önce gerçek son satın alımları getirmeyi dene
-  let pool = [];
-  try {
-    const res = await fetch(`${API}/api/stats`);
-    const data = await res.json();
-    // Gerçek veri yoksa fake pool kullan
-  } catch(e) {}
-
-  // Gerçekten gerçek satın alım listesi açık API olmadığı için
-  // fakePurchasePool kullanıyoruz ama daha seyrek gösteriyoruz
   const fakePool = [
     { u: "Ahmet***", g: "Elden Ring", e: "⚔️" },
     { u: "Murat***", g: "Cyberpunk 2077", e: "🤖" },
@@ -614,17 +652,17 @@ async function showRecentPurchaseNotifs() {
     { u: "Ayşe***", g: "The Witcher 3", e: "🗡️" },
   ];
 
-  let i = 0;
+  let i = Math.floor(Math.random() * fakePool.length);
   function next() {
     const n = fakePool[i % fakePool.length];
     showPurchaseNotification(n.u, n.g, n.e);
     i++;
-    // Daha seyrek göster: 20-35 saniye aralık
-    const delay = 20000 + Math.random() * 15000;
+    // Seyrek göster: 25-45 saniye aralık
+    const delay = 25000 + Math.random() * 20000;
     setTimeout(next, delay);
   }
-  // İlk bildirimi 8 saniye sonra göster
-  setTimeout(next, 8000);
+  // İlk bildirimi 12 saniye sonra göster
+  setTimeout(next, 12000);
 }
 
 function showPurchaseNotification(username, gameName, emoji) {
