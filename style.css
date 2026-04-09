@@ -315,18 +315,116 @@ body {
 }
 .btn-outline:hover { background: rgba(0,212,255,0.08); }
 
-/* Load more button */
-.btn-load-more {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  padding: 12px 28px; border-radius: 12px;
-  font-size: 14px; font-weight: 700;
+/* Load more button — YENİ TASARIM */
+.btn-load-more-new {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(123,94,248,0.08));
+  border: 1px solid rgba(0,212,255,0.25);
+  color: #00d4ff;
+  padding: 14px 36px; border-radius: 50px;
+  font-size: 15px; font-weight: 700;
   cursor: pointer; font-family: 'DM Sans', sans-serif;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  overflow: hidden;
+  letter-spacing: 0.3px;
 }
-.btn-load-more:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+.btn-load-more-new .blm-glow {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(123,94,248,0.12));
+  opacity: 0; transition: opacity 0.3s;
+  border-radius: inherit;
+}
+.btn-load-more-new:hover {
+  border-color: rgba(0,212,255,0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,212,255,0.18), 0 0 0 1px rgba(0,212,255,0.15);
+}
+.btn-load-more-new:hover .blm-glow { opacity: 1; }
+.btn-load-more-new:active { transform: translateY(0); }
+.btn-load-more-new svg { transition: transform 0.3s; flex-shrink: 0; }
+.btn-load-more-new:hover svg { transform: translateY(3px); }
+.blm-count {
+  background: rgba(0,212,255,0.15);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 20px; padding: 2px 10px;
+  font-size: 12px; font-weight: 700; color: #00d4ff;
+}
+
+/* ===== HESABIM — STAT CLICKABLE ===== */
+.acc-stat-clickable {
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s !important;
+}
+.acc-stat-clickable:hover {
+  border-color: rgba(0,210,255,0.25) !important;
+  background: rgba(0,210,255,0.04) !important;
+  transform: translateY(-2px);
+}
+
+/* ===== DESTEK — Admin yanıt bölümü (en üst) ===== */
+.sri-section-title {
+  font-size: 0.72rem; font-weight: 700;
+  color: #a78bfa; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.sri-section-title::after { content:''; flex:1; height:1px; background: rgba(123,94,248,0.15); }
+.support-reply-item-new {
+  background: rgba(123,94,248,0.05);
+  border: 1px solid rgba(123,94,248,0.2);
+  border-radius: 14px; padding: 1rem 1.125rem;
+  margin-bottom: 0.75rem;
+  animation: fadeInUp 0.4s ease both;
+}
+.sri-header {
+  display: flex; align-items: center; gap: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+.sri-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.sri-meta { flex: 1; }
+.sri-name { font-size: 0.78rem; font-weight: 700; color: #a78bfa; display: block; }
+.sri-time { font-size: 0.67rem; color: #4a566a; }
+.sri-grant-badge {
+  background: rgba(0,232,122,0.1); border: 1px solid rgba(0,232,122,0.25);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 0.67rem; font-weight: 700; color: #00e87a; flex-shrink: 0;
+}
+.sri-body {
+  font-size: 0.875rem; color: #d0d8ec; line-height: 1.65;
+  margin-bottom: 0.5rem;
+}
+.sri-subject { font-size: 0.67rem; color: #4a566a; }
+
+/* ===== DESTEK — Oyun listesi (progress bar'lı) ===== */
+.support-purchase-item { cursor: default; }
+.spi-clickable {
+  cursor: pointer !important;
+  transition: border-color 0.2s, background 0.2s !important;
+}
+.spi-clickable:hover {
+  border-color: rgba(0,212,255,0.3) !important;
+  background: rgba(0,212,255,0.06) !important;
+}
+.spi-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.spi-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.spi-bar {
+  flex: 1; height: 4px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden;
+}
+.spi-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.spi-req-warn { color: var(--red) !important; }
+.spi-extra-btn {
+  font-size: 0.67rem; font-weight: 700; color: #00d2ff;
+  background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.2);
+  border-radius: 20px; padding: 3px 10px; flex-shrink: 0; white-space: nowrap;
+}
 
 /* ===================== GAMES GRID ===================== */
 .games-grid {
