@@ -507,24 +507,38 @@ async function loadPurchaseHistory() {
     const data = await res.json();
     if (!data.success || !data.purchases.length) {
       listEl.innerHTML = "<div class='empty-state'>Henüz satın alım yok.</div>";
+      // Update total games count
+      const totalGamesEl = document.getElementById("acc-total-games");
+      if (totalGamesEl) totalGamesEl.textContent = "0";
       return;
     }
-    listEl.innerHTML = data.purchases.map(p => `
+    // Update total games count
+    const totalGamesEl = document.getElementById("acc-total-games");
+    if (totalGamesEl) totalGamesEl.textContent = data.purchases.length;
+
+    listEl.innerHTML = data.purchases.map(p => {
+      const used = p.steamCodeRequests || 0;
+      const pct = Math.min((used / 5) * 100, 100);
+      const isMax = used >= 5;
+      return `
       <div class="purchase-item">
         <div class="pi-emoji">${p.gameEmoji || '🎮'}</div>
         <div class="pi-info">
           <div class="pi-name">${p.gameName}</div>
           <div class="pi-meta">${formatDate(p.purchasedAt)} • ${p.steamUser || ''}</div>
-          <div class="pi-requests-bar">
-            <div class="pi-req-fill" style="width:${((p.steamCodeRequests||0)/5)*100}%"></div>
+          <div class="purchase-item-action-row">
+            <div class="pi-reqs-bar">
+              <div class="pi-reqs-fill" style="width:${pct}%;${isMax ? 'background:rgba(255,63,92,0.8)' : ''}"></div>
+            </div>
+            <span class="pi-reqs-label" style="${isMax ? 'color:rgba(255,63,92,0.7)' : ''}">${used}/5</span>
           </div>
-          <div class="pi-requests">${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı</div>
         </div>
-        <button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0})">
+        <button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${used})">
           🔑 Kodu Al
         </button>
       </div>
-    `).join("");
+    `;
+    }).join("");
   } catch (e) {
     listEl.innerHTML = "<div class='empty-state'>Yüklenemedi.</div>";
   }
@@ -564,13 +578,30 @@ async function loadSupportData() {
     const listEl = document.getElementById("support-purchases-list");
     if (data.success && data.purchases && data.purchases.length) {
       section.style.display = "block";
-      listEl.innerHTML = data.purchases.map(p => `
-        <div class="support-purchase-item">
-          <span class="spi-emoji">${p.gameEmoji || '🎮'}</span>
-          <span class="spi-name">${p.gameName}</span>
-          <span class="spi-requests">${p.steamCodeRequests||0}/5 hak</span>
+      listEl.innerHTML = data.purchases.map(p => {
+        const used = p.steamCodeRequests || 0;
+        const pct = Math.min((used / 5) * 100, 100);
+        const isMax = used >= 5;
+        return `
+        <div class="support-user-purchase-card">
+          <div class="supc-emoji">${p.gameEmoji || '🎮'}</div>
+          <div class="supc-info">
+            <div class="supc-name">${p.gameName}</div>
+            <div class="supc-meta">
+              <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.2rem;">
+                <div style="flex:1;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">
+                  <div style="height:100%;width:${pct}%;background:${isMax ? 'rgba(255,63,92,0.8)' : 'linear-gradient(90deg,#00d2ff,#7b2ff7)'};border-radius:2px;"></div>
+                </div>
+                <span style="font-size:0.62rem;color:${isMax ? 'rgba(255,63,92,0.7)' : '#3a4455'};">${used}/5 hak</span>
+              </div>
+            </div>
+          </div>
+          ${isMax ? `
+            <button class="supc-btn" onclick="requestExtraRightFromSupport('${p.id}','${escHtml(p.gameName)}')">🔄 Ekstra Hak</button>
+          ` : ''}
         </div>
-      `).join("");
+        `;
+      }).join("");
     } else {
       section.style.display = "none";
     }
@@ -578,7 +609,7 @@ async function loadSupportData() {
     document.getElementById("support-purchases-section").style.display = "none";
   }
 
-  // Önceki yanıtları yükle (eğer API varsa)
+  // Önceki yanıtları yükle
   try {
     const res = await fetch(`${API}/api/my-support?username=${encodeURIComponent(currentUser.username)}`);
     const data = await res.json();
@@ -589,11 +620,12 @@ async function loadSupportData() {
       if (withReplies.length) {
         section.style.display = "block";
         listEl.innerHTML = withReplies.map(t => `
-          <div class="support-reply-item">
-            <div class="support-reply-meta">
-              <span class="support-reply-admin">GameVault Destek</span> • ${formatDate(t.repliedAt || t.createdAt)}
+          <div class="support-reply-card">
+            <div class="src-header">
+              <span class="src-badge">🎧 GameVault Destek</span>
+              <span class="src-date">${formatDate(t.repliedAt || t.createdAt)}</span>
             </div>
-            <div class="support-reply-text">${t.adminReply}</div>
+            <div class="src-text">${t.adminReply}</div>
           </div>
         `).join("");
       } else {
@@ -605,6 +637,13 @@ async function loadSupportData() {
   } catch(e) {
     document.getElementById("support-replies-section").style.display = "none";
   }
+}
+
+function requestExtraRightFromSupport(purchaseId, gameName) {
+  selectSupportTypeByVal("extra_code");
+  document.getElementById("support-message").value = `Oyun: ${gameName}\nSatın Alım ID: ${purchaseId}\n\n5 hak kullandım, ekstra kod talebi yapıyorum.`;
+  document.getElementById("support-message").focus();
+  showToast("Ekstra hak talebi formu dolduruldu, mesajınızı gönderin.", "info");
 }
 
 async function sendSupportRequest() {
@@ -641,28 +680,34 @@ async function sendSupportRequest() {
 // SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
 // =============================================
 async function showRecentPurchaseNotifs() {
-  const fakePool = [
-    { u: "Ahmet***", g: "Elden Ring", e: "⚔️" },
-    { u: "Murat***", g: "Cyberpunk 2077", e: "🤖" },
-    { u: "Emre***", g: "GTA V", e: "🏙️" },
-    { u: "Burak***", g: "Red Dead 2", e: "🤠" },
-    { u: "Deniz***", g: "FIFA 25", e: "⚽" },
-    { u: "Selin***", g: "Hogwarts Legacy", e: "🧙" },
-    { u: "Kerem***", g: "Baldur's Gate 3", e: "🐉" },
-    { u: "Ayşe***", g: "The Witcher 3", e: "🗡️" },
-  ];
+  let pool = [];
+  let idx = 0;
 
-  let i = Math.floor(Math.random() * fakePool.length);
+  try {
+    const res = await fetch(`${API}/api/recent-purchases`);
+    const data = await res.json();
+    if (data.success && data.purchases && data.purchases.length > 0) {
+      pool = data.purchases;
+    }
+  } catch(e) {}
+
+  // API boşsa hiç gösterme
+  if (!pool.length) return;
+
+  // Karıştır
+  pool = pool.sort(() => Math.random() - 0.5);
+
   function next() {
-    const n = fakePool[i % fakePool.length];
-    showPurchaseNotification(n.u, n.g, n.e);
-    i++;
-    // Seyrek göster: 25-45 saniye aralık
-    const delay = 25000 + Math.random() * 20000;
+    if (!pool.length) return;
+    const n = pool[idx % pool.length];
+    showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
+    idx++;
+    // Seyrek göster: 30-55 saniye aralık
+    const delay = 30000 + Math.random() * 25000;
     setTimeout(next, delay);
   }
-  // İlk bildirimi 12 saniye sonra göster
-  setTimeout(next, 12000);
+  // İlk bildirimi 15 saniye sonra göster
+  setTimeout(next, 15000);
 }
 
 function showPurchaseNotification(username, gameName, emoji) {
