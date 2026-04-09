@@ -6,11 +6,521 @@
 <title>GameVault | Dijital Oyun Mağazası</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+
+/* ===== PURCHASE NOTIFICATIONS (BOTTOM LEFT) ===== */
+#purchase-notification {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.pn-item {
+  background: rgba(15,15,20,0.95);
+  border: 1px solid rgba(0,210,255,0.2);
+  border-left: 3px solid #00d2ff;
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 220px;
+  max-width: 300px;
+  animation: pnSlideIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards, pnFadeOut 0.4s ease 4.5s forwards;
+  box-shadow: 0 4px 24px rgba(0,210,255,0.1);
+}
+.pn-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#00d2ff,#7b2ff7);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.75rem; color: #fff;
+  flex-shrink: 0;
+}
+.pn-text { font-size: 0.72rem; color: #c8d0e0; line-height: 1.4; }
+.pn-text strong { color: #00d2ff; }
+.pn-game { color: #a78bfa; font-size: 0.68rem; }
+@keyframes pnSlideIn { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+@keyframes pnFadeOut { from { opacity:1; } to { opacity:0; transform:translateY(10px); } }
+
+/* ===== HOW SECTION ENHANCED ===== */
+.how-section {
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+.how-section::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,210,255,0.04) 0%, transparent 70%);
+  pointer-events:none;
+}
+.how-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 3rem;
+  position: relative;
+}
+.how-step {
+  flex: 1;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s;
+}
+.how-step::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(135deg, rgba(0,210,255,0.06) 0%, transparent 60%);
+  opacity:0;
+  transition: opacity 0.4s;
+}
+.how-step:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(0,210,255,0.3);
+  box-shadow: 0 20px 60px rgba(0,210,255,0.12), 0 0 0 1px rgba(0,210,255,0.1);
+}
+.how-step:hover::before { opacity:1; }
+.how-step.step-active {
+  border-color: rgba(0,210,255,0.5);
+  box-shadow: 0 0 40px rgba(0,210,255,0.15);
+}
+.how-step.step-active::before { opacity:1; }
+.how-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(0,210,255,0.12);
+  line-height: 1;
+  margin-bottom: 1rem;
+  letter-spacing: -2px;
+}
+.how-step:hover .how-num { color: rgba(0,210,255,0.25); transition: color 0.3s; }
+.how-icon-wrap {
+  width: 64px; height: 64px;
+  background: rgba(0,210,255,0.08);
+  border: 1px solid rgba(0,210,255,0.15);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem;
+  margin-bottom: 1.25rem;
+  transition: transform 0.3s, background 0.3s;
+}
+.how-step:hover .how-icon-wrap {
+  transform: scale(1.1) rotate(-4deg);
+  background: rgba(0,210,255,0.15);
+}
+.how-step h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f0f2f8;
+  margin-bottom: 0.5rem;
+}
+.how-step p { font-size: 0.875rem; color: #7a8499; line-height: 1.65; }
+.how-connector {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 1rem;
+  position: relative;
+}
+.how-connector-line {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, rgba(0,210,255,0.3), rgba(123,47,247,0.3));
+  position: relative;
+}
+.how-connector-arrow {
+  position: absolute;
+  right: -6px;
+  width: 10px; height: 10px;
+  border-top: 1.5px solid rgba(0,210,255,0.4);
+  border-right: 1.5px solid rgba(0,210,255,0.4);
+  transform: rotate(45deg);
+  animation: arrowPulse 1.5s ease-in-out infinite;
+}
+@keyframes arrowPulse {
+  0%,100% { opacity:0.4; transform: rotate(45deg) translate(-2px,-2px); }
+  50% { opacity:1; transform: rotate(45deg) translate(2px,2px); }
+}
+.how-step-glow {
+  position:absolute;
+  bottom:-30px; right:-30px;
+  width:100px; height:100px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(0,210,255,0.08), transparent 70%);
+  pointer-events:none;
+}
+
+/* ===== ACCOUNT OVERLAY ENHANCED ===== */
+.account-overlay-hero {
+  background: linear-gradient(135deg, rgba(0,210,255,0.06) 0%, rgba(123,47,247,0.06) 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.account-overlay-hero::before {
+  content:'';
+  position:absolute;
+  top:-40px; right:-40px;
+  width:160px; height:160px;
+  background: radial-gradient(circle, rgba(0,210,255,0.06), transparent 70%);
+  pointer-events:none;
+}
+.acc-avatar-new {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; font-weight: 900; color: #fff;
+  font-family: 'Orbitron', monospace;
+  flex-shrink: 0;
+  box-shadow: 0 0 30px rgba(0,210,255,0.25);
+  border: 2px solid rgba(0,210,255,0.3);
+}
+.acc-info-new .acc-username-new {
+  font-size: 1.4rem; font-weight: 700;
+  font-family: 'Orbitron', monospace;
+  color: #f0f2f8;
+  letter-spacing: 1px;
+}
+.acc-info-new .acc-email-new {
+  font-size: 0.8rem; color: #5a6478; margin-top: 0.2rem;
+}
+.acc-balance-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: rgba(0,210,255,0.1);
+  border: 1px solid rgba(0,210,255,0.2);
+  border-radius: 20px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  color: #00d2ff;
+  font-weight: 600;
+  margin-top: 0.6rem;
+}
+.acc-balance-chip .balance-icon { font-size: 0.9rem; }
+.acc-stats-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.acc-stat-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+}
+.acc-stat-val { font-size: 1.5rem; font-weight: 700; color: #00d2ff; font-family: 'Orbitron',monospace; }
+.acc-stat-lbl { font-size: 0.72rem; color: #5a6478; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.acc-games-title {
+  font-size: 0.75rem; font-weight: 600;
+  color: #5a6478; text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.acc-games-title::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.05); }
+.purchases-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.purchase-item-new {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.purchase-item-new:hover {
+  border-color: rgba(0,210,255,0.15);
+  background: rgba(0,210,255,0.03);
+}
+.purchase-item-img {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(123,47,247,0.15));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.purchase-item-info { flex: 1; }
+.purchase-item-name { font-size: 0.875rem; font-weight: 600; color: #d0d8ec; }
+.purchase-item-meta { font-size: 0.72rem; color: #4a566a; margin-top: 0.15rem; }
+.purchase-item-btn {
+  background: rgba(0,210,255,0.08);
+  border: 1px solid rgba(0,210,255,0.2);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  color: #00d2ff;
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.purchase-item-btn:hover { background: rgba(0,210,255,0.18); }
+.acc-logout-btn {
+  width: 100%; margin-top: 1rem;
+  background: rgba(255,60,60,0.06);
+  border: 1px solid rgba(255,60,60,0.15);
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: rgba(255,100,100,0.8);
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.acc-logout-btn:hover { background: rgba(255,60,60,0.12); color: #ff6464; }
+
+/* ===== SUPPORT OVERLAY REDESIGN ===== */
+.support-box-new {
+  max-width: 520px;
+  width: 100%;
+}
+.support-hero-bar {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(0,210,255,0.06), rgba(123,47,247,0.04));
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0,210,255,0.1);
+}
+.support-hero-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(123,47,247,0.1));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink:0;
+}
+.support-hero-title { font-size: 1.1rem; font-weight: 700; color: #f0f2f8; }
+.support-hero-sub { font-size: 0.78rem; color: #5a6478; margin-top: 0.15rem; }
+.support-resp-badge {
+  margin-left: auto;
+  background: rgba(0,210,255,0.08);
+  border: 1px solid rgba(0,210,255,0.15);
+  border-radius: 20px;
+  padding: 0.3rem 0.7rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+.support-resp-badge .resp-time { font-size: 0.9rem; font-weight: 700; color: #00d2ff; font-family:'Orbitron',monospace; }
+.support-resp-badge .resp-lbl { font-size: 0.62rem; color: #5a6478; }
+.support-field-label {
+  font-size: 0.7rem; font-weight: 600; color: #5a6478;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 0.6rem;
+}
+.support-type-grid-new {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.support-type-btn-new {
+  display: flex; align-items: center; gap: 0.6rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: left;
+}
+.support-type-btn-new:hover {
+  border-color: rgba(0,210,255,0.25);
+  background: rgba(0,210,255,0.04);
+}
+.support-type-btn-new.active {
+  border-color: rgba(0,210,255,0.5);
+  background: rgba(0,210,255,0.08);
+  box-shadow: 0 0 0 1px rgba(0,210,255,0.15) inset;
+}
+.stn-icon {
+  width: 36px; height: 36px;
+  background: rgba(0,210,255,0.08);
+  border-radius: 10px;
+  display: flex; align-items:center; justify-content:center;
+  font-size: 1rem;
+  flex-shrink:0;
+  transition: background 0.25s;
+}
+.support-type-btn-new.active .stn-icon { background: rgba(0,210,255,0.15); }
+.stn-label { font-size: 0.8rem; font-weight: 600; color: #c8d0e0; }
+.stn-desc { font-size: 0.67rem; color: #4a566a; margin-top: 0.1rem; line-height: 1.3; }
+.support-input-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.support-field { margin-bottom: 0.75rem; }
+.support-field label {
+  display: block;
+  font-size: 0.7rem; font-weight: 600; color: #5a6478;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 0.4rem;
+}
+.support-field input,
+.support-field textarea,
+.support-field select {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #d0d8ec;
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+.support-field input:focus,
+.support-field textarea:focus {
+  border-color: rgba(0,210,255,0.35);
+  box-shadow: 0 0 0 3px rgba(0,210,255,0.06);
+}
+.support-field input.required-field { border-color: rgba(0,210,255,0.2); }
+.support-field textarea { resize: vertical; min-height: 100px; }
+.support-mail-note {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.7rem; color: #5a6478; margin-top: 0.25rem;
+}
+.support-mail-note span { color: rgba(0,210,255,0.7); }
+.support-send-btn-new {
+  width: 100%;
+  padding: 0.95rem;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+  margin-top: 0.5rem;
+}
+.support-send-btn-new:hover {
+  opacity: 0.9; transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,210,255,0.2);
+}
+.support-prev-tickets {
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding-top: 1.25rem;
+}
+
+/* ===== GAME CARD CLICK ANIMATION ===== */
+@keyframes cardClickPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.game-card-clicked {
+  animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ===== SCROLL TO GAME HIGHLIGHT ===== */
+@keyframes gameHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(0,210,255,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(0,210,255,0); }
+}
+.game-highlight {
+  animation: gameHighlight 1s ease;
+}
+
+/* ===== FOOTER MINIMALIST ===== */
+footer {
+  border-top: 1px solid rgba(255,255,255,0.04);
+  background: #080a0f;
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2rem 2rem;
+}
+.footer-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.footer-brand .footer-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f0f2f8;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+.footer-brand .footer-desc {
+  font-size: 0.8rem; color: #3a4455; line-height: 1.6; max-width: 220px;
+}
+.footer-cols { display: flex; gap: 3rem; }
+.footer-col-title { font-size: 0.65rem; font-weight: 600; color: #3a4455; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; }
+.footer-col-links { display: flex; flex-direction: column; gap: 0.4rem; }
+.footer-col-links a { font-size: 0.8rem; color: #4a566a; text-decoration: none; transition: color 0.2s; }
+.footer-col-links a:hover { color: #00d2ff; }
+.footer-social-mini { display: flex; gap: 0.6rem; }
+.social-btn-mini {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  display: flex; align-items:center; justify-content:center;
+  color: #4a566a;
+  text-decoration:none;
+  transition: all 0.2s;
+}
+.social-btn-mini:hover { background: rgba(0,210,255,0.08); color: #00d2ff; border-color: rgba(0,210,255,0.2); }
+.footer-bottom-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.footer-copy { font-size: 0.72rem; color: #2a3040; }
+.footer-made { font-size: 0.72rem; color: #2a3040; }
+
+/* ===== OVERLAY SCROLL ANIMATION ===== */
+.overlay {
+  transition: opacity 0.3s ease;
+}
+.overlay.showing {
+  animation: overlayIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes overlayIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+.overlay-box {
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+}
+.overlay.showing .overlay-box {
+  animation: boxIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes boxIn {
+  from { opacity:0; transform: translateY(20px) scale(0.97); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+</style>
 </head>
 <body>
 
 <div id="toast-container"></div>
-<div id="purchase-notification" class="purchase-notif"></div>
+
+<!-- ===== PURCHASE NOTIFICATIONS ===== -->
+<div id="purchase-notification"></div>
 
 <!-- ===== OVERLAY: Giriş / Kayıt ===== -->
 <div id="auth-overlay" class="overlay">
@@ -140,66 +650,121 @@
   </div>
 </div>
 
-<!-- ===== OVERLAY: Hesabım ===== -->
+<!-- ===== OVERLAY: Hesabım (YENİ TASARIM) ===== -->
 <div id="account-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('account-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <h2>Hesabım</h2>
-    <div class="account-header-info">
-      <div class="acc-avatar" id="acc-avatar-letter">U</div>
-      <div>
-        <div class="acc-username" id="acc-display-username">—</div>
-        <div class="acc-balance">Bakiye: <span id="acc-display-balance">0</span> oyun hakkı</div>
+
+    <!-- Hero card -->
+    <div class="account-overlay-hero">
+      <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
+      <div class="acc-info-new">
+        <div class="acc-username-new" id="acc-display-username">—</div>
+        <div class="acc-email-new" id="acc-display-email">kullanici@gamevault.com</div>
+        <div class="acc-balance-chip">
+          <span class="balance-icon">⬡</span>
+          <span id="acc-display-balance">0</span> oyun hakkı
+        </div>
       </div>
     </div>
-    <h3 class="section-label">Satın Aldığım Oyunlar</h3>
+
+    <!-- İstatistikler -->
+    <div class="acc-stats-row">
+      <div class="acc-stat-card">
+        <div class="acc-stat-val" id="acc-total-games">0</div>
+        <div class="acc-stat-lbl">Satın Alınan</div>
+      </div>
+      <div class="acc-stat-card">
+        <div class="acc-stat-val" style="color:#a78bfa;">7/24</div>
+        <div class="acc-stat-lbl">Destek Hattı</div>
+      </div>
+    </div>
+
+    <!-- Oyunlar -->
+    <div class="acc-games-title">Satın Aldığım Oyunlar</div>
     <div id="purchases-list" class="purchases-list">
       <div class="empty-state">Henüz satın alım yok.</div>
     </div>
+
+    <button class="acc-logout-btn" onclick="logout()">↩ Çıkış Yap</button>
   </div>
 </div>
 
-<!-- ===== OVERLAY: Destek ===== -->
+<!-- ===== OVERLAY: Destek (YENİ TASARIM) ===== -->
 <div id="support-overlay" class="overlay">
-  <div class="overlay-box support-box">
+  <div class="overlay-box support-box-new">
     <button class="overlay-close" onclick="closeOverlay('support-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
 
-    <div class="support-header-new">
-      <div class="support-header-icon-new">🎧</div>
+    <!-- Hero bar -->
+    <div class="support-hero-bar">
+      <div class="support-hero-icon">🎧</div>
       <div>
-        <h2 class="support-title-new">Destek Merkezi</h2>
-        <p class="support-sub-new">Ekibimiz ortalama <strong>~15 dk</strong> içinde yanıt verir.</p>
+        <div class="support-hero-title">Destek Merkezi</div>
+        <div class="support-hero-sub">Sorununu bize anlat, hızlıca çözelim.</div>
+      </div>
+      <div class="support-resp-badge">
+        <div class="resp-time">~15dk</div>
+        <div class="resp-lbl">Ort. Yanıt</div>
       </div>
     </div>
 
-    <!-- Kullanıcının aldığı oyunlar -->
+    <!-- Satın alınan oyunlar (varsa) -->
     <div id="support-purchases-section" style="display:none;">
-      <div class="support-section-label">📦 Satın Aldığın Oyunlar</div>
-      <div id="support-purchases-list" class="support-purchases-list"></div>
+      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
+      <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
     </div>
 
     <!-- Talep türü -->
-    <div class="support-section-label" style="margin-top:1.25rem;">📋 Talep Türü</div>
-    <div class="support-type-grid">
-      <button class="support-type-btn active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')">🔑<span>Steam Kodu Sorunu</span></button>
-      <button class="support-type-btn" data-val="extra_code" onclick="selectSupportType(this,'extra_code')">🔄<span>Ekstra Kod Talebi</span></button>
-      <button class="support-type-btn" data-val="account" onclick="selectSupportType(this,'account')">👤<span>Hesap Sorunu</span></button>
-      <button class="support-type-btn" data-val="general" onclick="selectSupportType(this,'general')">💬<span>Genel</span></button>
+    <div class="support-field-label" style="margin-bottom:0.6rem;">📋 Talep Türü</div>
+    <div class="support-type-grid-new">
+      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')">
+        <div class="stn-icon">🔑</div>
+        <div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div>
+      </button>
+      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')">
+        <div class="stn-icon">🔄</div>
+        <div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div>
+      </button>
+      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')">
+        <div class="stn-icon">👤</div>
+        <div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div>
+      </button>
+      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')">
+        <div class="stn-icon">💬</div>
+        <div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div>
+      </button>
     </div>
     <input type="hidden" id="support-type" value="steam_code">
 
-    <div class="field-group" style="margin-top:1rem;">
-      <label>Mesajınız</label>
-      <textarea id="support-message" class="support-textarea" placeholder="Sorununuzu detaylı açıklayın..." rows="4"></textarea>
+    <!-- İsim + Mail zorunlu -->
+    <div class="support-input-row">
+      <div class="support-field">
+        <label>Adınız / Kullanıcı Adı</label>
+        <input type="text" id="support-name" placeholder="Kullanıcı adınız">
+      </div>
+      <div class="support-field">
+        <label>E-posta <span style="color:#00d2ff;">*</span></label>
+        <input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field">
+        <div class="support-mail-note">
+          <span>⚠</span> Yanıt bu adrese gönderilir
+        </div>
+      </div>
     </div>
-    <button class="btn-primary support-send-btn" onclick="sendSupportRequest()">📨 Gönder</button>
+
+    <!-- Mesaj -->
+    <div class="support-field">
+      <label>Mesajınız</label>
+      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ekran görüntüsü, hata mesajı, yaşadığınız adımlar... Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="5"></textarea>
+    </div>
+
+    <button class="support-send-btn-new" onclick="sendSupportRequest()">
+      Gönder →
+    </button>
     <div id="support-error" class="error-msg"></div>
 
-    <!-- Admin yanıtları -->
-    <div id="support-replies-section" style="display:none; margin-top:1.5rem;">
-      <div class="support-section-label">💬 Önceki Yanıtlarım</div>
+    <!-- Önceki yanıtlar -->
+    <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
+      <div class="support-field-label">💬 Önceki Yanıtlarım</div>
       <div id="support-replies-list" class="support-replies-list"></div>
     </div>
   </div>
@@ -212,13 +777,13 @@
     <div class="overlay-logo">⬡ GameVault</div>
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
-      <p>GameVault olarak kullanıcı gizliliğine büyük önem veriyoruz. Topladığımız veriler yalnızca hizmetimizi geliştirmek amacıyla kullanılır.</p>
+      <p>GameVault olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
       <h4>Toplanan Veriler</h4>
-      <p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır. Satın alım geçmişiniz ve destek talepleriniz hesabınızla ilişkili tutulur.</p>
+      <p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
       <h4>Veri Güvenliği</h4>
-      <p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz. SSL şifreleme ile iletişim güvence altındadır.</p>
+      <p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
       <h4>Çerezler</h4>
-      <p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır. Bu verileri istediğiniz zaman silebilirsiniz.</p>
+      <p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
     </div>
   </div>
 </div>
@@ -232,11 +797,11 @@
     <div class="legal-content">
       <p>GameVault platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
       <h4>Hizmet Kapsamı</h4>
-      <p>GameVault, dijital oyun erişimi sağlayan bir platformdur. Satın alınan oyunlar Steam hesaplarına tanımlanır ve kullanım hakkı kişiye özeldir.</p>
+      <p>GameVault, dijital oyun erişimi sağlayan bir platformdur.</p>
       <h4>Kullanıcı Sorumluluğu</h4>
-      <p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz. Hesabınızı başkasıyla paylaşmamalısınız.</p>
+      <p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
       <h4>İade Politikası</h4>
-      <p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır. Teknik sorunlar için destek ekibimizle iletişime geçebilirsiniz.</p>
+      <p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
     </div>
   </div>
 </div>
@@ -329,7 +894,7 @@
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
         <h3>Anında Teslimat</h3>
-        <p>Satın alma işlemi tamamlandıktan sonra oyununuz saniyeler içinde hesabınıza tanımlanır. Bekleme yok, doğrudan oynamaya başlayın.</p>
+        <p>Satın alma tamamlandıktan sonra oyununuz saniyeler içinde hesabınıza tanımlanır.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🖥️</div>
@@ -343,44 +908,47 @@
       <div class="feature-card">
         <div class="feature-icon">🎧</div>
         <h3>Hızlı Destek</h3>
-        <p>Sorun yaşadığınızda hızlı ve çözüm odaklı destek ekibimiz yanınızda.</p>
+        <p>Sorun yaşadığınızda çözüm odaklı destek ekibimiz yanınızda.</p>
         <div class="feature-meta">Ort. yanıt süresi: ~15 dk</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== NASIL ÇALIŞIR ===== -->
-<section class="how-section">
+<!-- ===== NASIL ÇALIŞIR (GELİŞTİRİLMİŞ) ===== -->
+<section class="how-section" id="how-section">
   <div class="container-wide">
     <div class="section-center-title">
       <div class="section-tag">NASIL ÇALIŞIR?</div>
       <h2>3 Adımda Oyununa Kavuş</h2>
     </div>
-    <div class="how-steps">
-      <div class="how-step">
+    <div class="how-steps" id="how-steps">
+      <div class="how-step" id="how-step-1">
         <div class="how-num">01</div>
         <div class="how-icon-wrap">🔑</div>
         <h4>Kod Satın Al</h4>
         <p>GameVault erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
+        <div class="how-step-glow"></div>
       </div>
-      <div class="how-arrow">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="how-connector">
+        <div class="how-connector-line"><div class="how-connector-arrow"></div></div>
       </div>
-      <div class="how-step">
+      <div class="how-step" id="how-step-2">
         <div class="how-num">02</div>
         <div class="how-icon-wrap">🎮</div>
         <h4>Oyun Seç</h4>
         <p>Kütüphanemizdeki oyunlardan birini seç ve tek tıkla satın al.</p>
+        <div class="how-step-glow"></div>
       </div>
-      <div class="how-arrow">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="how-connector">
+        <div class="how-connector-line"><div class="how-connector-arrow"></div></div>
       </div>
-      <div class="how-step">
+      <div class="how-step" id="how-step-3">
         <div class="how-num">03</div>
         <div class="how-icon-wrap">🚀</div>
         <h4>Oynamaya Başla</h4>
         <p>Steam bilgilerini al, doğrulama kodunu gir ve oyunun hazır!</p>
+        <div class="how-step-glow"></div>
       </div>
     </div>
   </div>
@@ -402,38 +970,199 @@
   </div>
 </section>
 
-<!-- ===== FOOTER ===== -->
+<!-- ===== FOOTER (MİNİMALİST) ===== -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">⬡ GameVault</div>
-    <p class="footer-desc">Türkiye'nin en hızlı dijital oyun platformu.<br>Güvenli, anında, 7/24.</p>
-    <div class="footer-social">
-      <a href="#" class="social-btn" title="Twitter/X">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <a href="#" class="social-btn" title="Instagram">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-      </a>
-      <a href="#" class="social-btn" title="Discord">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-      </a>
-      <a href="#" class="social-btn" title="Telegram">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>
-      </a>
-    </div>
-    <div class="footer-divider"></div>
-    <div class="footer-bottom">
-      <div class="footer-links">
-        <a href="#">Hakkımızda</a>
-        <a href="#" onclick="showOverlay('privacy-overlay'); return false;">Gizlilik Politikası</a>
-        <a href="#" onclick="showOverlay('terms-overlay'); return false;">Kullanım Şartları</a>
-        <a href="#" onclick="openSupport(); return false;">İletişim</a>
+    <div class="footer-top-row">
+      <div class="footer-brand">
+        <div class="footer-logo">⬡ GameVault</div>
+        <p class="footer-desc">Dijital oyun dünyasının güvenilir adresi. Hızlı, güvenli, 7/24.</p>
       </div>
-      <div class="footer-copy">© 2025 GameVault. Tüm hakları saklıdır.</div>
+      <div class="footer-cols">
+        <div>
+          <div class="footer-col-title">Sayfalar</div>
+          <div class="footer-col-links">
+            <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
+            <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
+            <a href="#" onclick="openSupport(); return false;">Destek</a>
+            <a href="#" onclick="openAccount(); return false;">Profil</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Yasal</div>
+          <div class="footer-col-links">
+            <a href="#" onclick="showOverlay('privacy-overlay'); return false;">Gizlilik</a>
+            <a href="#" onclick="showOverlay('terms-overlay'); return false;">Kullanım Şartları</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Sosyal</div>
+          <div class="footer-social-mini">
+            <a href="#" class="social-btn-mini" title="Discord">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            </a>
+            <a href="#" class="social-btn-mini" title="Twitter/X">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="#" class="social-btn-mini" title="Instagram">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="#" class="social-btn-mini" title="Telegram">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom-row">
+      <div class="footer-copy">© 2026 GameVault. Tüm hakları saklıdır.</div>
+      <div class="footer-made">by AmourHG</div>
     </div>
   </div>
 </footer>
 
 <script src="app.js"></script>
+
+<script>
+// ===== PURCHASE NOTIFICATIONS (GERÇEKÇİ) =====
+const fakeUsers = [
+  { name: 'OTT*', avatar: 'O' },
+  { name: 'KNR*', avatar: 'K' },
+  { name: 'MEL*', avatar: 'M' },
+  { name: 'ZFR*', avatar: 'Z' },
+  { name: 'BRK*', avatar: 'B' },
+  { name: 'AYS*', avatar: 'A' },
+  { name: 'HKN*', avatar: 'H' },
+  { name: 'SRY*', avatar: 'S' },
+  { name: 'CEM*', avatar: 'C' },
+  { name: 'NUR*', avatar: 'N' },
+];
+const fakeGames = [
+  'GTA V', 'Cyberpunk 2077', 'Elden Ring', 'Red Dead 2', 'CS2',
+  'Hogwarts Legacy', 'Baldur\'s Gate 3', 'Starfield', 'The Witcher 3', 'FIFA 25'
+];
+
+function showPurchaseNotif() {
+  const container = document.getElementById('purchase-notification');
+  if (!container) return;
+  const user = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
+  const game = fakeGames[Math.floor(Math.random() * fakeGames.length)];
+  const item = document.createElement('div');
+  item.className = 'pn-item';
+  item.innerHTML = `
+    <div class="pn-avatar">${user.avatar}</div>
+    <div class="pn-text">
+      <strong>${user.name}</strong> satın aldı<br>
+      <span class="pn-game">🎮 ${game}</span>
+    </div>
+  `;
+  container.appendChild(item);
+  setTimeout(() => { if (item.parentNode) item.remove(); }, 5000);
+}
+
+// Başlat
+setTimeout(() => showPurchaseNotif(), 3000);
+setInterval(() => showPurchaseNotif(), 7000 + Math.random() * 5000);
+
+// ===== HOW SECTION SCROLL ANIMATION =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const steps = document.querySelectorAll('.how-step');
+      steps.forEach((step, i) => {
+        setTimeout(() => {
+          step.style.opacity = '1';
+          step.style.transform = 'translateY(0)';
+          step.classList.add('step-active');
+          setTimeout(() => step.classList.remove('step-active'), 1000);
+        }, i * 200);
+      });
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Init how steps hidden
+  document.querySelectorAll('.how-step').forEach(step => {
+    step.style.opacity = '0';
+    step.style.transform = 'translateY(30px)';
+    step.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s';
+  });
+  const howSection = document.getElementById('how-section');
+  if (howSection) observer.observe(howSection);
+});
+
+// ===== GAME CARD CLICK SMOOTH SCROLL =====
+// Override/extend the game click to scroll down smoothly
+const origOpenBuyConfirm = window.openBuyConfirm;
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.game-card');
+  if (card) {
+    card.classList.add('game-card-clicked');
+    setTimeout(() => card.classList.remove('game-card-clicked'), 350);
+
+    // Smooth scroll to confirm overlay area (happens via existing app.js)
+    // Add highlight pulse after purchase overlay opens
+    setTimeout(() => {
+      const overlay = document.getElementById('buy-confirm-overlay');
+      if (overlay && overlay.style.display !== 'none') {
+        overlay.classList.add('showing');
+      }
+    }, 50);
+  }
+});
+
+// ===== SUPPORT TYPE SELECT FOR NEW BUTTONS =====
+window.selectSupportType = function(btn, val) {
+  document.querySelectorAll('.support-type-btn-new').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('support-type').value = val;
+};
+
+// ===== ACCOUNT OVERLAY ENHANCEMENTS =====
+const origOpenAccount = window.openAccount;
+window.openAccount = function() {
+  // Update total games count
+  const purchasesList = document.getElementById('purchases-list');
+  const totalGamesEl = document.getElementById('acc-total-games');
+  if (purchasesList && totalGamesEl) {
+    const items = purchasesList.querySelectorAll('.purchase-item, .purchase-item-new');
+    totalGamesEl.textContent = items.length;
+  }
+  if (origOpenAccount) origOpenAccount();
+  else if (window.showOverlay) window.showOverlay('account-overlay');
+};
+
+// Show overlay with animation class
+const origShowOverlay = window.showOverlay;
+window.showOverlay = function(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('showing');
+    setTimeout(() => el.classList.remove('showing'), 500);
+  }
+  if (origShowOverlay) origShowOverlay(id);
+};
+
+// ===== SUPPORT EMAIL VALIDATION =====
+const origSendSupport = window.sendSupportRequest;
+window.sendSupportRequest = function() {
+  const emailEl = document.getElementById('support-email');
+  if (emailEl && !emailEl.value.trim()) {
+    emailEl.style.borderColor = 'rgba(255,80,80,0.5)';
+    emailEl.style.boxShadow = '0 0 0 3px rgba(255,80,80,0.08)';
+    emailEl.placeholder = '⚠ E-posta zorunludur!';
+    setTimeout(() => {
+      emailEl.style.borderColor = '';
+      emailEl.style.boxShadow = '';
+      emailEl.placeholder = 'mail@ornek.com';
+    }, 2500);
+    document.getElementById('support-error').textContent = 'E-posta adresi zorunludur.';
+    return;
+  }
+  if (origSendSupport) origSendSupport();
+};
+</script>
 </body>
 </html>
