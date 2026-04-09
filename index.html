@@ -660,7 +660,7 @@ footer {
       <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
       <div class="acc-info-new">
         <div class="acc-username-new" id="acc-display-username">—</div>
-        <div class="acc-email-new" id="acc-display-email">—</div>
+        <div class="acc-email-new" id="acc-display-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c9a2bca5a5a8a7a0aaa089aea8a4acbfa8bca5bde7aaa6a4">[email&#160;protected]</a></div>
         <div class="acc-balance-chip">
           <span class="balance-icon">⬡</span>
           <span id="acc-display-balance">0</span> oyun hakkı
@@ -670,11 +670,11 @@ footer {
 
     <!-- İstatistikler -->
     <div class="acc-stats-row">
-      <div class="acc-stat-card acc-stat-clickable" onclick="closeOverlay('account-overlay'); setTimeout(openSupport, 200);">
+      <div class="acc-stat-card">
         <div class="acc-stat-val" id="acc-total-games">0</div>
         <div class="acc-stat-lbl">Satın Alınan</div>
       </div>
-      <div class="acc-stat-card acc-stat-clickable" onclick="closeOverlay('account-overlay'); setTimeout(openSupport, 200);">
+      <div class="acc-stat-card">
         <div class="acc-stat-val" style="color:#a78bfa;">7/24</div>
         <div class="acc-stat-lbl">Destek Hattı</div>
       </div>
@@ -708,15 +708,9 @@ footer {
       </div>
     </div>
 
-    <!-- Admin yanıtları (varsa) — EN ÜSTTE göster -->
-    <div id="support-replies-section" style="display:none;">
-      <div class="sri-section-title">📨 Admin Yanıtları</div>
-      <div id="support-replies-list"></div>
-    </div>
-
     <!-- Satın alınan oyunlar (varsa) -->
     <div id="support-purchases-section" style="display:none;">
-      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 Satın Aldığım Oyunlar <span style="font-size:0.65rem;color:#4a566a;font-weight:400;">(üstüne tıkla → otomatik doldur)</span></div>
+      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
       <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
     </div>
 
@@ -760,13 +754,19 @@ footer {
     <!-- Mesaj -->
     <div class="support-field">
       <label>Mesajınız</label>
-      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="4"></textarea>
+      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ekran görüntüsü, hata mesajı, yaşadığınız adımlar... Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="5"></textarea>
     </div>
 
     <button class="support-send-btn-new" onclick="sendSupportRequest()">
-      📨 Gönder
+      Gönder →
     </button>
     <div id="support-error" class="error-msg"></div>
+
+    <!-- Önceki yanıtlar -->
+    <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
+      <div class="support-field-label">💬 Önceki Yanıtlarım</div>
+      <div id="support-replies-list" class="support-replies-list"></div>
+    </div>
   </div>
 </div>
 
@@ -962,12 +962,10 @@ footer {
   <div class="games-grid" id="main-grid">
     <div class="loading-state">Oyunlar yükleniyor...</div>
   </div>
-  <div id="load-more-wrap" style="text-align:center; margin-top:2.5rem; display:none;">
-    <button class="btn-load-more-new" id="load-more-btn" onclick="loadMoreGames()">
-      <span class="blm-glow"></span>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      <span>Daha Fazla Oyun Gör</span>
-      <span class="blm-count" id="blm-count"></span>
+  <div id="load-more-wrap" style="text-align:center; margin-top:2rem; display:none;">
+    <button class="btn-load-more" id="load-more-btn" onclick="loadMoreGames()">
+      <span>Daha Fazla Yükle</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
   </div>
 </section>
@@ -1158,3 +1156,327 @@ window.sendSupportRequest = function() {
     setTimeout(() => {
       emailEl.style.borderColor = '';
       emailEl.style.boxShadow = '';
+     emailEl.placeholder = 'mail@ornek.com';
+    }, 3000);
+    return;
+  }
+  if (origSendSupport) origSendSupport();
+};
+</script>
+
+<!-- ===== CANLI DESTEK WIDGET ===== -->
+<div id="live-support-widget">
+  <!-- Tooltip -->
+  <div class="lsw-tooltip" id="lsw-tooltip">
+    <span>★ 7/24 Canlı Destek</span>
+    <button class="lsw-tooltip-close" onclick="document.getElementById('lsw-tooltip').style.display='none'">✕</button>
+  </div>
+  <!-- Toggle butonu -->
+  <button class="lsw-fab" id="lsw-fab" onclick="toggleLiveSupport()" title="Canlı Destek">
+    <svg class="lsw-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg class="lsw-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <span class="lsw-notif-dot" id="lsw-notif-dot"></span>
+  </button>
+  <!-- Chat paneli -->
+  <div class="lsw-panel" id="lsw-panel">
+    <div class="lsw-panel-header">
+      <div class="lsw-header-info">
+        <div class="lsw-header-avatar">GV</div>
+        <div>
+          <div class="lsw-header-name">GameVault Destek</div>
+          <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
+        </div>
+      </div>
+      <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
+    </div>
+    <div class="lsw-messages" id="lsw-messages">
+      <div class="lsw-msg lsw-msg-bot">
+        <div class="lsw-msg-avatar">GV</div>
+        <div class="lsw-msg-bubble">
+          Merhaba! 👋 GameVault destek hattına hoş geldiniz.<br><br>
+          Sorunuz için aşağıdaki seçeneklerden birini seçebilir veya bize yazabilirsiniz.
+        </div>
+      </div>
+      <div class="lsw-quick-btns">
+        <button onclick="lswQuick('steam_code')">🔑 Steam Kodu Sorunu</button>
+        <button onclick="lswQuick('extra_code')">🔄 Ekstra Kod Talebi</button>
+        <button onclick="lswQuick('account')">👤 Hesap Sorunu</button>
+        <button onclick="lswQuick('general')">💬 Diğer</button>
+      </div>
+    </div>
+    <div class="lsw-input-area">
+      <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
+      <button class="lsw-send-btn" onclick="lswSend()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ===== CANLI DESTEK WIDGET ===== */
+#live-support-widget {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  z-index: 8000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.lsw-tooltip {
+  background: rgba(10,12,22,0.95);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px; font-weight: 600; color: #d0d8ec;
+  display: flex; align-items: center; gap: 8px;
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: lswTooltipIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.lsw-tooltip-close {
+  background: none; border: none; color: #4a566a;
+  cursor: pointer; font-size: 12px; padding: 0; line-height: 1;
+  transition: color 0.2s;
+}
+.lsw-tooltip-close:hover { color: #d0d8ec; }
+@keyframes lswTooltipIn {
+  from { opacity:0; transform: translateX(10px) scale(0.95); }
+  to   { opacity:1; transform: translateX(0) scale(1); }
+}
+
+.lsw-fab {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(0,210,255,0.35), 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+  position: relative; color: #fff;
+}
+.lsw-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 30px rgba(0,210,255,0.45), 0 4px 12px rgba(0,0,0,0.3);
+}
+.lsw-notif-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 10px; height: 10px;
+  background: #ff3f5c; border-radius: 50%;
+  border: 2px solid #06080f;
+  animation: lswPulse 2s infinite;
+}
+@keyframes lswPulse {
+  0%,100% { transform: scale(1); opacity:1; }
+  50%      { transform: scale(1.3); opacity:0.8; }
+}
+
+.lsw-panel {
+  width: 340px;
+  background: rgba(10,12,22,0.98);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,255,0.08);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  max-height: 520px;
+  animation: lswPanelIn 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.lsw-panel.open { display: flex; }
+@keyframes lswPanelIn {
+  from { opacity:0; transform: translateY(20px) scale(0.95); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+.lsw-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.125rem;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(123,94,248,0.06));
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.lsw-header-info { display: flex; align-items: center; gap: 10px; }
+.lsw-header-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 800; color: #fff;
+}
+.lsw-header-name { font-size: 0.9rem; font-weight: 700; color: #f0f2f8; }
+.lsw-header-status { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: #00e87a; margin-top: 2px; }
+.lsw-online-dot { width: 6px; height: 6px; background: #00e87a; border-radius: 50%; display: inline-block; animation: lswOnlinePulse 2s infinite; }
+@keyframes lswOnlinePulse {
+  0%,100%{ opacity:1; } 50%{ opacity:0.5; }
+}
+.lsw-panel-close {
+  background: none; border: none; color: #4a566a;
+  font-size: 1rem; cursor: pointer; padding: 4px;
+  border-radius: 6px; transition: all 0.2s; line-height: 1;
+}
+.lsw-panel-close:hover { background: rgba(255,255,255,0.06); color: #d0d8ec; }
+
+.lsw-messages {
+  flex: 1; overflow-y: auto; padding: 1rem;
+  display: flex; flex-direction: column; gap: 10px;
+  scrollbar-width: thin;
+}
+.lsw-msg { display: flex; align-items: flex-start; gap: 8px; }
+.lsw-msg-bot .lsw-msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.lsw-msg-user { flex-direction: row-reverse; }
+.lsw-msg-bubble {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px 14px 14px 4px;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.825rem; color: #d0d8ec; line-height: 1.55;
+  max-width: 240px;
+}
+.lsw-msg-user .lsw-msg-bubble {
+  background: rgba(0,212,255,0.1);
+  border-color: rgba(0,212,255,0.2);
+  border-radius: 14px 14px 4px 14px;
+  color: #e8f4ff;
+}
+
+.lsw-quick-btns {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 4px;
+}
+.lsw-quick-btns button {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.8rem; font-weight: 600; color: #c8d0e0;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  text-align: left;
+  transition: all 0.2s;
+}
+.lsw-quick-btns button:hover { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.06); color: #00d2ff; }
+
+.lsw-input-area {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.2);
+}
+.lsw-input-area input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #d0d8ec; font-size: 0.825rem;
+  font-family: 'DM Sans', sans-serif; outline: none;
+  transition: border-color 0.2s;
+}
+.lsw-input-area input:focus { border-color: rgba(0,212,255,0.35); }
+.lsw-send-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+  border: none; cursor: pointer; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.lsw-send-btn:hover { opacity: 0.9; transform: scale(1.05); }
+</style>
+
+<script>
+// ===== CANLI DESTEK WIDGET LOGIC =====
+let lswOpen = false;
+let lswTooltipShown = true;
+
+setTimeout(() => {
+  const t = document.getElementById("lsw-tooltip");
+  if (t) { t.style.display = "flex"; }
+}, 4000);
+setTimeout(() => {
+  const t = document.getElementById("lsw-tooltip");
+  if (t) t.style.display = "none";
+}, 10000);
+
+function toggleLiveSupport() {
+  lswOpen = !lswOpen;
+  const panel = document.getElementById("lsw-panel");
+  const chatIcon = document.querySelector(".lsw-icon-chat");
+  const closeIcon = document.querySelector(".lsw-icon-close");
+  const dot = document.getElementById("lsw-notif-dot");
+  const tooltip = document.getElementById("lsw-tooltip");
+  if (lswOpen) {
+    panel.classList.add("open");
+    chatIcon.style.display = "none";
+    closeIcon.style.display = "block";
+    if (dot) dot.style.display = "none";
+    if (tooltip) tooltip.style.display = "none";
+    setTimeout(() => document.getElementById("lsw-input")?.focus(), 300);
+  } else {
+    panel.classList.remove("open");
+    chatIcon.style.display = "block";
+    closeIcon.style.display = "none";
+  }
+}
+
+function lswQuick(type) {
+  const labels = { steam_code: "🔑 Steam Kodu Sorunu", extra_code: "🔄 Ekstra Kod Talebi", account: "👤 Hesap Sorunu", general: "💬 Diğer Konu" };
+  lswAddUserMsg(labels[type] || type);
+  setTimeout(() => {
+    lswAddBotMsg("Talebiniz alındı! Sizi resmi destek formuna yönlendiriyorum...");
+    setTimeout(() => {
+      if (window.openSupport) {
+        if (window.selectSupportTypeByVal) window.selectSupportTypeByVal(type);
+        window.openSupport();
+        toggleLiveSupport();
+      } else {
+        lswAddBotMsg("Lütfen giriş yaparak destek talebi oluşturun.");
+      }
+    }, 1200);
+  }, 600);
+  // Hızlı butonları gizle
+  document.querySelector(".lsw-quick-btns") && (document.querySelector(".lsw-quick-btns").style.display = "none");
+}
+
+function lswSend() {
+  const inp = document.getElementById("lsw-input");
+  const msg = inp?.value.trim();
+  if (!msg) return;
+  inp.value = "";
+  lswAddUserMsg(msg);
+  setTimeout(() => {
+    if (!window.currentUser) {
+      lswAddBotMsg("Destek talebi oluşturmak için önce giriş yapmanız gerekiyor.");
+      setTimeout(() => { if (window.showOverlay) window.showOverlay("auth-overlay"); toggleLiveSupport(); }, 1000);
+    } else {
+      lswAddBotMsg("Mesajınızı aldık! Sizi destek formu ile bağlıyorum...");
+      const msgEl = document.getElementById("support-message");
+      if (msgEl) msgEl.value = msg;
+      setTimeout(() => { if (window.openSupport) window.openSupport(); toggleLiveSupport(); }, 1200);
+    }
+  }, 700);
+}
+
+function lswAddUserMsg(text) {
+  const c = document.getElementById("lsw-messages");
+  const d = document.createElement("div");
+  d.className = "lsw-msg lsw-msg-user";
+  d.innerHTML = `<div class="lsw-msg-bubble">${text}</div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function lswAddBotMsg(text) {
+  const c = document.getElementById("lsw-messages");
+  const d = document.createElement("div");
+  d.className = "lsw-msg lsw-msg-bot";
+  d.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${text}</div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+</script>
+
+</body>
+</html>
