@@ -1,7 +1,7 @@
 // =============================================
 // CONFIG
 // =============================================
-const API = "https://backendsite-production-6bcb.up.railway.app/";
+const API = "https://backendsite-production-6bcb.up.railway.app";
 
 // =============================================
 // STATE
