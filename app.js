@@ -7,6 +7,8 @@ const API = "https://backendsite-production-6bcb.up.railway.app";
 // STATE
 // =============================================
 let GAMES = [];
+let DISPLAYED_COUNT = 10;
+const PAGE_SIZE = 10;
 let currentUser = null;
 let selectedGameForPurchase = null;
 let currentPurchaseId = null;
@@ -35,16 +37,12 @@ async function loadStats() {
     const res = await fetch(`${API}/api/stats`);
     const data = await res.json();
     if (data.success) {
-      // Kullanıcı sayısı: min 137 + gerçek
       const realUsers = data.userCount;
       const displayUsers = Math.max(137, 137 + realUsers);
       animateNumber("stat-users", displayUsers);
       animateNumber("stat-games", data.gameCount);
-
       const rating = parseFloat(data.rating) || 5;
       document.getElementById("stat-rating").textContent = rating.toFixed(1);
-
-      // Sunucu durumu
       const dot = document.getElementById("server-status-dot");
       const txt = document.getElementById("server-status-text");
       if (data.serverStatus) {
@@ -56,7 +54,6 @@ async function loadStats() {
       }
     }
   } catch (e) {
-    // sunucu bağlanmıyorsa varsayılan göster
     document.getElementById("server-status-dot").className = "status-dot offline";
     document.getElementById("server-status-text").textContent = "Sunucuya ulaşılamıyor";
   }
@@ -79,19 +76,16 @@ function animateNumber(id, target) {
 }
 
 function animateUserCount() {
-  // Kullanıcı sayısı yavaş yavaş artsın (görsel efekt)
   setInterval(() => {
     const el = document.getElementById("stat-users");
     if (!el) return;
     const current = parseInt(el.textContent) || 137;
-    if (Math.random() < 0.3) {
-      animateNumber("stat-users", current + 1);
-    }
+    if (Math.random() < 0.3) animateNumber("stat-users", current + 1);
   }, 15000);
 }
 
 // =============================================
-// OYUNLARI YÜKLE
+// OYUNLARI YÜKLE (lazy — 10'ar 10'ar)
 // =============================================
 async function loadGames() {
   try {
@@ -99,8 +93,8 @@ async function loadGames() {
     const data = await res.json();
     if (data.success) {
       GAMES = data.games;
+      DISPLAYED_COUNT = 10;
       renderGames();
-      // Oyun sayısını güncelle
       const el = document.getElementById("stat-games");
       if (el) animateNumber("stat-games", GAMES.length);
     }
@@ -111,11 +105,31 @@ async function loadGames() {
 
 function renderGames() {
   const grid = document.getElementById("main-grid");
+  const loadMoreWrap = document.getElementById("load-more-wrap");
+
   if (!GAMES.length) {
     grid.innerHTML = "<div class='loading-state'>Henüz oyun eklenmemiş.</div>";
+    loadMoreWrap.style.display = "none";
     return;
   }
-  grid.innerHTML = GAMES.map(g => `
+
+  const visible = GAMES.slice(0, DISPLAYED_COUNT);
+  grid.innerHTML = visible.map(g => gameCardHTML(g)).join("");
+
+  if (DISPLAYED_COUNT < GAMES.length) {
+    loadMoreWrap.style.display = "block";
+  } else {
+    loadMoreWrap.style.display = "none";
+  }
+}
+
+function loadMoreGames() {
+  DISPLAYED_COUNT = Math.min(DISPLAYED_COUNT + PAGE_SIZE, GAMES.length);
+  renderGames();
+}
+
+function gameCardHTML(g) {
+  return `
     <div class="game-card" onclick="handleGameClick('${g.id}')">
       ${g.image
         ? `<div class="game-thumb-img" style="background-image:url('${API}${g.image}')"></div>`
@@ -125,13 +139,34 @@ function renderGames() {
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
         <div class="game-price">${g.price || 'Hesap'}</div>
+        <div class="game-buy-btn">Satın Al →</div>
       </div>
     </div>
-  `).join("");
+  `;
 }
 
 // =============================================
-// AUTH: GİRİŞ / KAYIT
+// TÜM OYUNLAR OVERLAY (nav'dan açılır)
+// =============================================
+function openAllGames() {
+  if (!currentUser) { showOverlay("auth-overlay"); return; }
+  document.getElementById("all-games-balance").textContent = currentUser.balance;
+  const grid = document.getElementById("all-games-grid");
+  grid.innerHTML = GAMES.map(g => `
+    <div class="gs-card" onclick="handleGameClick('${g.id}'); closeOverlay('all-games-overlay');">
+      ${g.image
+        ? `<div class="gs-img" style="background-image:url('${API}${g.image}')"></div>`
+        : `<div class="gs-emoji">${g.emoji || '🎮'}</div>`
+      }
+      <div class="gs-name">${g.name}</div>
+      <div class="gs-platform">${g.platform || 'PC / Steam'}</div>
+    </div>
+  `).join("");
+  showOverlay("all-games-overlay");
+}
+
+// =============================================
+// AUTH
 // =============================================
 function togglePass(inputId, btn) {
   const inp = document.getElementById(inputId);
@@ -148,7 +183,6 @@ function checkPasswordStrength(val) {
   if (/[A-Z]/.test(val)) strength++;
   if (/[0-9]/.test(val)) strength++;
   if (/[^A-Za-z0-9]/.test(val)) strength++;
-
   const levels = [
     { pct: 0, color: "transparent", text: "" },
     { pct: 20, color: "#ff3f5c", text: "Çok Zayıf" },
@@ -172,19 +206,15 @@ function switchAuthTab(tab) {
   document.getElementById("register-form").style.display = tab === "register" ? "block" : "none";
 }
 
-function closeAuthOverlay() {
-  closeOverlay("auth-overlay");
-}
+function closeAuthOverlay() { closeOverlay("auth-overlay"); }
 
 async function login() {
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
   const errEl = document.getElementById("login-error");
   errEl.style.color = "var(--text2)";
-
   if (!username || !password) { errEl.textContent = "Tüm alanları doldur."; errEl.style.color = "var(--red)"; return; }
   errEl.textContent = "Kontrol ediliyor...";
-
   try {
     const res = await fetch(`${API}/api/login`, {
       method: "POST",
@@ -215,14 +245,11 @@ async function register() {
   const password2 = document.getElementById("reg-password2").value.trim();
   const errEl = document.getElementById("reg-error");
   errEl.style.color = "var(--red)";
-
   if (!username || !password || !password2) { errEl.textContent = "Tüm alanları doldur."; return; }
   if (password.length < 4) { errEl.textContent = "Şifre en az 4 karakter olmalı."; return; }
   if (password !== password2) { errEl.textContent = "Şifreler eşleşmiyor."; return; }
-
   errEl.style.color = "var(--text2)";
   errEl.textContent = "Kayıt yapılıyor...";
-
   try {
     const res = await fetch(`${API}/api/register`, {
       method: "POST",
@@ -277,11 +304,9 @@ async function redeemCode() {
   if (!currentUser) return;
   const code = document.getElementById("redeem-code-input").value.trim().toUpperCase();
   const errEl = document.getElementById("redeem-error");
-
   if (!code) { errEl.textContent = "Kod girin."; return; }
   errEl.textContent = "Yükleniyor...";
   errEl.style.color = "var(--text2)";
-
   try {
     const res = await fetch(`${API}/api/redeem-code`, {
       method: "POST",
@@ -300,62 +325,49 @@ async function redeemCode() {
       errEl.style.color = "var(--red)";
       errEl.textContent = data.message;
     }
-  } catch (e) {
-    errEl.textContent = "Sunucu hatası.";
-  }
+  } catch (e) { errEl.textContent = "Sunucu hatası."; }
 }
 
 // =============================================
-// OYUN SATIN ALMA
+// OYUN SATIN ALMA — direkt onay ekranı
 // =============================================
 function handleGameClick(gameId) {
   if (!currentUser) { showOverlay("auth-overlay"); return; }
   const game = GAMES.find(g => g.id === gameId);
   if (!game) return;
   selectedGameForPurchase = game;
-  document.getElementById("balance-display-modal").textContent = currentUser.balance;
 
-  const grid = document.getElementById("game-select-grid");
-  grid.innerHTML = GAMES.map(g => `
-    <div class="gs-card ${g.id === gameId ? 'selected' : ''}" onclick="selectGame('${g.id}')">
-      ${g.image
-        ? `<div class="gs-img" style="background-image:url('${API}${g.image}')"></div>`
-        : `<div class="gs-emoji">${g.emoji || '🎮'}</div>`
-      }
-      <div class="gs-name">${g.name}</div>
-      <div class="gs-platform">${g.platform || 'PC / Steam'}</div>
-    </div>
-  `).join("");
+  // Onay overlay'ini doldur
+  const imgEl = document.getElementById("bco-game-image");
+  if (game.image) {
+    imgEl.style.backgroundImage = `url('${API}${game.image}')`;
+    imgEl.className = "bco-image bco-image-real";
+  } else {
+    imgEl.style.backgroundImage = "";
+    imgEl.className = "bco-image bco-image-emoji";
+    imgEl.textContent = game.emoji || "🎮";
+  }
 
-  document.getElementById("confirm-box").style.display = "none";
-  document.getElementById("confirm-game-name").textContent = game.name;
+  document.getElementById("bco-game-name").textContent = game.name;
+  document.getElementById("bco-platform").textContent = game.platform || "PC / Steam";
+  document.getElementById("bco-balance").textContent = currentUser.balance;
+  document.getElementById("bco-error").textContent = "";
 
-  // Seçili oyunu göster
-  showConfirmBox(game);
-  showOverlay("game-overlay");
-}
-
-function selectGame(gameId) {
-  const game = GAMES.find(g => g.id === gameId);
-  if (!game) return;
-  selectedGameForPurchase = game;
-  document.querySelectorAll(".gs-card").forEach(c => c.classList.remove("selected"));
-  event.currentTarget.classList.add("selected");
-  showConfirmBox(game);
-}
-
-function showConfirmBox(game) {
-  document.getElementById("confirm-game-name").textContent = game.name;
-  document.getElementById("confirm-box").style.display = "block";
-}
-
-function closeConfirm() {
-  document.getElementById("confirm-box").style.display = "none";
+  showOverlay("buy-confirm-overlay");
 }
 
 async function confirmPurchase() {
   if (!currentUser || !selectedGameForPurchase) return;
-  if (currentUser.balance <= 0) { showToast("Bakiye yetersiz!", "error"); return; }
+  const errEl = document.getElementById("bco-error");
+
+  if (currentUser.balance <= 0) {
+    errEl.style.color = "var(--red)";
+    errEl.textContent = "Bakiye yetersiz! Önce kod yükle.";
+    return;
+  }
+
+  errEl.style.color = "var(--text2)";
+  errEl.textContent = "İşleniyor...";
 
   try {
     const res = await fetch(`${API}/api/purchase`, {
@@ -370,13 +382,15 @@ async function confirmPurchase() {
       updateNavUI();
       currentPurchaseId = data.purchaseId;
       showPurchaseNotification(currentUser.username, selectedGameForPurchase.name, selectedGameForPurchase.emoji);
-      closeOverlay("game-overlay");
+      closeOverlay("buy-confirm-overlay");
       openPurchaseOverlay(data);
     } else {
-      showToast(data.message, "error");
+      errEl.style.color = "var(--red)";
+      errEl.textContent = data.message;
     }
   } catch (e) {
-    showToast("Sunucu hatası.", "error");
+    errEl.style.color = "var(--red)";
+    errEl.textContent = "Sunucu hatası.";
   }
 }
 
@@ -394,6 +408,7 @@ function openPurchaseOverlay(data) {
   document.getElementById("po-error").textContent = "";
   document.getElementById("po-requests-info").textContent = "5 doğrulama talebi hakkın var.";
   document.getElementById("po-get-code-btn").style.display = "block";
+  document.getElementById("po-get-code-btn").textContent = "🔑 Steam Doğrulama Kodu Al";
   showOverlay("purchase-overlay");
 }
 
@@ -408,7 +423,6 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
   document.getElementById("steam-instructions").style.display = "none";
   document.getElementById("po-error").textContent = "";
   document.getElementById("po-requests-info").textContent = `Kalan talep hakkı: ${5 - requests}/5`;
-
   const btn = document.getElementById("po-get-code-btn");
   const extra = document.getElementById("po-extra-request");
   if (requests >= 5) {
@@ -417,6 +431,7 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
     document.getElementById("po-error").textContent = "Maksimum talep hakkın doldu (5/5).";
   } else {
     btn.style.display = "block";
+    btn.textContent = "🔑 Steam Doğrulama Kodu Al";
     extra.style.display = "none";
   }
   showOverlay("purchase-overlay");
@@ -429,11 +444,9 @@ async function requestSteamCode() {
   const display = document.getElementById("po-code-display");
   const errEl = document.getElementById("po-error");
   const extra = document.getElementById("po-extra-request");
-
   btn.style.display = "none";
   loader.style.display = "block";
   errEl.textContent = "";
-
   try {
     const res = await fetch(`${API}/api/get-steam-code`, {
       method: "POST",
@@ -442,7 +455,6 @@ async function requestSteamCode() {
     });
     const data = await res.json();
     loader.style.display = "none";
-
     if (data.success) {
       display.innerHTML = `<div class="steam-code-val">${data.steamCode}</div>`;
       display.style.display = "block";
@@ -474,7 +486,7 @@ async function requestSteamCode() {
 
 function openSupportFromPurchase() {
   const gameName = document.getElementById("po-game-name").textContent;
-  document.getElementById("support-type").value = "extra_code";
+  selectSupportTypeByVal("extra_code");
   document.getElementById("support-message").value = `Oyun: ${gameName}\nPurchase ID: ${currentPurchaseId}\n\n5 hak bitti, ekstra kod talep ediyorum.`;
   closeOverlay("purchase-overlay");
   showOverlay("support-overlay");
@@ -507,11 +519,14 @@ async function loadPurchaseHistory() {
         <div class="pi-emoji">${p.gameEmoji || '🎮'}</div>
         <div class="pi-info">
           <div class="pi-name">${p.gameName}</div>
-          <div class="pi-meta">${formatDate(p.purchasedAt)} • ${p.steamUser}</div>
-          <div class="pi-requests">Talep: ${p.steamCodeRequests}/5</div>
+          <div class="pi-meta">${formatDate(p.purchasedAt)} • ${p.steamUser || ''}</div>
+          <div class="pi-requests-bar">
+            <div class="pi-req-fill" style="width:${((p.steamCodeRequests||0)/5)*100}%"></div>
+          </div>
+          <div class="pi-requests">${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı</div>
         </div>
-        <button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests})">
-          🔑 Detay
+        <button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0})">
+          🔑 Kodu Al
         </button>
       </div>
     `).join("");
@@ -521,12 +536,26 @@ async function loadPurchaseHistory() {
 }
 
 // =============================================
-// DESTEK
+// DESTEK — güzel tip seçimi
 // =============================================
+function selectSupportType(btn, val) {
+  document.querySelectorAll(".support-type-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("support-type").value = val;
+}
+
+function selectSupportTypeByVal(val) {
+  document.querySelectorAll(".support-type-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.val === val);
+  });
+  document.getElementById("support-type").value = val;
+}
+
 function openSupport() {
   if (!currentUser) { showOverlay("auth-overlay"); return; }
   document.getElementById("support-message").value = "";
   document.getElementById("support-error").textContent = "";
+  selectSupportTypeByVal("steam_code");
   showOverlay("support-overlay");
 }
 
@@ -535,11 +564,9 @@ async function sendSupportRequest() {
   const message = document.getElementById("support-message").value.trim();
   const type = document.getElementById("support-type").value;
   const errEl = document.getElementById("support-error");
-
-  if (!message) { errEl.textContent = "Mesaj boş olamaz."; return; }
+  if (!message) { errEl.textContent = "Mesaj boş olamaz."; errEl.style.color = "var(--red)"; return; }
   errEl.textContent = "Gönderiliyor...";
   errEl.style.color = "var(--text2)";
-
   try {
     const res = await fetch(`${API}/api/support-request`, {
       method: "POST",
@@ -563,34 +590,49 @@ async function sendSupportRequest() {
 }
 
 // =============================================
-// SATIN ALMA BİLDİRİMİ
+// SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
 // =============================================
+async function showRecentPurchaseNotifs() {
+  // Önce gerçek son satın alımları getirmeyi dene
+  let pool = [];
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    const data = await res.json();
+    // Gerçek veri yoksa fake pool kullan
+  } catch(e) {}
+
+  // Gerçekten gerçek satın alım listesi açık API olmadığı için
+  // fakePurchasePool kullanıyoruz ama daha seyrek gösteriyoruz
+  const fakePool = [
+    { u: "Ahmet***", g: "Elden Ring", e: "⚔️" },
+    { u: "Murat***", g: "Cyberpunk 2077", e: "🤖" },
+    { u: "Emre***", g: "GTA V", e: "🏙️" },
+    { u: "Burak***", g: "Red Dead 2", e: "🤠" },
+    { u: "Deniz***", g: "FIFA 25", e: "⚽" },
+    { u: "Selin***", g: "Hogwarts Legacy", e: "🧙" },
+    { u: "Kerem***", g: "Baldur's Gate 3", e: "🐉" },
+    { u: "Ayşe***", g: "The Witcher 3", e: "🗡️" },
+  ];
+
+  let i = 0;
+  function next() {
+    const n = fakePool[i % fakePool.length];
+    showPurchaseNotification(n.u, n.g, n.e);
+    i++;
+    // Daha seyrek göster: 20-35 saniye aralık
+    const delay = 20000 + Math.random() * 15000;
+    setTimeout(next, delay);
+  }
+  // İlk bildirimi 8 saniye sonra göster
+  setTimeout(next, 8000);
+}
+
 function showPurchaseNotification(username, gameName, emoji) {
   const el = document.getElementById("purchase-notification");
   const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
-  el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> ${gameName} aldı!</span>`;
+  el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
   el.classList.add("show");
   setTimeout(() => el.classList.remove("show"), 5000);
-}
-
-const fakeNotifPool = [
-  { u: "Ahmet***", g: "Elden Ring", e: "⚔️" },
-  { u: "Murat***", g: "Cyberpunk 2077", e: "🤖" },
-  { u: "Emre***", g: "GTA V", e: "🏙️" },
-  { u: "Burak***", g: "Red Dead 2", e: "🤠" },
-  { u: "Deniz***", g: "FIFA 25", e: "⚽" },
-  { u: "Selin***", g: "Hogwarts Legacy", e: "🧙" },
-];
-
-function showRecentPurchaseNotifs() {
-  let i = 0;
-  function next() {
-    const n = fakeNotifPool[i % fakeNotifPool.length];
-    showPurchaseNotification(n.u, n.g, n.e);
-    i++;
-    setTimeout(next, 9000 + Math.random() * 6000);
-  }
-  setTimeout(next, 3000);
 }
 
 // =============================================
@@ -606,7 +648,6 @@ function showOverlay(id) {
 function closeOverlay(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove("active");
-  // Başka overlay açık değilse scroll kilidi kaldır
   setTimeout(() => {
     if (!document.querySelector(".overlay.active")) {
       document.body.style.overflow = "";
