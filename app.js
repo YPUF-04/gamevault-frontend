@@ -18,20 +18,123 @@ let currentPurchaseForSupport = null;
 // INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Giriş animasyonu — sadece 1 kere
+  const seenIntro = sessionStorage.getItem("gv_intro_seen");
+  if (!seenIntro) {
+    showIntroAnimation();
+    sessionStorage.setItem("gv_intro_seen", "1");
+  }
+
   const saved = localStorage.getItem("gv_user");
   if (saved) {
     currentUser = JSON.parse(saved);
     updateNavUI();
   }
+  loadPopularGames();
   loadGames();
   loadStats();
+  loadReviews();
   showRecentPurchaseNotifs();
   animateUserCount();
+
+  // games.html'den yönlendirme
+  const pendingGame = localStorage.getItem("gv_pending_game");
+  if (pendingGame) {
+    localStorage.removeItem("gv_pending_game");
+    setTimeout(() => {
+      const g = GAMES.find(x => x.id === pendingGame);
+      if (g) handleGameClick(pendingGame);
+    }, 1200);
+  }
 });
 
 // =============================================
-// İSTATİSTİKLER
+// GİRİŞ ANİMASYONU
 // =============================================
+function showIntroAnimation() {
+  const overlay = document.createElement("div");
+  overlay.id = "intro-overlay";
+  overlay.style.cssText = `
+    position:fixed; inset:0; z-index:99999;
+    background:#06080f;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1.5rem;
+  `;
+  overlay.innerHTML = `
+    <div style="font-family:'Orbitron',monospace; font-size:2.5rem; font-weight:900; letter-spacing:4px;
+      background:linear-gradient(135deg,#00d2ff,#7b2ff7); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      animation: introLogoIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards; opacity:0;">
+      ⬡ GameVault
+    </div>
+    <div style="font-size:0.9rem; color:#3a4560; letter-spacing:3px; text-transform:uppercase;
+      animation: introSubIn 0.8s 0.3s cubic-bezier(0.16,1,0.3,1) forwards; opacity:0;">
+      Dijital Oyun Mağazası
+    </div>
+    <div style="display:flex; gap:6px; margin-top:0.5rem; animation: introSubIn 0.8s 0.6s forwards; opacity:0;">
+      <div class="intro-dot"></div><div class="intro-dot" style="animation-delay:0.15s"></div><div class="intro-dot" style="animation-delay:0.3s"></div>
+    </div>
+    <style>
+      @keyframes introLogoIn { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+      @keyframes introSubIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+      .intro-dot { width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#7b2ff7);
+        animation:introDotPulse 0.8s ease-in-out infinite alternate; }
+      @keyframes introDotPulse { from{opacity:0.3;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+      #intro-overlay { animation: introFadeOut 0.6s 2s forwards; }
+      @keyframes introFadeOut { from{opacity:1} to{opacity:0;pointer-events:none} }
+    </style>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 2700);
+}
+
+// =============================================
+// POPÜLER OYUNLAR
+// =============================================
+async function loadPopularGames() {
+  try {
+    const res = await fetch(`${API}/api/popular-games`);
+    const data = await res.json();
+    const grid = document.getElementById("popular-grid");
+    if (!grid) return;
+    if (data.success && data.games && data.games.length) {
+      grid.innerHTML = data.games.map(g => gameCardHTML(g)).join("");
+      const section = document.getElementById("popular-section");
+      if (section) section.style.display = "block";
+    } else {
+      const section = document.getElementById("popular-section");
+      if (section) section.style.display = "none";
+    }
+  } catch(e) {}
+}
+
+// =============================================
+// REVIEWS
+// =============================================
+async function loadReviews() {
+  try {
+    const res = await fetch(`${API}/api/reviews`);
+    const data = await res.json();
+    const grid = document.getElementById("reviews-grid");
+    if (!grid) return;
+    if (data.success && data.reviews && data.reviews.length) {
+      const visible = data.reviews.slice(0, 5);
+      grid.innerHTML = visible.map(r => `
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">${r.avatar || '😊'}</div>
+            <div class="review-info">
+              <div class="review-username">${r.username}</div>
+              <div class="review-stars">${'★'.repeat(r.rating||5)}${'☆'.repeat(5-(r.rating||5))}</div>
+            </div>
+          </div>
+          <div class="review-message">"${r.message}"</div>
+        </div>
+      `).join("");
+    }
+  } catch(e) {}
+}
+
+
 async function loadStats() {
   try {
     const res = await fetch(`${API}/api/stats`);
@@ -679,7 +782,7 @@ async function sendSupportRequest() {
 }
 
 // =============================================
-// SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
+// SATIN ALMA BİLDİRİMİ — 5sn göster, 10sn gizle döngüsü
 // =============================================
 async function showRecentPurchaseNotifs() {
   let pool = [];
@@ -689,38 +792,37 @@ async function showRecentPurchaseNotifs() {
     const res = await fetch(`${API}/api/recent-purchases`);
     const data = await res.json();
     if (data.success && data.purchases && data.purchases.length > 0) {
-      // Gerçek verileri kullan
       pool = data.purchases;
     }
-  } catch(e) {
-    // API'ye ulaşamazsa hiç gösterme
-    return;
-  }
+  } catch(e) { return; }
 
   if (!pool.length) return;
-
-  // Karıştır ki her seferinde farklı sırayla gözüksün
-  pool = pool.sort(() => Math.random() - 0.5);
 
   function next() {
     if (!pool.length) return;
     const n = pool[idx % pool.length];
     showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
     idx++;
-    // Seyrek: 30-60 saniye aralık
-    const delay = 30000 + Math.random() * 30000;
-    setTimeout(next, delay);
+    // 5sn göster, 10sn gizle = 15sn sonra tekrar
+    setTimeout(next, 15000);
   }
-  // İlk bildirimi 18 saniye sonra göster
-  setTimeout(next, 18000);
+  setTimeout(next, 8000);
 }
 
 function showPurchaseNotification(username, gameName, emoji) {
   const el = document.getElementById("purchase-notification");
+  if (!el) return;
   const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
   el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 5000);
+  el.style.display = "flex";
+  el.style.opacity = "1";
+  el.style.transform = "translateX(0)";
+  // 5 saniye sonra gizle
+  setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translateX(-30px)";
+    setTimeout(() => { el.style.display = "none"; el.style.transform = "translateX(0)"; }, 500);
+  }, 5000);
 }
 
 // =============================================
