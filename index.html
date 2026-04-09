@@ -660,7 +660,7 @@ footer {
       <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
       <div class="acc-info-new">
         <div class="acc-username-new" id="acc-display-username">—</div>
-        <div class="acc-email-new" id="acc-display-email">kullanici@gamevault.com</div>
+        <div class="acc-email-new" id="acc-display-email">—</div>
         <div class="acc-balance-chip">
           <span class="balance-icon">⬡</span>
           <span id="acc-display-balance">0</span> oyun hakkı
@@ -670,11 +670,11 @@ footer {
 
     <!-- İstatistikler -->
     <div class="acc-stats-row">
-      <div class="acc-stat-card">
+      <div class="acc-stat-card acc-stat-clickable" onclick="closeOverlay('account-overlay'); setTimeout(openSupport, 200);">
         <div class="acc-stat-val" id="acc-total-games">0</div>
         <div class="acc-stat-lbl">Satın Alınan</div>
       </div>
-      <div class="acc-stat-card">
+      <div class="acc-stat-card acc-stat-clickable" onclick="closeOverlay('account-overlay'); setTimeout(openSupport, 200);">
         <div class="acc-stat-val" style="color:#a78bfa;">7/24</div>
         <div class="acc-stat-lbl">Destek Hattı</div>
       </div>
@@ -708,9 +708,15 @@ footer {
       </div>
     </div>
 
+    <!-- Admin yanıtları (varsa) — EN ÜSTTE göster -->
+    <div id="support-replies-section" style="display:none;">
+      <div class="sri-section-title">📨 Admin Yanıtları</div>
+      <div id="support-replies-list"></div>
+    </div>
+
     <!-- Satın alınan oyunlar (varsa) -->
     <div id="support-purchases-section" style="display:none;">
-      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
+      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 Satın Aldığım Oyunlar <span style="font-size:0.65rem;color:#4a566a;font-weight:400;">(üstüne tıkla → otomatik doldur)</span></div>
       <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
     </div>
 
@@ -754,19 +760,13 @@ footer {
     <!-- Mesaj -->
     <div class="support-field">
       <label>Mesajınız</label>
-      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ekran görüntüsü, hata mesajı, yaşadığınız adımlar... Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="5"></textarea>
+      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="4"></textarea>
     </div>
 
     <button class="support-send-btn-new" onclick="sendSupportRequest()">
-      Gönder →
+      📨 Gönder
     </button>
     <div id="support-error" class="error-msg"></div>
-
-    <!-- Önceki yanıtlar -->
-    <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
-      <div class="support-field-label">💬 Önceki Yanıtlarım</div>
-      <div id="support-replies-list" class="support-replies-list"></div>
-    </div>
   </div>
 </div>
 
@@ -962,10 +962,12 @@ footer {
   <div class="games-grid" id="main-grid">
     <div class="loading-state">Oyunlar yükleniyor...</div>
   </div>
-  <div id="load-more-wrap" style="text-align:center; margin-top:2rem; display:none;">
-    <button class="btn-load-more" id="load-more-btn" onclick="loadMoreGames()">
-      <span>Daha Fazla Yükle</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  <div id="load-more-wrap" style="text-align:center; margin-top:2.5rem; display:none;">
+    <button class="btn-load-more-new" id="load-more-btn" onclick="loadMoreGames()">
+      <span class="blm-glow"></span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      <span>Daha Fazla Oyun Gör</span>
+      <span class="blm-count" id="blm-count"></span>
     </button>
   </div>
 </section>
@@ -1021,7 +1023,7 @@ footer {
   </div>
 </footer>
 
-<script src="app.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
 
 <script>
 // ===== PURCHASE NOTIFICATIONS (GERÇEKÇİ) =====
@@ -1156,13 +1158,3 @@ window.sendSupportRequest = function() {
     setTimeout(() => {
       emailEl.style.borderColor = '';
       emailEl.style.boxShadow = '';
-      emailEl.placeholder = 'mail@ornek.com';
-    }, 2500);
-    document.getElementById('support-error').textContent = 'E-posta adresi zorunludur.';
-    return;
-  }
-  if (origSendSupport) origSendSupport();
-};
-</script>
-</body>
-</html>
