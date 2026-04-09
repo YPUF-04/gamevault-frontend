@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tüm Oyunlar | GameVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body { background: #06080f; }
+.games-page-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(6,8,15,0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+}
+.games-page-nav .nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.5rem;
+}
+.games-page-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem; font-weight: 700;
+  color: #f0f2f8; letter-spacing: 1px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.games-page-search {
+  flex: 1; max-width: 420px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  color: #d0d8ec; font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.games-page-search:focus { border-color: rgba(0,210,255,0.35); }
+.games-page-search::placeholder { color: #3a4560; }
+.games-back {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: #4a566a; font-size: 0.82rem; font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.games-back:hover { color: #00d2ff; }
+
+.games-page-main {
+  max-width: 1200px; margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+.games-page-header {
+  margin-bottom: 2rem;
+}
+.games-page-header h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.75rem; font-weight: 700;
+  color: #f0f2f8; letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+.games-page-header p {
+  color: #4a566a; font-size: 0.875rem;
+}
+.games-count-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: rgba(0,210,255,0.08);
+  border: 1px solid rgba(0,210,255,0.15);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  color: #00d2ff; font-size: 0.78rem; font-weight: 600;
+  margin-top: 0.75rem;
+}
+.games-full-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+.loading-state {
+  color: #4a566a; text-align: center;
+  padding: 4rem; grid-column: 1/-1;
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="games-page-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="games-page-logo">⬡ GameVault</a>
+    <input type="text" class="games-page-search" id="games-search" placeholder="🔍 Oyun ara..." oninput="filterGamesPage()">
+    <a href="index.html" class="games-back">← Ana Sayfa</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="games-page-main">
+  <div class="games-page-header">
+    <h1>🎮 Tüm Oyunlar</h1>
+    <p>GameVault kütüphanesindeki tüm oyunları keşfet</p>
+    <div class="games-count-chip" id="games-count-chip">Yükleniyor...</div>
+  </div>
+  <div class="games-full-grid" id="games-full-grid">
+    <div class="loading-state">Oyunlar yükleniyor...</div>
+  </div>
+</div>
+
+<script>
+const API = "https://backendsite-production-6bcb.up.railway.app";
+let ALL_GAMES_PAGE = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Kullanıcı oturumunu oku (satın alma için)
+  try {
+    const saved = localStorage.getItem("gv_user");
+    if (saved) window._gvUser = JSON.parse(saved);
+  } catch(e) {}
+
+  try {
+    const res = await fetch(`${API}/api/games`);
+    const data = await res.json();
+    if (data.success) {
+      ALL_GAMES_PAGE = data.games;
+      renderGamesPage(ALL_GAMES_PAGE);
+    }
+  } catch(e) {
+    document.getElementById("games-full-grid").innerHTML = "<div class='loading-state'>Sunucuya bağlanılamadı.</div>";
+  }
+});
+
+function renderGamesPage(games) {
+  const grid = document.getElementById("games-full-grid");
+  const chip = document.getElementById("games-count-chip");
+  chip.textContent = `${games.length} oyun`;
+
+  if (!games.length) {
+    grid.innerHTML = "<div class='loading-state'>Oyun bulunamadı.</div>";
+    return;
+  }
+
+  grid.innerHTML = games.map(g => `
+    <div class="game-card" onclick="goToMain('${g.id}')">
+      ${g.image
+        ? `<div class="game-thumb-img" style="background-image:url('${API}${g.image}')"></div>`
+        : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
+      }
+      <div class="game-body">
+        <div class="game-platform">${g.platform || 'PC / Steam'}</div>
+        <div class="game-name">${g.name}</div>
+        <div class="game-price">${g.price || 'Hesap'}</div>
+        <div class="game-buy-btn">Satın Al →</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function filterGamesPage() {
+  const q = document.getElementById("games-search").value.toLowerCase();
+  const filtered = ALL_GAMES_PAGE.filter(g =>
+    g.name.toLowerCase().includes(q) || (g.platform||"").toLowerCase().includes(q)
+  );
+  renderGamesPage(filtered);
+}
+
+function goToMain(gameId) {
+  // Ana sayfaya yönlendir ve ilgili oyunu aç
+  localStorage.setItem("gv_pending_game", gameId);
+  window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
