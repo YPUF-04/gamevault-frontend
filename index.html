@@ -811,7 +811,8 @@ footer {
   <div class="nav-inner">
     <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">⬡ GameVault</div>
     <div class="nav-links">
-      <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
+      <a href="#" onclick="smoothScrollToGames(event)">Oyunlar</a>
+      <a href="games.html">Tüm Oyunlar</a>
       <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
       <a href="#" onclick="openSupport(); return false;">Destek</a>
     </div>
@@ -954,10 +955,22 @@ footer {
   </div>
 </section>
 
-<!-- ===== OYUNLAR ===== -->
+<!-- ===== POPÜLER OYUNLAR ===== -->
+<section id="popular-section" style="display:none;">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-title">⭐ Popüler Oyunlar</div>
+      <a href="games.html" style="font-size:0.82rem;color:#00d2ff;text-decoration:none;opacity:0.8;">Tümünü Gör →</a>
+    </div>
+    <div class="games-grid" id="popular-grid"></div>
+  </div>
+</section>
+
+<!-- ===== TÜM OYUNLAR (Ana sayfa önizleme) ===== -->
 <section class="container" id="games">
   <div class="section-header">
-    <div class="section-title">🔥 Öne Çıkan Oyunlar</div>
+    <div class="section-title">🎮 Oyunlar</div>
+    <a href="games.html" style="font-size:0.82rem;color:#00d2ff;text-decoration:none;opacity:0.8;">Tüm Oyunlar →</a>
   </div>
   <div class="games-grid" id="main-grid">
     <div class="loading-state">Oyunlar yükleniyor...</div>
@@ -969,6 +982,81 @@ footer {
     </button>
   </div>
 </section>
+
+<!-- ===== KULLANICI YORUMLARI ===== -->
+<section class="container" id="reviews-section" style="margin-top:4rem;">
+  <div class="section-header">
+    <div class="section-title">💬 Kullanıcı Yorumları</div>
+  </div>
+  <div class="reviews-grid" id="reviews-grid">
+    <div class="loading-state">Yorumlar yükleniyor...</div>
+  </div>
+</section>
+
+<style>
+/* ===== REVIEWS ===== */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.review-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.review-card:hover {
+  border-color: rgba(0,210,255,0.2);
+  transform: translateY(-3px);
+}
+.review-header {
+  display: flex; align-items: center; gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+.review-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,rgba(0,210,255,0.15),rgba(123,47,247,0.15));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.review-username { font-weight: 700; color: #f0f2f8; font-size: 0.9rem; }
+.review-stars { color: #f5c518; font-size: 0.85rem; letter-spacing: 1px; margin-top: 2px; }
+.review-message {
+  font-size: 0.85rem; color: #7a8499; line-height: 1.65;
+  font-style: italic;
+}
+/* ===== PURCHASE NOTIFICATION FIX ===== */
+#purchase-notification {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(15,15,20,0.95);
+  border: 1px solid rgba(0,210,255,0.2);
+  border-left: 3px solid #00d2ff;
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  min-width: 220px;
+  max-width: 300px;
+  box-shadow: 0 4px 24px rgba(0,210,255,0.1);
+  transition: opacity 0.5s, transform 0.5s;
+  font-size: 0.8rem; color: #c8d0e0;
+}
+#purchase-notification strong { color: #00d2ff; }
+#purchase-notification em { color: #a78bfa; font-style: normal; }
+.pn-emoji { font-size: 1.2rem; flex-shrink: 0; }
+</style>
+
+
 
 <!-- ===== FOOTER (MİNİMALİST) ===== -->
 <footer>
@@ -1024,46 +1112,6 @@ footer {
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
 
 <script>
-// ===== PURCHASE NOTIFICATIONS (GERÇEKÇİ) =====
-const fakeUsers = [
-  { name: 'OTT*', avatar: 'O' },
-  { name: 'KNR*', avatar: 'K' },
-  { name: 'MEL*', avatar: 'M' },
-  { name: 'ZFR*', avatar: 'Z' },
-  { name: 'BRK*', avatar: 'B' },
-  { name: 'AYS*', avatar: 'A' },
-  { name: 'HKN*', avatar: 'H' },
-  { name: 'SRY*', avatar: 'S' },
-  { name: 'CEM*', avatar: 'C' },
-  { name: 'NUR*', avatar: 'N' },
-];
-const fakeGames = [
-  'GTA V', 'Cyberpunk 2077', 'Elden Ring', 'Red Dead 2', 'CS2',
-  'Hogwarts Legacy', 'Baldur\'s Gate 3', 'Starfield', 'The Witcher 3', 'FIFA 25'
-];
-
-function showPurchaseNotif() {
-  const container = document.getElementById('purchase-notification');
-  if (!container) return;
-  const user = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
-  const game = fakeGames[Math.floor(Math.random() * fakeGames.length)];
-  const item = document.createElement('div');
-  item.className = 'pn-item';
-  item.innerHTML = `
-    <div class="pn-avatar">${user.avatar}</div>
-    <div class="pn-text">
-      <strong>${user.name}</strong> satın aldı<br>
-      <span class="pn-game">🎮 ${game}</span>
-    </div>
-  `;
-  container.appendChild(item);
-  setTimeout(() => { if (item.parentNode) item.remove(); }, 5000);
-}
-
-// Başlat
-setTimeout(() => showPurchaseNotif(), 3000);
-setInterval(() => showPurchaseNotif(), 7000 + Math.random() * 5000);
-
 // ===== HOW SECTION SCROLL ANIMATION =====
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
