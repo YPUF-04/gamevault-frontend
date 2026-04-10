@@ -6,590 +6,10 @@
 <title>GameVault | Dijital Oyun Mağazası</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>
-
-/* ===== SATIN ALMA BİLDİRİMİ — TEK KART ===== */
-#purchase-notification {
-  position: fixed;
-  bottom: 1.5rem; left: 1.5rem;
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  gap: 0.65rem;
-  background: rgba(10,12,22,0.97);
-  border: 1px solid rgba(0,210,255,0.25);
-  border-left: 3px solid #00d2ff;
-  backdrop-filter: blur(16px);
-  padding: 0.75rem 1.1rem;
-  border-radius: 12px;
-  min-width: 230px; max-width: 300px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  font-size: 0.8rem; color: #c8d0e0;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  pointer-events: none;
-}
-#purchase-notification strong { color: #00d2ff; font-weight: 700; }
-#purchase-notification em { color: #a78bfa; font-style: normal; font-weight: 600; }
-.pn-emoji { font-size: 1.25rem; flex-shrink: 0; }
-
-/* ===== HOW SECTION ENHANCED ===== */
-.how-section {
-  padding: 6rem 0;
-  position: relative;
-  overflow: hidden;
-}
-.how-section::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,210,255,0.04) 0%, transparent 70%);
-  pointer-events:none;
-}
-.how-steps {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  margin-top: 3rem;
-  position: relative;
-}
-.how-step {
-  flex: 1;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  position: relative;
-  overflow: hidden;
-  cursor: default;
-  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s;
-}
-.how-step::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  background: linear-gradient(135deg, rgba(0,210,255,0.06) 0%, transparent 60%);
-  opacity:0;
-  transition: opacity 0.4s;
-}
-.how-step:hover {
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(0,210,255,0.3);
-  box-shadow: 0 20px 60px rgba(0,210,255,0.12), 0 0 0 1px rgba(0,210,255,0.1);
-}
-.how-step:hover::before { opacity:1; }
-.how-step.step-active {
-  border-color: rgba(0,210,255,0.5);
-  box-shadow: 0 0 40px rgba(0,210,255,0.15);
-}
-.how-step.step-active::before { opacity:1; }
-.how-num {
-  font-family: 'Orbitron', monospace;
-  font-size: 3rem;
-  font-weight: 900;
-  color: rgba(0,210,255,0.12);
-  line-height: 1;
-  margin-bottom: 1rem;
-  letter-spacing: -2px;
-}
-.how-step:hover .how-num { color: rgba(0,210,255,0.25); transition: color 0.3s; }
-.how-icon-wrap {
-  width: 64px; height: 64px;
-  background: rgba(0,210,255,0.08);
-  border: 1px solid rgba(0,210,255,0.15);
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.75rem;
-  margin-bottom: 1.25rem;
-  transition: transform 0.3s, background 0.3s;
-}
-.how-step:hover .how-icon-wrap {
-  transform: scale(1.1) rotate(-4deg);
-  background: rgba(0,210,255,0.15);
-}
-.how-step h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #f0f2f8;
-  margin-bottom: 0.5rem;
-}
-.how-step p { font-size: 0.875rem; color: #7a8499; line-height: 1.65; }
-.how-connector {
-  display: flex; align-items: center; justify-content: center;
-  padding: 0 1rem;
-  position: relative;
-}
-.how-connector-line {
-  width: 60px; height: 1px;
-  background: linear-gradient(90deg, rgba(0,210,255,0.3), rgba(123,47,247,0.3));
-  position: relative;
-}
-.how-connector-arrow {
-  position: absolute;
-  right: -6px;
-  width: 10px; height: 10px;
-  border-top: 1.5px solid rgba(0,210,255,0.4);
-  border-right: 1.5px solid rgba(0,210,255,0.4);
-  transform: rotate(45deg);
-  animation: arrowPulse 1.5s ease-in-out infinite;
-}
-@keyframes arrowPulse {
-  0%,100% { opacity:0.4; transform: rotate(45deg) translate(-2px,-2px); }
-  50% { opacity:1; transform: rotate(45deg) translate(2px,2px); }
-}
-.how-step-glow {
-  position:absolute;
-  bottom:-30px; right:-30px;
-  width:100px; height:100px;
-  border-radius:50%;
-  background: radial-gradient(circle, rgba(0,210,255,0.08), transparent 70%);
-  pointer-events:none;
-}
-
-/* ===== ACCOUNT OVERLAY ENHANCED ===== */
-.account-overlay-hero {
-  background: linear-gradient(135deg, rgba(0,210,255,0.06) 0%, rgba(123,47,247,0.06) 100%);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-.account-overlay-hero::before {
-  content:'';
-  position:absolute;
-  top:-40px; right:-40px;
-  width:160px; height:160px;
-  background: radial-gradient(circle, rgba(0,210,255,0.06), transparent 70%);
-  pointer-events:none;
-}
-.acc-avatar-new {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.75rem; font-weight: 900; color: #fff;
-  font-family: 'Orbitron', monospace;
-  flex-shrink: 0;
-  box-shadow: 0 0 30px rgba(0,210,255,0.25);
-  border: 2px solid rgba(0,210,255,0.3);
-}
-.acc-info-new .acc-username-new {
-  font-size: 1.4rem; font-weight: 700;
-  font-family: 'Orbitron', monospace;
-  color: #f0f2f8;
-  letter-spacing: 1px;
-}
-.acc-info-new .acc-email-new {
-  font-size: 0.8rem; color: #5a6478; margin-top: 0.2rem;
-}
-.acc-balance-chip {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  background: rgba(0,210,255,0.1);
-  border: 1px solid rgba(0,210,255,0.2);
-  border-radius: 20px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.85rem;
-  color: #00d2ff;
-  font-weight: 600;
-  margin-top: 0.6rem;
-}
-.acc-balance-chip .balance-icon { font-size: 0.9rem; }
-.acc-stats-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-.acc-stat-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  text-align: center;
-}
-.acc-stat-val { font-size: 1.5rem; font-weight: 700; color: #00d2ff; font-family: 'Orbitron',monospace; }
-.acc-stat-lbl { font-size: 0.72rem; color: #5a6478; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
-.acc-games-title {
-  font-size: 0.75rem; font-weight: 600;
-  color: #5a6478; text-transform: uppercase; letter-spacing: 1px;
-  margin-bottom: 0.75rem;
-  display: flex; align-items: center; gap: 0.5rem;
-}
-.acc-games-title::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.05); }
-.purchases-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.purchase-item-new {
-  display: flex; align-items: center; gap: 0.75rem;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  transition: border-color 0.2s, background 0.2s;
-}
-.purchase-item-new:hover {
-  border-color: rgba(0,210,255,0.15);
-  background: rgba(0,210,255,0.03);
-}
-.purchase-item-img {
-  width: 48px; height: 48px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(123,47,247,0.15));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-.purchase-item-info { flex: 1; }
-.purchase-item-name { font-size: 0.875rem; font-weight: 600; color: #d0d8ec; }
-.purchase-item-meta { font-size: 0.72rem; color: #4a566a; margin-top: 0.15rem; }
-.purchase-item-btn {
-  background: rgba(0,210,255,0.08);
-  border: 1px solid rgba(0,210,255,0.2);
-  border-radius: 8px;
-  padding: 0.4rem 0.75rem;
-  color: #00d2ff;
-  font-size: 0.72rem; font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.purchase-item-btn:hover { background: rgba(0,210,255,0.18); }
-.acc-logout-btn {
-  width: 100%; margin-top: 1rem;
-  background: rgba(255,60,60,0.06);
-  border: 1px solid rgba(255,60,60,0.15);
-  border-radius: 10px;
-  padding: 0.75rem;
-  color: rgba(255,100,100,0.8);
-  font-size: 0.85rem; font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.acc-logout-btn:hover { background: rgba(255,60,60,0.12); color: #ff6464; }
-
-/* ===== SUPPORT OVERLAY REDESIGN ===== */
-.support-box-new {
-  max-width: 520px;
-  width: 100%;
-}
-.support-hero-bar {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(0,210,255,0.06), rgba(123,47,247,0.04));
-  border-radius: 16px;
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(0,210,255,0.1);
-}
-.support-hero-icon {
-  width: 48px; height: 48px;
-  background: linear-gradient(135deg, rgba(0,210,255,0.15), rgba(123,47,247,0.1));
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem;
-  flex-shrink:0;
-}
-.support-hero-title { font-size: 1.1rem; font-weight: 700; color: #f0f2f8; }
-.support-hero-sub { font-size: 0.78rem; color: #5a6478; margin-top: 0.15rem; }
-.support-resp-badge {
-  margin-left: auto;
-  background: rgba(0,210,255,0.08);
-  border: 1px solid rgba(0,210,255,0.15);
-  border-radius: 20px;
-  padding: 0.3rem 0.7rem;
-  text-align: center;
-  flex-shrink: 0;
-}
-.support-resp-badge .resp-time { font-size: 0.9rem; font-weight: 700; color: #00d2ff; font-family:'Orbitron',monospace; }
-.support-resp-badge .resp-lbl { font-size: 0.62rem; color: #5a6478; }
-.support-field-label {
-  font-size: 0.7rem; font-weight: 600; color: #5a6478;
-  text-transform: uppercase; letter-spacing: 0.8px;
-  margin-bottom: 0.6rem;
-}
-.support-type-grid-new {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
-}
-.support-type-btn-new {
-  display: flex; align-items: center; gap: 0.6rem;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  padding: 0.875rem 1rem;
-  cursor: pointer;
-  transition: all 0.25s;
-  text-align: left;
-}
-.support-type-btn-new:hover {
-  border-color: rgba(0,210,255,0.25);
-  background: rgba(0,210,255,0.04);
-}
-.support-type-btn-new.active {
-  border-color: rgba(0,210,255,0.5);
-  background: rgba(0,210,255,0.08);
-  box-shadow: 0 0 0 1px rgba(0,210,255,0.15) inset;
-}
-.stn-icon {
-  width: 36px; height: 36px;
-  background: rgba(0,210,255,0.08);
-  border-radius: 10px;
-  display: flex; align-items:center; justify-content:center;
-  font-size: 1rem;
-  flex-shrink:0;
-  transition: background 0.25s;
-}
-.support-type-btn-new.active .stn-icon { background: rgba(0,210,255,0.15); }
-.stn-label { font-size: 0.8rem; font-weight: 600; color: #c8d0e0; }
-.stn-desc { font-size: 0.67rem; color: #4a566a; margin-top: 0.1rem; line-height: 1.3; }
-.support-input-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-.support-field { margin-bottom: 0.75rem; }
-.support-field label {
-  display: block;
-  font-size: 0.7rem; font-weight: 600; color: #5a6478;
-  text-transform: uppercase; letter-spacing: 0.8px;
-  margin-bottom: 0.4rem;
-}
-.support-field input,
-.support-field textarea,
-.support-field select {
-  width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  color: #d0d8ec;
-  font-size: 0.875rem;
-  font-family: 'DM Sans', sans-serif;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-  box-sizing: border-box;
-}
-.support-field input:focus,
-.support-field textarea:focus {
-  border-color: rgba(0,210,255,0.35);
-  box-shadow: 0 0 0 3px rgba(0,210,255,0.06);
-}
-.support-field input.required-field { border-color: rgba(0,210,255,0.2); }
-.support-field textarea { resize: vertical; min-height: 100px; }
-.support-mail-note {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.7rem; color: #5a6478; margin-top: 0.25rem;
-}
-.support-mail-note span { color: rgba(0,210,255,0.7); }
-.support-send-btn-new {
-  width: 100%;
-  padding: 0.95rem;
-  background: linear-gradient(135deg, #00d2ff, #7b2ff7);
-  border: none; border-radius: 12px;
-  color: #fff; font-size: 0.9rem; font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
-  font-family: 'DM Sans', sans-serif;
-  letter-spacing: 0.3px;
-  margin-top: 0.5rem;
-}
-.support-send-btn-new:hover {
-  opacity: 0.9; transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(0,210,255,0.2);
-}
-.support-prev-tickets {
-  margin-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.04);
-  padding-top: 1.25rem;
-}
-
-/* ===== GAME CARD CLICK ANIMATION ===== */
-@keyframes cardClickPulse {
-  0% { transform: scale(1); }
-  40% { transform: scale(0.96); }
-  100% { transform: scale(1); }
-}
-.game-card-clicked {
-  animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1);
-}
-
-/* ===== SCROLL TO GAME HIGHLIGHT ===== */
-@keyframes gameHighlight {
-  0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.5); }
-  50% { box-shadow: 0 0 0 8px rgba(0,210,255,0.15); }
-  100% { box-shadow: 0 0 0 0 rgba(0,210,255,0); }
-}
-.game-highlight {
-  animation: gameHighlight 1s ease;
-}
-
-/* ===== FOOTER MINIMALIST ===== */
-footer {
-  border-top: 1px solid rgba(255,255,255,0.04);
-  background: #080a0f;
-}
-.footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 3rem 2rem 2rem;
-}
-.footer-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-.footer-brand .footer-logo {
-  font-family: 'Orbitron', monospace;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #f0f2f8;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-}
-.footer-brand .footer-desc {
-  font-size: 0.8rem; color: #3a4455; line-height: 1.6; max-width: 220px;
-}
-.footer-cols { display: flex; gap: 3rem; }
-.footer-col-title { font-size: 0.65rem; font-weight: 600; color: #3a4455; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem; }
-.footer-col-links { display: flex; flex-direction: column; gap: 0.4rem; }
-.footer-col-links a { font-size: 0.8rem; color: #4a566a; text-decoration: none; transition: color 0.2s; }
-.footer-col-links a:hover { color: #00d2ff; }
-.footer-social-mini { display: flex; gap: 0.6rem; }
-.social-btn-mini {
-  width: 34px; height: 34px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px;
-  display: flex; align-items:center; justify-content:center;
-  color: #4a566a;
-  text-decoration:none;
-  transition: all 0.2s;
-}
-.social-btn-mini:hover { background: rgba(0,210,255,0.08); color: #00d2ff; border-color: rgba(0,210,255,0.2); }
-.footer-bottom-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.03);
-}
-.footer-copy { font-size: 0.72rem; color: #2a3040; }
-.footer-made { font-size: 0.72rem; color: #2a3040; }
-
-/* ===== OVERLAY SCROLL ANIMATION ===== */
-.overlay {
-  transition: opacity 0.3s ease;
-}
-.overlay.showing {
-  animation: overlayIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
-}
-@keyframes overlayIn {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-.overlay-box {
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
-}
-.overlay.showing .overlay-box {
-  animation: boxIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
-}
-@keyframes boxIn {
-  from { opacity:0; transform: translateY(20px) scale(0.97); }
-  to { opacity:1; transform: translateY(0) scale(1); }
-}
-
-/* ===== CANLI DESTEK WIDGET ===== */
-#live-support-widget {
-  position: fixed; bottom: 1.5rem; right: 1.5rem;
-  z-index: 8000;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
-}
-.lsw-tooltip {
-  background: rgba(10,12,22,0.96); border: 1px solid rgba(0,212,255,0.2);
-  border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600;
-  color: #d0d8ec; display: none; align-items: center; gap: 8px;
-  backdrop-filter: blur(12px); white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-.lsw-tooltip-close { background:none; border:none; color:#4a566a; cursor:pointer; font-size:12px; padding:0; }
-.lsw-fab {
-  width:54px; height:54px; border-radius:50%;
-  background: linear-gradient(135deg,#00d2ff,#7b2ff7);
-  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 6px 24px rgba(0,210,255,0.35); transition: transform 0.3s, box-shadow 0.3s;
-  position:relative; color:#fff;
-}
-.lsw-fab:hover { transform:scale(1.1); box-shadow:0 10px 30px rgba(0,210,255,0.45); }
-.lsw-notif-dot {
-  position:absolute; top:4px; right:4px; width:10px; height:10px;
-  background:#ff3f5c; border-radius:50%; border:2px solid #06080f;
-  animation:lswPulse 2s infinite;
-}
-@keyframes lswPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:0.8} }
-.lsw-panel {
-  width:340px; background:rgba(10,12,22,0.98); border:1px solid rgba(0,212,255,0.15);
-  border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.5);
-  backdrop-filter:blur(20px); overflow:hidden; display:none; flex-direction:column;
-  max-height:500px; animation:lswPanelIn 0.35s cubic-bezier(0.16,1,0.3,1);
-}
-.lsw-panel.open { display:flex; }
-@keyframes lswPanelIn { from{opacity:0;transform:translateY(20px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
-.lsw-panel-header {
-  display:flex; align-items:center; justify-content:space-between; padding:1rem 1.125rem;
-  background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(123,94,248,0.06));
-  border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.lsw-header-info { display:flex; align-items:center; gap:10px; }
-.lsw-header-avatar {
-  width:38px; height:38px; border-radius:50%;
-  background:linear-gradient(135deg,#00d2ff,#7b2ff7);
-  display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; color:#fff;
-}
-.lsw-header-name { font-size:0.9rem; font-weight:700; color:#f0f2f8; }
-.lsw-header-status { display:flex; align-items:center; gap:5px; font-size:0.7rem; color:#00e87a; margin-top:2px; }
-.lsw-online-dot { width:6px; height:6px; background:#00e87a; border-radius:50%; animation:lswOnP 2s infinite; }
-@keyframes lswOnP { 0%,100%{opacity:1} 50%{opacity:0.5} }
-.lsw-panel-close { background:none; border:none; color:#4a566a; font-size:1rem; cursor:pointer; padding:4px; border-radius:6px; transition:all 0.2s; }
-.lsw-panel-close:hover { background:rgba(255,255,255,0.06); color:#d0d8ec; }
-.lsw-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:10px; scrollbar-width:thin; }
-.lsw-msg { display:flex; align-items:flex-start; gap:8px; }
-.lsw-msg-bot .lsw-msg-avatar {
-  width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#00d2ff,#7b2ff7);
-  display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:800; color:#fff; flex-shrink:0;
-}
-.lsw-msg-user { flex-direction:row-reverse; }
-.lsw-msg-bubble {
-  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07);
-  border-radius:14px 14px 14px 4px; padding:0.6rem 0.875rem;
-  font-size:0.825rem; color:#d0d8ec; line-height:1.55; max-width:240px;
-}
-.lsw-msg-user .lsw-msg-bubble {
-  background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.2);
-  border-radius:14px 14px 4px 14px; color:#e8f4ff;
-}
-.lsw-input-area {
-  display:flex; align-items:center; gap:8px; padding:0.75rem 1rem;
-  border-top:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.2);
-}
-.lsw-input-area input {
-  flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px; padding:8px 12px; color:#d0d8ec; font-size:0.825rem;
-  font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s;
-}
-.lsw-input-area input:focus { border-color:rgba(0,212,255,0.35); }
-.lsw-send-btn {
-  width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#00d2ff,#7b2ff7);
-  border:none; cursor:pointer; color:#fff; display:flex; align-items:center; justify-content:center;
-  transition:opacity 0.2s, transform 0.2s;
-}
-.lsw-send-btn:hover { opacity:0.9; transform:scale(1.05); }
-</style>
 </head>
 <body>
 
 <div id="toast-container"></div>
-
-<!-- ===== PURCHASE NOTIFICATIONS ===== -->
 <div id="purchase-notification"></div>
 
 <!-- ===== OVERLAY: Giriş / Kayıt ===== -->
@@ -602,45 +22,21 @@ footer {
       <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
     </div>
     <div id="login-form">
-      <div class="field-group">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="login-username" placeholder="kullaniciadiniz" autocomplete="username">
-      </div>
-      <div class="field-group">
-        <label>Şifre</label>
-        <div class="pass-wrap">
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-          <button class="pass-toggle" onclick="togglePass('login-password', this)" type="button">👁</button>
-        </div>
-      </div>
+      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="login-username" placeholder="kullaniciadiniz" autocomplete="username"></div>
+      <div class="field-group"><label>Şifre</label><div class="pass-wrap"><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"><button class="pass-toggle" onclick="togglePass('login-password', this)" type="button">👁</button></div></div>
       <button class="btn-primary" onclick="login()">Giriş Yap</button>
       <div id="login-error" class="error-msg"></div>
     </div>
     <div id="register-form" style="display:none;">
-      <div class="field-group">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="reg-username" placeholder="benzersiz bir ad seç" autocomplete="username">
-      </div>
-      <div class="field-group">
-        <label>E-posta Adresi</label>
-        <input type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email">
-      </div>
+      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="reg-username" placeholder="benzersiz bir ad seç" autocomplete="username"></div>
+      <div class="field-group"><label>E-posta Adresi</label><input type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email"></div>
       <div class="field-group">
         <label>Şifre</label>
-        <div class="pass-wrap">
-          <input type="password" id="reg-password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" autocomplete="new-password">
-          <button class="pass-toggle" onclick="togglePass('reg-password', this)" type="button">👁</button>
-        </div>
+        <div class="pass-wrap"><input type="password" id="reg-password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password', this)" type="button">👁</button></div>
         <div class="pass-strength-bar"><div id="pass-strength-fill"></div></div>
         <div id="pass-strength-label" class="pass-strength-label"></div>
       </div>
-      <div class="field-group">
-        <label>Şifreyi Tekrar Gir</label>
-        <div class="pass-wrap">
-          <input type="password" id="reg-password2" placeholder="••••••••" autocomplete="new-password">
-          <button class="pass-toggle" onclick="togglePass('reg-password2', this)" type="button">👁</button>
-        </div>
-      </div>
+      <div class="field-group"><label>Şifreyi Tekrar Gir</label><div class="pass-wrap"><input type="password" id="reg-password2" placeholder="••••••••" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password2', this)" type="button">👁</button></div></div>
       <button class="btn-primary" onclick="register()">Kayıt Ol</button>
       <div id="reg-error" class="error-msg"></div>
     </div>
@@ -654,10 +50,7 @@ footer {
     <div class="overlay-logo">⬡ GameVault</div>
     <h2>Kodu Yükle</h2>
     <p>Satın aldığın erişim kodunu girerek bakiyeni yükle.</p>
-    <div class="field-group">
-      <label>Erişim Kodu</label>
-      <input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX" maxlength="35">
-    </div>
+    <div class="field-group"><label>Erişim Kodu</label><input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX" maxlength="35"></div>
     <button class="btn-primary" onclick="redeemCode()">Bakiyeyi Yükle</button>
     <div id="redeem-error" class="error-msg"></div>
   </div>
@@ -670,9 +63,7 @@ footer {
     <div class="overlay-logo">⬡ GameVault</div>
     <div id="bco-game-image" class="bco-image"></div>
     <h2 id="bco-game-name" class="bco-title">Oyun Adı</h2>
-    <div class="bco-meta">
-      <span id="bco-platform" class="bco-platform-badge">PC / Steam</span>
-    </div>
+    <div class="bco-meta"><span id="bco-platform" class="bco-platform-badge">PC / Steam</span></div>
     <div class="bco-balance-row">
       <span class="bco-bal-label">Bakiyen</span>
       <span class="bco-bal-val" id="bco-balance">0</span>
@@ -720,52 +111,32 @@ footer {
   </div>
 </div>
 
-<!-- ===== OVERLAY: Hesabım (YENİ TASARIM) ===== -->
+<!-- ===== OVERLAY: Hesabım ===== -->
 <div id="account-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('account-overlay')">✕</button>
-
-    <!-- Hero card -->
     <div class="account-overlay-hero">
       <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
       <div class="acc-info-new">
         <div class="acc-username-new" id="acc-display-username">—</div>
-        <div class="acc-email-new" id="acc-display-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c9a2bca5a5a8a7a0aaa089aea8a4acbfa8bca5bde7aaa6a4">[email&#160;protected]</a></div>
-        <div class="acc-balance-chip">
-          <span class="balance-icon">⬡</span>
-          <span id="acc-display-balance">0</span> oyun hakkı
-        </div>
+        <div class="acc-email-new" id="acc-display-email">—</div>
+        <div class="acc-balance-chip"><span class="balance-icon">⬡</span><span id="acc-display-balance">0</span> oyun hakkı</div>
       </div>
     </div>
-
-    <!-- İstatistikler -->
     <div class="acc-stats-row">
-      <div class="acc-stat-card">
-        <div class="acc-stat-val" id="acc-total-games">0</div>
-        <div class="acc-stat-lbl">Satın Alınan</div>
-      </div>
-      <div class="acc-stat-card">
-        <div class="acc-stat-val" style="color:#a78bfa;">7/24</div>
-        <div class="acc-stat-lbl">Destek Hattı</div>
-      </div>
+      <div class="acc-stat-card"><div class="acc-stat-val" id="acc-total-games">0</div><div class="acc-stat-lbl">Satın Alınan</div></div>
+      <div class="acc-stat-card"><div class="acc-stat-val" style="color:#a78bfa;">7/24</div><div class="acc-stat-lbl">Destek Hattı</div></div>
     </div>
-
-    <!-- Oyunlar -->
     <div class="acc-games-title">Satın Aldığım Oyunlar</div>
-    <div id="purchases-list" class="purchases-list">
-      <div class="empty-state">Henüz satın alım yok.</div>
-    </div>
-
+    <div id="purchases-list" class="purchases-list"><div class="empty-state">Henüz satın alım yok.</div></div>
     <button class="acc-logout-btn" onclick="logout()">↩ Çıkış Yap</button>
   </div>
 </div>
 
-<!-- ===== OVERLAY: Destek (YENİ TASARIM) ===== -->
+<!-- ===== OVERLAY: Destek ===== -->
 <div id="support-overlay" class="overlay">
   <div class="overlay-box support-box-new">
     <button class="overlay-close" onclick="closeOverlay('support-overlay')">✕</button>
-
-    <!-- Hero bar -->
     <div class="support-hero-bar">
       <div class="support-hero-icon">🎧</div>
       <div>
@@ -777,62 +148,25 @@ footer {
         <div class="resp-lbl">Ort. Yanıt</div>
       </div>
     </div>
-
-    <!-- Satın alınan oyunlar (varsa) -->
     <div id="support-purchases-section" style="display:none;">
       <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
       <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
     </div>
-
-    <!-- Talep türü -->
     <div class="support-field-label" style="margin-bottom:0.6rem;">📋 Talep Türü</div>
     <div class="support-type-grid-new">
-      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')">
-        <div class="stn-icon">🔑</div>
-        <div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div>
-      </button>
-      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')">
-        <div class="stn-icon">🔄</div>
-        <div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div>
-      </button>
-      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')">
-        <div class="stn-icon">👤</div>
-        <div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div>
-      </button>
-      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')">
-        <div class="stn-icon">💬</div>
-        <div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div>
-      </button>
+      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')"><div class="stn-icon">🔑</div><div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div></button>
+      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')"><div class="stn-icon">🔄</div><div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div></button>
+      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')"><div class="stn-icon">👤</div><div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div></button>
+      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')"><div class="stn-icon">💬</div><div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div></button>
     </div>
     <input type="hidden" id="support-type" value="steam_code">
-
-    <!-- İsim + Mail zorunlu -->
     <div class="support-input-row">
-      <div class="support-field">
-        <label>Adınız / Kullanıcı Adı</label>
-        <input type="text" id="support-name" placeholder="Kullanıcı adınız">
-      </div>
-      <div class="support-field">
-        <label>E-posta <span style="color:#00d2ff;">*</span></label>
-        <input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field">
-        <div class="support-mail-note">
-          <span>⚠</span> Yanıt bu adrese gönderilir
-        </div>
-      </div>
+      <div class="support-field"><label>Adınız / Kullanıcı Adı</label><input type="text" id="support-name" placeholder="Kullanıcı adınız"></div>
+      <div class="support-field"><label>E-posta <span style="color:#00d2ff;">*</span></label><input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field"><div class="support-mail-note"><span>⚠</span> Yanıt bu adrese gönderilir</div></div>
     </div>
-
-    <!-- Mesaj -->
-    <div class="support-field">
-      <label>Mesajınız</label>
-      <textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın. Ekran görüntüsü, hata mesajı, yaşadığınız adımlar... Ne kadar detay verirseniz o kadar hızlı çözeriz." rows="5"></textarea>
-    </div>
-
-    <button class="support-send-btn-new" onclick="sendSupportRequest()">
-      Gönder →
-    </button>
+    <div class="support-field"><label>Mesajınız</label><textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın..." rows="5"></textarea></div>
+    <button class="support-send-btn-new" onclick="sendSupportRequest()">Gönder →</button>
     <div id="support-error" class="error-msg"></div>
-
-    <!-- Önceki yanıtlar -->
     <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
       <div class="support-field-label">💬 Önceki Yanıtlarım</div>
       <div id="support-replies-list" class="support-replies-list"></div>
@@ -848,12 +182,9 @@ footer {
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
       <p>GameVault olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
-      <h4>Toplanan Veriler</h4>
-      <p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
-      <h4>Veri Güvenliği</h4>
-      <p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
-      <h4>Çerezler</h4>
-      <p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
+      <h4>Toplanan Veriler</h4><p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
+      <h4>Veri Güvenliği</h4><p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
+      <h4>Çerezler</h4><p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
     </div>
   </div>
 </div>
@@ -866,12 +197,9 @@ footer {
     <h2>Kullanım Şartları</h2>
     <div class="legal-content">
       <p>GameVault platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
-      <h4>Hizmet Kapsamı</h4>
-      <p>GameVault, dijital oyun erişimi sağlayan bir platformdur.</p>
-      <h4>Kullanıcı Sorumluluğu</h4>
-      <p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
-      <h4>İade Politikası</h4>
-      <p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
+      <h4>Hizmet Kapsamı</h4><p>GameVault, dijital oyun erişimi sağlayan bir platformdur.</p>
+      <h4>Kullanıcı Sorumluluğu</h4><p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
+      <h4>İade Politikası</h4><p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
     </div>
   </div>
 </div>
@@ -893,11 +221,7 @@ footer {
       <div class="nav-balance">⬡ <span id="nav-balance">0</span></div>
       <button class="btn-nav-account" onclick="openAccount()">👤 <span id="nav-username">—</span></button>
       <button class="btn-nav-logout" onclick="logout()" title="Çıkış Yap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </div>
@@ -915,7 +239,6 @@ footer {
       <button class="hero-btn-secondary" onclick="handleCodeBtn()">🔑 Kod Yükle</button>
     </div>
   </div>
-  <!-- Hero sağ taraf: Kullanıcı Yorumları -->
   <div class="hero-reviews" id="hero-reviews">
     <div class="hero-reviews-label">⭐ Kullanıcı Yorumları</div>
     <div class="hero-reviews-list" id="hero-reviews-list">
@@ -924,125 +247,40 @@ footer {
   </div>
 </section>
 
-<style>
-.hero-reviews {
-  display: flex; flex-direction: column; gap: 0.75rem;
-  max-width: 340px; width: 100%;
-  animation: heroReviewsIn 0.8s 0.4s cubic-bezier(0.16,1,0.3,1) both;
-}
-@keyframes heroReviewsIn {
-  from { opacity:0; transform: translateX(30px); }
-  to   { opacity:1; transform: translateX(0); }
-}
-.hero-reviews-label {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: #3a4560;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.hero-reviews-list { display: flex; flex-direction: column; gap: 0.6rem; }
-.hero-review-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  display: flex; align-items: flex-start; gap: 0.75rem;
-  transition: border-color 0.3s;
-  animation: reviewCardIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
-}
-@keyframes reviewCardIn {
-  from { opacity:0; transform: translateY(10px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-.hero-review-card:hover { border-color: rgba(0,210,255,0.15); }
-.hero-review-avatar {
-  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg,rgba(0,210,255,0.15),rgba(123,47,247,0.15));
-  display: flex; align-items:center; justify-content:center; font-size: 1.1rem;
-}
-.hero-review-body { flex: 1; min-width: 0; }
-.hero-review-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; }
-.hero-review-name { font-size: 0.8rem; font-weight: 700; color: #d0d8ec; }
-.hero-review-stars { color: #f5c518; font-size: 0.72rem; letter-spacing: 1px; }
-.hero-review-text { font-size: 0.75rem; color: #5a6478; line-height: 1.5; font-style: italic; }
-.hero-review-loading { color: #3a4560; font-size: 0.8rem; text-align:center; padding: 1rem 0; }
-</style>
-
 <!-- ===== İSTATİSTİKLER ===== -->
 <section class="stats-bar">
-  <div class="stat-item">
-    <div class="stat-icon">👥</div>
-    <div class="stat-info">
-      <div class="stat-value" id="stat-users">137</div>
-      <div class="stat-label">Kayıtlı Kullanıcı</div>
-    </div>
-  </div>
+  <div class="stat-item"><div class="stat-icon">👥</div><div class="stat-info"><div class="stat-value" id="stat-users">137</div><div class="stat-label">Kayıtlı Kullanıcı</div></div></div>
   <div class="stat-divider"></div>
-  <div class="stat-item">
-    <div class="stat-icon">🎮</div>
-    <div class="stat-info">
-      <div class="stat-value" id="stat-games">0</div>
-      <div class="stat-label">Mevcut Oyun</div>
-    </div>
-  </div>
+  <div class="stat-item"><div class="stat-icon">🎮</div><div class="stat-info"><div class="stat-value" id="stat-games">0</div><div class="stat-label">Mevcut Oyun</div></div></div>
   <div class="stat-divider"></div>
-  <div class="stat-item">
-    <div class="stat-icon">⭐</div>
-    <div class="stat-info">
-      <div class="stat-value" id="stat-rating">5.0</div>
-      <div class="stat-label">Kullanıcı Puanı / 5</div>
-    </div>
-  </div>
+  <div class="stat-item"><div class="stat-icon">⭐</div><div class="stat-info"><div class="stat-value" id="stat-rating">5.0</div><div class="stat-label">Kullanıcı Puanı / 5</div></div></div>
   <div class="stat-divider"></div>
-  <div class="stat-item">
-    <div class="stat-icon">💬</div>
-    <div class="stat-info">
-      <div class="stat-value stat-live">7/24</div>
-      <div class="stat-label">Canlı Destek</div>
-    </div>
-  </div>
+  <div class="stat-item"><div class="stat-icon">💬</div><div class="stat-info"><div class="stat-value stat-live">7/24</div><div class="stat-label">Canlı Destek</div></div></div>
 </section>
 
 <!-- ===== ÖZELLİKLER ===== -->
 <section class="features-section">
   <div class="container-wide">
     <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Anında Teslimat</h3>
-        <p>Satın alma tamamlandıktan sonra oyununuz saniyeler içinde hesabınıza tanımlanır.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🖥️</div>
-        <h3>Kesintisiz Hizmet</h3>
-        <p>Sunucularımız her zaman aktif. Oyunlarınıza istediğiniz zaman erişin.</p>
-        <div class="feature-status">
-          <span class="status-dot" id="server-status-dot"></span>
-          <span id="server-status-text">Sunucu durumu kontrol ediliyor...</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎧</div>
-        <h3>Hızlı Destek</h3>
-        <p>Sorun yaşadığınızda çözüm odaklı destek ekibimiz yanınızda.</p>
-        <div class="feature-meta">Ort. yanıt süresi: ~15 dk</div>
-      </div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Anında Teslimat</h3><p>Satın alma tamamlandıktan sonra oyununuz saniyeler içinde hesabınıza tanımlanır.</p></div>
+      <div class="feature-card"><div class="feature-icon">🖥️</div><h3>Kesintisiz Hizmet</h3><p>Sunucularımız her zaman aktif. Oyunlarınıza istediğiniz zaman erişin.</p><div class="feature-status"><span class="status-dot" id="server-status-dot"></span><span id="server-status-text">Sunucu durumu kontrol ediliyor...</span></div></div>
+      <div class="feature-card"><div class="feature-icon">🎧</div><h3>Hızlı Destek</h3><p>Sorun yaşadığınızda çözüm odaklı destek ekibimiz yanınızda.</p><div class="feature-meta">Ort. yanıt süresi: ~15 dk</div></div>
     </div>
   </div>
 </section>
 
-<!-- ===== POPÜLER OYUNLAR (stats altında) ===== -->
+<!-- ===== POPÜLER OYUNLAR ===== -->
 <section id="popular-section" style="display:none; margin-top:0;">
   <div class="container">
     <div class="section-header">
       <div class="section-title">🔥 Popüler Oyunlar</div>
-      <a href="games.html" style="font-size:0.82rem;color:#00d2ff;text-decoration:none;opacity:0.8;">Tümünü Gör →</a>
+      <a href="Games.html" style="font-size:0.82rem;color:#00d2ff;text-decoration:none;opacity:0.8;">Tümünü Gör →</a>
     </div>
     <div class="games-grid" id="popular-grid"></div>
   </div>
 </section>
 
-<!-- ===== NASIL ÇALIŞIR (GELİŞTİRİLMİŞ) ===== -->
+<!-- ===== NASIL ÇALIŞIR ===== -->
 <section class="how-section" id="how-section">
   <div class="container-wide">
     <div class="section-center-title">
@@ -1051,30 +289,20 @@ footer {
     </div>
     <div class="how-steps" id="how-steps">
       <div class="how-step" id="how-step-1">
-        <div class="how-num">01</div>
-        <div class="how-icon-wrap">🔑</div>
-        <h4>Kod Satın Al</h4>
-        <p>GameVault erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
+        <div class="how-num">01</div><div class="how-icon-wrap">🔑</div>
+        <h4>Kod Satın Al</h4><p>GameVault erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
         <div class="how-step-glow"></div>
       </div>
-      <div class="how-connector">
-        <div class="how-connector-line"><div class="how-connector-arrow"></div></div>
-      </div>
+      <div class="how-connector"><div class="how-connector-line"><div class="how-connector-arrow"></div></div></div>
       <div class="how-step" id="how-step-2">
-        <div class="how-num">02</div>
-        <div class="how-icon-wrap">🎮</div>
-        <h4>Oyun Seç</h4>
-        <p>Kütüphanemizdeki oyunlardan birini seç ve tek tıkla satın al.</p>
+        <div class="how-num">02</div><div class="how-icon-wrap">🎮</div>
+        <h4>Oyun Seç</h4><p>Kütüphanemizdeki oyunlardan birini seç ve tek tıkla satın al.</p>
         <div class="how-step-glow"></div>
       </div>
-      <div class="how-connector">
-        <div class="how-connector-line"><div class="how-connector-arrow"></div></div>
-      </div>
+      <div class="how-connector"><div class="how-connector-line"><div class="how-connector-arrow"></div></div></div>
       <div class="how-step" id="how-step-3">
-        <div class="how-num">03</div>
-        <div class="how-icon-wrap">🚀</div>
-        <h4>Oynamaya Başla</h4>
-        <p>Steam bilgilerini al, doğrulama kodunu gir ve oyunun hazır!</p>
+        <div class="how-num">03</div><div class="how-icon-wrap">🚀</div>
+        <h4>Oynamaya Başla</h4><p>Steam bilgilerini al, doğrulama kodunu gir ve oyunun hazır!</p>
         <div class="how-step-glow"></div>
       </div>
     </div>
@@ -1083,12 +311,8 @@ footer {
 
 <!-- ===== OYUNLAR ===== -->
 <section class="container" id="games">
-  <div class="section-header">
-    <div class="section-title">🔥 Öne Çıkan Oyunlar</div>
-  </div>
-  <div class="games-grid" id="main-grid">
-    <div class="loading-state">Oyunlar yükleniyor...</div>
-  </div>
+  <div class="section-header"><div class="section-title">🔥 Öne Çıkan Oyunlar</div></div>
+  <div class="games-grid" id="main-grid"><div class="loading-state">Oyunlar yükleniyor...</div></div>
   <div id="load-more-wrap" style="text-align:center; margin-top:2rem; display:none;">
     <button class="btn-load-more" id="load-more-btn" onclick="loadMoreGames()">
       <span>Daha Fazla Yükle</span>
@@ -1097,7 +321,7 @@ footer {
   </div>
 </section>
 
-<!-- ===== FOOTER (MİNİMALİST) ===== -->
+<!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer-inner">
     <div class="footer-top-row">
@@ -1125,18 +349,10 @@ footer {
         <div>
           <div class="footer-col-title">Sosyal</div>
           <div class="footer-social-mini">
-            <a href="#" class="social-btn-mini" title="Discord">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            </a>
-            <a href="#" class="social-btn-mini" title="Twitter/X">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="#" class="social-btn-mini" title="Instagram">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-            <a href="#" class="social-btn-mini" title="Telegram">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>
-            </a>
+            <a href="#" class="social-btn-mini" title="Discord"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg></a>
+            <a href="#" class="social-btn-mini" title="Twitter/X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" class="social-btn-mini" title="Instagram"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="#" class="social-btn-mini" title="Telegram"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg></a>
           </div>
         </div>
       </div>
@@ -1148,64 +364,15 @@ footer {
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
-
-<script>
-// ===== HOW SECTION SCROLL ANIMATION =====
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const steps = document.querySelectorAll('.how-step');
-      steps.forEach((step, i) => {
-        setTimeout(() => {
-          step.style.opacity = '1';
-          step.style.transform = 'translateY(0)';
-          step.classList.add('step-active');
-          setTimeout(() => step.classList.remove('step-active'), 1000);
-        }, i * 200);
-      });
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.2 });
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.how-step').forEach(step => {
-    step.style.opacity = '0';
-    step.style.transform = 'translateY(30px)';
-    step.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s';
-  });
-  const howSection = document.getElementById('how-section');
-  if (howSection) observer.observe(howSection);
-});
-
-document.addEventListener('click', function(e) {
-  const card = e.target.closest('.game-card');
-  if (card) {
-    card.classList.add('game-card-clicked');
-    setTimeout(() => card.classList.remove('game-card-clicked'), 350);
-  }
-});
-
-// ===== SUPPORT TYPE SELECT FOR NEW BUTTONS =====
-window.selectSupportType = function(btn, val) {
-  document.querySelectorAll('.support-type-btn-new').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('support-type').value = val;
-};
-</script>
-
-<!-- ===== CANLI DESTEK WIDGET (Admin'e bağlı gerçek chat) ===== -->
+<!-- ===== CANLI DESTEK WIDGET ===== -->
 <div id="live-support-widget">
+  <!-- Tooltip -->
   <div class="lsw-tooltip" id="lsw-tooltip">
     <span>★ 7/24 Canlı Destek</span>
     <button class="lsw-tooltip-close" onclick="document.getElementById('lsw-tooltip').style.display='none'">✕</button>
   </div>
-  <button class="lsw-fab" id="lsw-fab" onclick="toggleLiveSupport()" title="Canlı Destek">
-    <svg class="lsw-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <svg class="lsw-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    <span class="lsw-notif-dot" id="lsw-notif-dot" style="display:none;"></span>
-  </button>
+
+  <!-- Panel — FAB üstünde absolute konumlanır (CSS'te bottom:64px) -->
   <div class="lsw-panel" id="lsw-panel">
     <div class="lsw-panel-header">
       <div class="lsw-header-info">
@@ -1223,8 +390,8 @@ window.selectSupportType = function(btn, val) {
         <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
       </div>
     </div>
-    <div id="lsw-login-notice" style="display:none; padding:0.75rem 1rem; background:rgba(0,210,255,0.06); border-top:1px solid rgba(255,255,255,0.05); font-size:0.78rem; color:#5a6478; text-align:center;">
-      Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;" style="color:#00d2ff;">giriş yapın</a>
+    <div id="lsw-login-notice">
+      Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
     </div>
     <div class="lsw-input-area" id="lsw-input-area">
       <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
@@ -1233,122 +400,15 @@ window.selectSupportType = function(btn, val) {
       </button>
     </div>
   </div>
+
+  <!-- FAB — listenin en sonunda (panel üstünde görünür) -->
+  <button class="lsw-fab" id="lsw-fab" onclick="toggleLiveSupport()" title="Canlı Destek">
+    <svg class="lsw-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg class="lsw-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <span class="lsw-notif-dot" id="lsw-notif-dot" style="display:none;"></span>
+  </button>
 </div>
 
-<script>
-const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
-let lswOpen = false;
-let lswPollTimer = null;
-let lswLastCount = 0;
-
-// Tooltip göster/gizle
-setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if(t) t.style.display="flex"; }, 5000);
-setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if(t) t.style.display="none"; }, 12000);
-
-function toggleLiveSupport() {
-  lswOpen = !lswOpen;
-  const panel = document.getElementById("lsw-panel");
-  const chatIcon = document.querySelector(".lsw-icon-chat");
-  const closeIcon = document.querySelector(".lsw-icon-close");
-  const dot = document.getElementById("lsw-notif-dot");
-  const tooltip = document.getElementById("lsw-tooltip");
-
-  if (lswOpen) {
-    panel.classList.add("open");
-    chatIcon.style.display = "none";
-    closeIcon.style.display = "block";
-    if (dot) dot.style.display = "none";
-    if (tooltip) tooltip.style.display = "none";
-    lswCheckAuth();
-    lswLoadMessages();
-    lswStartPoll();
-    setTimeout(() => document.getElementById("lsw-input")?.focus(), 300);
-  } else {
-    panel.classList.remove("open");
-    chatIcon.style.display = "block";
-    closeIcon.style.display = "none";
-    lswStopPoll();
-  }
-}
-
-function lswCheckAuth() {
-  const user = window.currentUser;
-  const inputArea = document.getElementById("lsw-input-area");
-  const loginNotice = document.getElementById("lsw-login-notice");
-  if (!user) {
-    if (inputArea) inputArea.style.display = "none";
-    if (loginNotice) loginNotice.style.display = "block";
-  } else {
-    if (inputArea) inputArea.style.display = "flex";
-    if (loginNotice) loginNotice.style.display = "none";
-  }
-}
-
-async function lswLoadMessages() {
-  const user = window.currentUser;
-  if (!user) return;
-  try {
-    const res = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(user.username)}`);
-    const data = await res.json();
-    if (!data.success) return;
-    const c = document.getElementById("lsw-messages");
-    // Mevcut bot mesajı dışında temizle
-    const existing = c.querySelectorAll(".lsw-msg-db");
-    existing.forEach(e => e.remove());
-    data.messages.forEach(m => lswRenderMsg(m));
-    c.scrollTop = c.scrollHeight;
-  } catch(e) {}
-}
-
-function lswRenderMsg(m) {
-  const c = document.getElementById("lsw-messages");
-  const isAdmin = m.sender === "admin";
-  const d = document.createElement("div");
-  d.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
-  if (isAdmin) {
-    d.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${escHtmlLsw(m.text)}</div>`;
-  } else {
-    d.innerHTML = `<div class="lsw-msg-bubble">${escHtmlLsw(m.text)}</div>`;
-  }
-  c.appendChild(d);
-}
-
-function escHtmlLsw(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-async function lswSend() {
-  const user = window.currentUser;
-  const inp = document.getElementById("lsw-input");
-  const msg = inp?.value.trim();
-  if (!msg || !user) return;
-  inp.value = "";
-  // Anında göster
-  const c = document.getElementById("lsw-messages");
-  const d = document.createElement("div");
-  d.className = "lsw-msg lsw-msg-user lsw-msg-db";
-  d.innerHTML = `<div class="lsw-msg-bubble">${escHtmlLsw(msg)}</div>`;
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
-  try {
-    await fetch(`${LSW_API}/api/chat/send`, {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ username: user.username, message: msg, isAdmin: false })
-    });
-  } catch(e) {}
-}
-
-function lswStartPoll() {
-  lswStopPoll();
-  lswPollTimer = setInterval(lswLoadMessages, 4000);
-}
-function lswStopPoll() {
-  if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
-}
-
-// Giriş sonrası chat'i güncelle
-document.addEventListener("gv_login", () => {
-  if (lswOpen) { lswCheckAuth(); lswLoadMessages(); }
-});
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
