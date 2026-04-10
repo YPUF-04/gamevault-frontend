@@ -18,74 +18,28 @@ let currentPurchaseForSupport = null;
 // INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Giriş animasyonu — sadece 1 kere
   const seenIntro = sessionStorage.getItem("gv_intro_seen");
   if (!seenIntro) {
     showIntroAnimation();
     sessionStorage.setItem("gv_intro_seen", "1");
   }
-
   const saved = localStorage.getItem("gv_user");
   if (saved) {
     currentUser = JSON.parse(saved);
     updateNavUI();
   }
+  loadHeroReviews();
   loadPopularGames();
   loadGames();
   loadStats();
-  loadReviews();
   showRecentPurchaseNotifs();
   animateUserCount();
-
-  // games.html'den yönlendirme
   const pendingGame = localStorage.getItem("gv_pending_game");
   if (pendingGame) {
     localStorage.removeItem("gv_pending_game");
-    setTimeout(() => {
-      const g = GAMES.find(x => x.id === pendingGame);
-      if (g) handleGameClick(pendingGame);
-    }, 1200);
+    setTimeout(() => { if (GAMES.find(x => x.id === pendingGame)) handleGameClick(pendingGame); }, 1200);
   }
 });
-
-// =============================================
-// GİRİŞ ANİMASYONU
-// =============================================
-function showIntroAnimation() {
-  const overlay = document.createElement("div");
-  overlay.id = "intro-overlay";
-  overlay.style.cssText = `
-    position:fixed; inset:0; z-index:99999;
-    background:#06080f;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:1.5rem;
-  `;
-  overlay.innerHTML = `
-    <div style="font-family:'Orbitron',monospace; font-size:2.5rem; font-weight:900; letter-spacing:4px;
-      background:linear-gradient(135deg,#00d2ff,#7b2ff7); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      animation: introLogoIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards; opacity:0;">
-      ⬡ GameVault
-    </div>
-    <div style="font-size:0.9rem; color:#3a4560; letter-spacing:3px; text-transform:uppercase;
-      animation: introSubIn 0.8s 0.3s cubic-bezier(0.16,1,0.3,1) forwards; opacity:0;">
-      Dijital Oyun Mağazası
-    </div>
-    <div style="display:flex; gap:6px; margin-top:0.5rem; animation: introSubIn 0.8s 0.6s forwards; opacity:0;">
-      <div class="intro-dot"></div><div class="intro-dot" style="animation-delay:0.15s"></div><div class="intro-dot" style="animation-delay:0.3s"></div>
-    </div>
-    <style>
-      @keyframes introLogoIn { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
-      @keyframes introSubIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-      .intro-dot { width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#7b2ff7);
-        animation:introDotPulse 0.8s ease-in-out infinite alternate; }
-      @keyframes introDotPulse { from{opacity:0.3;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
-      #intro-overlay { animation: introFadeOut 0.6s 2s forwards; }
-      @keyframes introFadeOut { from{opacity:1} to{opacity:0;pointer-events:none} }
-    </style>
-  `;
-  document.body.appendChild(overlay);
-  setTimeout(() => overlay.remove(), 2700);
-}
 
 // =============================================
 // POPÜLER OYUNLAR
@@ -95,46 +49,105 @@ async function loadPopularGames() {
     const res = await fetch(`${API}/api/popular-games`);
     const data = await res.json();
     const grid = document.getElementById("popular-grid");
-    if (!grid) return;
+    const section = document.getElementById("popular-section");
+    if (!grid || !section) return;
     if (data.success && data.games && data.games.length) {
       grid.innerHTML = data.games.map(g => gameCardHTML(g)).join("");
-      const section = document.getElementById("popular-section");
-      if (section) section.style.display = "block";
+      section.style.display = "block";
     } else {
-      const section = document.getElementById("popular-section");
-      if (section) section.style.display = "none";
+      section.style.display = "none";
     }
   } catch(e) {}
 }
 
 // =============================================
-// REVIEWS
+// HERO YORUMLAR
 // =============================================
-async function loadReviews() {
+async function loadHeroReviews() {
   try {
     const res = await fetch(`${API}/api/reviews`);
     const data = await res.json();
-    const grid = document.getElementById("reviews-grid");
-    if (!grid) return;
+    const list = document.getElementById("hero-reviews-list");
+    if (!list) return;
     if (data.success && data.reviews && data.reviews.length) {
-      const visible = data.reviews.slice(0, 5);
-      grid.innerHTML = visible.map(r => `
-        <div class="review-card">
-          <div class="review-header">
-            <div class="review-avatar">${r.avatar || '😊'}</div>
-            <div class="review-info">
-              <div class="review-username">${r.username}</div>
-              <div class="review-stars">${'★'.repeat(r.rating||5)}${'☆'.repeat(5-(r.rating||5))}</div>
+      const visible = data.reviews.slice(0, 3);
+      list.innerHTML = visible.map((r, i) => `
+        <div class="hero-review-card" style="animation-delay:${i*0.15}s">
+          <div class="hero-review-avatar">${r.avatar||'😊'}</div>
+          <div class="hero-review-body">
+            <div class="hero-review-top">
+              <span class="hero-review-name">${r.username}</span>
+              <span class="hero-review-stars">${'★'.repeat(r.rating||5)}</span>
             </div>
+            <div class="hero-review-text">${r.message}</div>
           </div>
-          <div class="review-message">"${r.message}"</div>
         </div>
       `).join("");
+    } else {
+      const list2 = document.getElementById("hero-reviews-list");
+      if (list2) list2.innerHTML = "";
+      const section = document.getElementById("hero-reviews");
+      if (section) section.style.display = "none";
     }
-  } catch(e) {}
+  } catch(e) {
+    const section = document.getElementById("hero-reviews");
+    if (section) section.style.display = "none";
+  }
 }
 
+// =============================================
+// GİRİŞ ANİMASYONU (1 kere)
+// =============================================
+function showIntroAnimation() {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:#06080f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;";
+  overlay.innerHTML = `
+    <div style="font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#00d2ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:introIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0;">⬡ GameVault</div>
+    <div style="font-size:0.85rem;color:#3a4560;letter-spacing:3px;text-transform:uppercase;animation:introIn 0.8s 0.3s forwards;opacity:0;">Dijital Oyun Mağazası</div>
+    <style>@keyframes introIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}#intro-overlay{animation:introFade 0.6s 2s forwards}@keyframes introFade{to{opacity:0;pointer-events:none}}</style>
+  `;
+  overlay.id = "intro-overlay";
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 2700);
+}
 
+// =============================================
+// SATIN ALMA BİLDİRİMİ — 5sn göster, 10sn gizle
+// =============================================
+async function showRecentPurchaseNotifs() {
+  let pool = [], idx = 0;
+  try {
+    const res = await fetch(`${API}/api/recent-purchases`);
+    const data = await res.json();
+    if (data.success && data.purchases && data.purchases.length) pool = data.purchases;
+  } catch(e) { return; }
+  if (!pool.length) return;
+
+  function next() {
+    const n = pool[idx % pool.length];
+    showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
+    idx++;
+    setTimeout(next, 15000); // 5sn göster + 10sn gizle = 15sn döngü
+  }
+  setTimeout(next, 8000);
+}
+
+function showPurchaseNotification(username, gameName, emoji) {
+  const el = document.getElementById("purchase-notification");
+  if (!el) return;
+  const short = username.length > 8 ? username.substring(0,5)+"***" : username;
+  el.innerHTML = `<span class="pn-emoji">${emoji||'🎮'}</span><span><strong>${short}</strong> az önce <em>${gameName}</em> aldı!</span>`;
+  el.style.cssText = "display:flex;opacity:1;transform:translateX(0);transition:opacity 0.5s,transform 0.5s;";
+  setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translateX(-30px)";
+    setTimeout(() => { el.style.display = "none"; }, 500);
+  }, 5000);
+}
+
+// =============================================
+// İSTATİSTİKLER
+// =============================================
 async function loadStats() {
   try {
     const res = await fetch(`${API}/api/stats`);
@@ -329,6 +342,7 @@ async function login() {
       closeOverlay("auth-overlay");
       showToast(`Hoş geldin, ${data.username}! 🎮`);
       errEl.textContent = "";
+      document.dispatchEvent(new Event("gv_login"));
     } else {
       errEl.style.color = "var(--red)";
       errEl.textContent = data.message;
@@ -598,14 +612,13 @@ function openSupportFromPurchase() {
 // =============================================
 async function openAccount() {
   if (!currentUser) return;
+  // Önce purchase overlay'i kapat
+  closeOverlay("purchase-overlay");
   document.getElementById("acc-avatar-letter").textContent = currentUser.username[0].toUpperCase();
   document.getElementById("acc-display-username").textContent = currentUser.username;
   document.getElementById("acc-display-balance").textContent = currentUser.balance;
-  // Email göster
   const emailEl = document.getElementById("acc-display-email");
-  if (emailEl) {
-    emailEl.textContent = currentUser.email || (currentUser.username.toLowerCase() + "@gamevault.com");
-  }
+  if (emailEl) emailEl.textContent = currentUser.email || (currentUser.username.toLowerCase() + "@gamevault.com");
   showOverlay("account-overlay");
   loadPurchaseHistory();
 }
@@ -782,7 +795,7 @@ async function sendSupportRequest() {
 }
 
 // =============================================
-// SATIN ALMA BİLDİRİMİ — 5sn göster, 10sn gizle döngüsü
+// SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
 // =============================================
 async function showRecentPurchaseNotifs() {
   let pool = [];
@@ -792,37 +805,38 @@ async function showRecentPurchaseNotifs() {
     const res = await fetch(`${API}/api/recent-purchases`);
     const data = await res.json();
     if (data.success && data.purchases && data.purchases.length > 0) {
+      // Gerçek verileri kullan
       pool = data.purchases;
     }
-  } catch(e) { return; }
+  } catch(e) {
+    // API'ye ulaşamazsa hiç gösterme
+    return;
+  }
 
   if (!pool.length) return;
+
+  // Karıştır ki her seferinde farklı sırayla gözüksün
+  pool = pool.sort(() => Math.random() - 0.5);
 
   function next() {
     if (!pool.length) return;
     const n = pool[idx % pool.length];
     showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
     idx++;
-    // 5sn göster, 10sn gizle = 15sn sonra tekrar
-    setTimeout(next, 15000);
+    // Seyrek: 30-60 saniye aralık
+    const delay = 30000 + Math.random() * 30000;
+    setTimeout(next, delay);
   }
-  setTimeout(next, 8000);
+  // İlk bildirimi 18 saniye sonra göster
+  setTimeout(next, 18000);
 }
 
 function showPurchaseNotification(username, gameName, emoji) {
   const el = document.getElementById("purchase-notification");
-  if (!el) return;
   const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
   el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
-  el.style.display = "flex";
-  el.style.opacity = "1";
-  el.style.transform = "translateX(0)";
-  // 5 saniye sonra gizle
-  setTimeout(() => {
-    el.style.opacity = "0";
-    el.style.transform = "translateX(-30px)";
-    setTimeout(() => { el.style.display = "none"; el.style.transform = "translateX(0)"; }, 500);
-  }, 5000);
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 5000);
 }
 
 // =============================================
