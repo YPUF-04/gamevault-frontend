@@ -528,6 +528,8 @@ function openPurchaseOverlay(data) {
 }
 
 function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, requests) {
+  // Önce profil overlay'ini kapat
+  closeOverlay("account-overlay");
   currentPurchaseId = purchaseId;
   currentPurchaseForSupport = { purchaseId, gameName };
   document.getElementById("po-game-name").textContent = gameName;
@@ -549,7 +551,8 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
     btn.textContent = "🔑 Steam Doğrulama Kodu Al";
     extra.style.display = "none";
   }
-  showOverlay("purchase-overlay");
+  // Kısa gecikme ile aç (kapanma animasyonu için)
+  setTimeout(() => showOverlay("purchase-overlay"), 150);
 }
 
 async function requestSteamCode() {
@@ -631,8 +634,14 @@ async function loadPurchaseHistory() {
     const data = await res.json();
     if (!data.success || !data.purchases.length) {
       listEl.innerHTML = "<div class='empty-state'>Henüz satın alım yok.</div>";
+      const totalEl = document.getElementById("acc-total-games");
+      if (totalEl) totalEl.textContent = "0";
       return;
     }
+    // Satın alım sayısını güncelle
+    const totalEl = document.getElementById("acc-total-games");
+    if (totalEl) totalEl.textContent = data.purchases.length;
+
     listEl.innerHTML = data.purchases.map(p => `
       <div class="purchase-item">
         <div class="pi-emoji">${p.gameEmoji || '🎮'}</div>
