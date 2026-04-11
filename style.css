@@ -1605,7 +1605,7 @@ footer {
 
 /* Login notice */
 #lsw-login-notice {
-  display: none;
+  display: block; /* Başlangıçta görünür — JS giriş yapılmışsa gizler */
   padding: 0.75rem 1rem;
   background: rgba(0,210,255,0.06);
   border-top: 1px solid rgba(255,255,255,0.05);
@@ -1617,7 +1617,8 @@ footer {
 
 /* Input area */
 .lsw-input-area {
-  display: flex; align-items: center; gap: 8px;
+  display: none; /* Başlangıçta gizli — JS giriş yapılmışsa gösterir */
+  align-items: center; gap: 8px;
   padding: 0.625rem 0.875rem;
   border-top: 1px solid rgba(255,255,255,0.05);
   background: rgba(0,0,0,0.2);
