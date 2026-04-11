@@ -1034,6 +1034,7 @@ window.lswSend = async function() {
   const msg = inp?.value.trim();
   if (!msg || !user) return;
   inp.value = "";
+  // Anında UI'da göster
   const c = document.getElementById("lsw-messages");
   const d = document.createElement("div");
   d.className = "lsw-msg lsw-msg-user lsw-msg-db";
@@ -1045,12 +1046,14 @@ window.lswSend = async function() {
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ username: user.username, message: msg, isAdmin: false })
     });
+    // Hemen sunucudan tekrar çek (echo düzeltmek için)
+    setTimeout(lswLoadMessages, 300);
   } catch(e) {}
 };
 
 function lswStartPoll() {
   lswStopPoll();
-  lswPollTimer = setInterval(lswLoadMessages, 4000);
+  lswPollTimer = setInterval(lswLoadMessages, 800); // Anlık yazışma için hızlı poll
 }
 function lswStopPoll() {
   if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
