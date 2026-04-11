@@ -208,7 +208,7 @@
 <nav id="main-nav">
   <div class="nav-inner">
     <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">⬡ GameVault</div>
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
       <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
@@ -225,6 +225,9 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
