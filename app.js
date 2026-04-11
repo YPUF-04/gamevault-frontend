@@ -1094,3 +1094,25 @@ function lswStartPoll() {
 function lswStopPoll() {
   if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
 }
+
+// =============================================
+// MOBİL MENÜ
+// =============================================
+window.toggleMobileMenu = function() {
+  const links = document.getElementById("nav-links");
+  const hamburger = document.getElementById("hamburger");
+  if (!links) return;
+  const isOpen = links.classList.toggle("mobile-open");
+  if (hamburger) hamburger.classList.toggle("active", isOpen);
+};
+
+// Dışarı tıklayınca menüyü kapat
+document.addEventListener("click", function(e) {
+  const links = document.getElementById("nav-links");
+  const hamburger = document.getElementById("hamburger");
+  if (!links || !links.classList.contains("mobile-open")) return;
+  if (!links.contains(e.target) && !hamburger?.contains(e.target)) {
+    links.classList.remove("mobile-open");
+    if (hamburger) hamburger.classList.remove("active");
+  }
+});
