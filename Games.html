@@ -326,22 +326,13 @@ const API_GP = "https://backendsite-production-6bcb.up.railway.app";
 let ALL_GAMES_PAGE = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Kullanıcı oturumu
-  try {
-    const saved = localStorage.getItem("gv_user");
-    if (saved) {
-      currentUser = JSON.parse(saved);
-      updateNavUI();
-    }
-  } catch(e) {}
-
-  // Oyunları yükle
+  // Oyunları yükle (oturum app.js tarafından zaten yüklendi)
   try {
     const res = await fetch(`${API_GP}/api/games`);
     const data = await res.json();
     if (data.success) {
       ALL_GAMES_PAGE = data.games;
-      GAMES = data.games; // app.js'deki GAMES array'ini doldur (satın alma için)
+      GAMES = data.games;
       renderGamesPage(ALL_GAMES_PAGE);
     }
   } catch(e) {
