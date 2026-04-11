@@ -210,6 +210,7 @@
     <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">⬡ GameVault</div>
     <div class="nav-links">
       <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
+      <a href="Games.html">Tüm Oyunlar</a>
       <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
       <a href="#" onclick="openSupport(); return false;">Destek</a>
     </div>
@@ -364,44 +365,41 @@
   </div>
 </footer>
 
-<!-- ===== CANLI DESTEK WIDGET ===== -->
+<!-- ===== CANLI DESTEK — PANEL (fixed, FAB üstünde) ===== -->
+<div class="lsw-panel" id="lsw-panel">
+  <div class="lsw-panel-header">
+    <div class="lsw-header-info">
+      <div class="lsw-header-avatar">GV</div>
+      <div>
+        <div class="lsw-header-name">GameVault Destek</div>
+        <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
+      </div>
+    </div>
+    <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
+  </div>
+  <div class="lsw-messages" id="lsw-messages">
+    <div class="lsw-msg lsw-msg-bot">
+      <div class="lsw-msg-avatar">GV</div>
+      <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
+    </div>
+  </div>
+  <div id="lsw-login-notice">
+    Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
+  </div>
+  <div class="lsw-input-area" id="lsw-input-area">
+    <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
+    <button class="lsw-send-btn" onclick="lswSend()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== CANLI DESTEK — FAB + TOOLTIP (fixed, sağ-alt) ===== -->
 <div id="live-support-widget">
-  <!-- Tooltip -->
   <div class="lsw-tooltip" id="lsw-tooltip">
     <span>★ 7/24 Canlı Destek</span>
     <button class="lsw-tooltip-close" onclick="document.getElementById('lsw-tooltip').style.display='none'">✕</button>
   </div>
-
-  <!-- Panel — FAB üstünde absolute konumlanır (CSS'te bottom:64px) -->
-  <div class="lsw-panel" id="lsw-panel">
-    <div class="lsw-panel-header">
-      <div class="lsw-header-info">
-        <div class="lsw-header-avatar">GV</div>
-        <div>
-          <div class="lsw-header-name">GameVault Destek</div>
-          <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
-        </div>
-      </div>
-      <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
-    </div>
-    <div class="lsw-messages" id="lsw-messages">
-      <div class="lsw-msg lsw-msg-bot">
-        <div class="lsw-msg-avatar">GV</div>
-        <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
-      </div>
-    </div>
-    <div id="lsw-login-notice">
-      Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
-    </div>
-    <div class="lsw-input-area" id="lsw-input-area">
-      <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
-      <button class="lsw-send-btn" onclick="lswSend()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- FAB — listenin en sonunda (panel üstünde görünür) -->
   <button class="lsw-fab" id="lsw-fab" onclick="toggleLiveSupport()" title="Canlı Destek">
     <svg class="lsw-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <svg class="lsw-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
