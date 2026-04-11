@@ -7,123 +7,341 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-body { background: #06080f; }
-.games-page-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(6,8,15,0.95);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-}
-.games-page-nav .nav-inner {
-  max-width: 1200px; margin: 0 auto;
-  padding: 1rem 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 1.5rem;
-}
-.games-page-logo {
-  font-family: 'Orbitron', monospace;
-  font-size: 1.1rem; font-weight: 700;
-  color: #f0f2f8; letter-spacing: 1px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.games-page-search {
-  flex: 1; max-width: 420px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 0.65rem 1rem;
-  color: #d0d8ec; font-size: 0.875rem;
-  font-family: 'DM Sans', sans-serif;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.games-page-search:focus { border-color: rgba(0,210,255,0.35); }
-.games-page-search::placeholder { color: #3a4560; }
-.games-back {
-  display: flex; align-items: center; gap: 0.4rem;
-  color: #4a566a; font-size: 0.82rem; font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.games-back:hover { color: #00d2ff; }
-
+/* ===== GAMES PAGE SPECIFIC ===== */
 .games-page-main {
-  max-width: 1200px; margin: 0 auto;
-  padding: 3rem 2rem 4rem;
+  max-width: 1300px; margin: 0 auto;
+  padding: calc(var(--nav-h) + 3rem) 2rem 5rem;
 }
 .games-page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 .games-page-header h1 {
   font-family: 'Orbitron', monospace;
-  font-size: 1.75rem; font-weight: 700;
-  color: #f0f2f8; letter-spacing: 1px;
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 900; color: var(--text);
+  letter-spacing: 1px; margin-bottom: 0.5rem;
 }
-.games-page-header p {
-  color: #4a566a; font-size: 0.875rem;
+.games-page-header p { color: var(--text2); font-size: 0.9rem; }
+.games-page-top {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap; margin-bottom: 2rem;
 }
+.games-search-bar {
+  flex: 1; max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 0.7rem 1.1rem;
+  color: var(--text); font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; transition: border-color 0.2s;
+}
+.games-search-bar:focus { border-color: var(--accent); }
+.games-search-bar::placeholder { color: var(--text3); }
 .games-count-chip {
   display: inline-flex; align-items: center; gap: 0.4rem;
   background: rgba(0,210,255,0.08);
   border: 1px solid rgba(0,210,255,0.15);
   border-radius: 20px;
-  padding: 0.3rem 0.75rem;
-  color: #00d2ff; font-size: 0.78rem; font-weight: 600;
-  margin-top: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  color: var(--accent); font-size: 0.78rem; font-weight: 700;
+  white-space: nowrap;
 }
 .games-full-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.25rem;
 }
-.loading-state {
-  color: #4a566a; text-align: center;
-  padding: 4rem; grid-column: 1/-1;
-  font-size: 0.9rem;
+@media (max-width: 768px) {
+  .games-full-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .games-page-top { flex-direction: column; align-items: stretch; }
+  .games-search-bar { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .games-full-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="games-page-nav">
-  <div class="nav-inner">
-    <a href="index.html" class="games-page-logo">⬡ GameVault</a>
-    <input type="text" class="games-page-search" id="games-search" placeholder="🔍 Oyun ara..." oninput="filterGamesPage()">
-    <a href="index.html" class="games-back">← Ana Sayfa</a>
-  </div>
-</nav>
+<div id="toast-container"></div>
+<div id="purchase-notification"></div>
 
-<!-- MAIN -->
-<div class="games-page-main">
-  <div class="games-page-header">
-    <h1>🎮 Tüm Oyunlar</h1>
-    <p>GameVault kütüphanesindeki tüm oyunları keşfet</p>
-    <div class="games-count-chip" id="games-count-chip">Yükleniyor...</div>
-  </div>
-  <div class="games-full-grid" id="games-full-grid">
-    <div class="loading-state">Oyunlar yükleniyor...</div>
+<!-- ===== OVERLAY: Giriş / Kayıt ===== -->
+<div id="auth-overlay" class="overlay">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeAuthOverlay()">✕</button>
+    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
+    </div>
+    <div id="login-form">
+      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="login-username" placeholder="kullaniciadiniz" autocomplete="username"></div>
+      <div class="field-group"><label>Şifre</label><div class="pass-wrap"><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"><button class="pass-toggle" onclick="togglePass('login-password', this)" type="button">👁</button></div></div>
+      <button class="btn-primary" onclick="login()">Giriş Yap</button>
+      <div id="login-error" class="error-msg"></div>
+    </div>
+    <div id="register-form" style="display:none;">
+      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="reg-username" placeholder="benzersiz bir ad seç" autocomplete="username"></div>
+      <div class="field-group"><label>E-posta Adresi</label><input type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email"></div>
+      <div class="field-group">
+        <label>Şifre</label>
+        <div class="pass-wrap"><input type="password" id="reg-password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password', this)" type="button">👁</button></div>
+        <div class="pass-strength-bar"><div id="pass-strength-fill"></div></div>
+        <div id="pass-strength-label" class="pass-strength-label"></div>
+      </div>
+      <div class="field-group"><label>Şifreyi Tekrar Gir</label><div class="pass-wrap"><input type="password" id="reg-password2" placeholder="••••••••" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password2', this)" type="button">👁</button></div></div>
+      <button class="btn-primary" onclick="register()">Kayıt Ol</button>
+      <div id="reg-error" class="error-msg"></div>
+    </div>
   </div>
 </div>
 
+<!-- ===== OVERLAY: Kod Yükle ===== -->
+<div id="code-overlay" class="overlay">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
+    <div class="overlay-logo">⬡ GameVault</div>
+    <h2>Kodu Yükle</h2>
+    <p>Satın aldığın erişim kodunu girerek bakiyeni yükle.</p>
+    <div class="field-group"><label>Erişim Kodu</label><input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX" maxlength="35"></div>
+    <button class="btn-primary" onclick="redeemCode()">Bakiyeyi Yükle</button>
+    <div id="redeem-error" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- ===== OVERLAY: Satın Alma Onayı ===== -->
+<div id="buy-confirm-overlay" class="overlay">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeOverlay('buy-confirm-overlay')">✕</button>
+    <div class="overlay-logo">⬡ GameVault</div>
+    <div id="bco-game-image" class="bco-image"></div>
+    <h2 id="bco-game-name" class="bco-title">Oyun Adı</h2>
+    <div class="bco-meta"><span id="bco-platform" class="bco-platform-badge">PC / Steam</span></div>
+    <div class="bco-balance-row">
+      <span class="bco-bal-label">Bakiyen</span>
+      <span class="bco-bal-val" id="bco-balance">0</span>
+      <span class="bco-bal-label">oyun hakkı</span>
+    </div>
+    <p class="bco-confirm-text">Bu oyunu satın almak istiyor musun?<br><span class="bco-cost-note">1 oyun hakkı düşülecek.</span></p>
+    <div class="bco-btns">
+      <button class="btn-primary" onclick="confirmPurchase()">🎮 Satın Al</button>
+      <button class="bco-cancel" onclick="closeOverlay('buy-confirm-overlay')">İptal</button>
+    </div>
+    <div id="bco-error" class="error-msg" style="text-align:center;"></div>
+  </div>
+</div>
+
+<!-- ===== OVERLAY: Steam Detay / 2FA ===== -->
+<div id="purchase-overlay" class="overlay">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeOverlay('purchase-overlay')">✕</button>
+    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="steam-icon">♨</div>
+    <h2 id="po-game-name">Oyun Adı</h2>
+    <div class="account-info-box">
+      <div class="acc-row"><span class="acc-label">Steam Kullanıcı</span><span class="acc-val" id="po-steam-user">—</span></div>
+      <div class="acc-row"><span class="acc-label">Steam Şifre</span><span class="acc-val" id="po-steam-pass">—</span></div>
+    </div>
+    <div class="code-request-area">
+      <div id="po-code-display" class="steam-code-display" style="display:none;"></div>
+      <div id="po-loader" class="loader" style="display:none;"></div>
+      <div id="po-requests-info" class="requests-info"></div>
+      <button id="po-get-code-btn" class="btn-primary" onclick="requestSteamCode()">🔑 Steam Doğrulama Kodu Al</button>
+    </div>
+    <div id="steam-instructions" class="instructions" style="display:none;">
+      <p class="instr-title">Nasıl kullanılır?</p>
+      <ol>
+        <li>Steam'i aç, hesaba giriş yap (kullanıcı + şifre yukarıda)</li>
+        <li>Steam Guard doğrulama kodu isteyecek</li>
+        <li>Yukarıdaki kodu gir ve oynamaya başla!</li>
+      </ol>
+    </div>
+    <div id="po-extra-request" class="extra-request-area" style="display:none;">
+      <p class="extra-req-text">5 hakkın bitti ama hâlâ kod gerekiyor mu?</p>
+      <button class="btn-extra-req" onclick="openSupportFromPurchase()">💬 Destek Talebi Gönder</button>
+    </div>
+    <div id="po-error" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- ===== OVERLAY: Hesabım ===== -->
+<div id="account-overlay" class="overlay">
+  <div class="overlay-box wide">
+    <button class="overlay-close" onclick="closeOverlay('account-overlay')">✕</button>
+    <div class="account-overlay-hero">
+      <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
+      <div class="acc-info-new">
+        <div class="acc-username-new" id="acc-display-username">—</div>
+        <div class="acc-email-new" id="acc-display-email">—</div>
+        <div class="acc-balance-chip"><span class="balance-icon">⬡</span><span id="acc-display-balance">0</span> oyun hakkı</div>
+      </div>
+    </div>
+    <div class="acc-stats-row">
+      <div class="acc-stat-card"><div class="acc-stat-val" id="acc-total-games">0</div><div class="acc-stat-lbl">Satın Alınan</div></div>
+      <div class="acc-stat-card"><div class="acc-stat-val" style="color:#a78bfa;">7/24</div><div class="acc-stat-lbl">Destek Hattı</div></div>
+    </div>
+    <div class="acc-games-title">Satın Aldığım Oyunlar</div>
+    <div id="purchases-list" class="purchases-list"><div class="empty-state">Henüz satın alım yok.</div></div>
+    <button class="acc-logout-btn" onclick="logout()">↩ Çıkış Yap</button>
+  </div>
+</div>
+
+<!-- ===== OVERLAY: Destek ===== -->
+<div id="support-overlay" class="overlay">
+  <div class="overlay-box support-box-new">
+    <button class="overlay-close" onclick="closeOverlay('support-overlay')">✕</button>
+    <div class="support-hero-bar">
+      <div class="support-hero-icon">🎧</div>
+      <div>
+        <div class="support-hero-title">Destek Merkezi</div>
+        <div class="support-hero-sub">Sorununu bize anlat, hızlıca çözelim.</div>
+      </div>
+      <div class="support-resp-badge">
+        <div class="resp-time">~15dk</div>
+        <div class="resp-lbl">Ort. Yanıt</div>
+      </div>
+    </div>
+    <div id="support-purchases-section" style="display:none;">
+      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
+      <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
+    </div>
+    <div class="support-field-label" style="margin-bottom:0.6rem;">📋 Talep Türü</div>
+    <div class="support-type-grid-new">
+      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')"><div class="stn-icon">🔑</div><div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div></button>
+      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')"><div class="stn-icon">🔄</div><div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div></button>
+      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')"><div class="stn-icon">👤</div><div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div></button>
+      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')"><div class="stn-icon">💬</div><div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div></button>
+    </div>
+    <input type="hidden" id="support-type" value="steam_code">
+    <div class="support-input-row">
+      <div class="support-field"><label>Adınız / Kullanıcı Adı</label><input type="text" id="support-name" placeholder="Kullanıcı adınız"></div>
+      <div class="support-field"><label>E-posta <span style="color:#00d2ff;">*</span></label><input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field"><div class="support-mail-note"><span>⚠</span> Yanıt bu adrese gönderilir</div></div>
+    </div>
+    <div class="support-field"><label>Mesajınız</label><textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın..." rows="5"></textarea></div>
+    <button class="support-send-btn-new" onclick="sendSupportRequest()">Gönder →</button>
+    <div id="support-error" class="error-msg"></div>
+    <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
+      <div class="support-field-label">💬 Önceki Yanıtlarım</div>
+      <div id="support-replies-list" class="support-replies-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NAV ===== -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;">⬡ GameVault</div>
+    <div class="nav-links">
+      <a href="index.html">Ana Sayfa</a>
+      <a href="Games.html" style="color:var(--accent);">Tüm Oyunlar</a>
+      <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
+      <a href="#" onclick="openSupport(); return false;">Destek</a>
+    </div>
+    <div class="nav-right" id="nav-auth-area">
+      <button class="btn-nav-login" onclick="showOverlay('auth-overlay')">Giriş Yap</button>
+      <button class="btn-nav-register" onclick="switchAuthTab('register'); showOverlay('auth-overlay')">Kayıt Ol</button>
+    </div>
+    <div class="nav-right nav-user-area" id="nav-user-area" style="display:none;">
+      <div class="nav-balance">⬡ <span id="nav-balance">0</span></div>
+      <button class="btn-nav-account" onclick="openAccount()">👤 <span id="nav-username">—</span></button>
+      <button class="btn-nav-logout" onclick="logout()" title="Çıkış Yap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== ANA İÇERİK ===== -->
+<main class="games-page-main">
+  <div class="games-page-header">
+    <h1>🎮 Tüm Oyunlar</h1>
+    <p>GameVault kütüphanesindeki tüm oyunları keşfet ve satın al</p>
+  </div>
+
+  <div class="games-page-top">
+    <input
+      type="text"
+      class="games-search-bar"
+      id="games-search"
+      placeholder="🔍 Oyun ara..."
+      oninput="filterGamesPage()"
+    >
+    <div class="games-count-chip" id="games-count-chip">Yükleniyor...</div>
+  </div>
+
+  <div class="games-full-grid" id="games-full-grid">
+    <div class="loading-state">Oyunlar yükleniyor...</div>
+  </div>
+</main>
+
+<!-- ===== CANLI DESTEK — PANEL ===== -->
+<div class="lsw-panel" id="lsw-panel">
+  <div class="lsw-panel-header">
+    <div class="lsw-header-info">
+      <div class="lsw-header-avatar">GV</div>
+      <div>
+        <div class="lsw-header-name">GameVault Destek</div>
+        <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
+      </div>
+    </div>
+    <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
+  </div>
+  <div class="lsw-messages" id="lsw-messages">
+    <div class="lsw-msg lsw-msg-bot">
+      <div class="lsw-msg-avatar">GV</div>
+      <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
+    </div>
+  </div>
+  <div id="lsw-login-notice">
+    Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
+  </div>
+  <div class="lsw-input-area" id="lsw-input-area">
+    <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
+    <button class="lsw-send-btn" onclick="lswSend()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== CANLI DESTEK — FAB ===== -->
+<div id="live-support-widget">
+  <div class="lsw-tooltip" id="lsw-tooltip">
+    <span>★ 7/24 Canlı Destek</span>
+    <button class="lsw-tooltip-close" onclick="document.getElementById('lsw-tooltip').style.display='none'">✕</button>
+  </div>
+  <button class="lsw-fab" id="lsw-fab" onclick="toggleLiveSupport()" title="Canlı Destek">
+    <svg class="lsw-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg class="lsw-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <span class="lsw-notif-dot" id="lsw-notif-dot" style="display:none;"></span>
+  </button>
+</div>
+
+<script src="app.js"></script>
 <script>
-const API = "https://backendsite-production-6bcb.up.railway.app";
+// ===== GAMES PAGE INIT =====
+const API_GP = "https://backendsite-production-6bcb.up.railway.app";
 let ALL_GAMES_PAGE = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Kullanıcı oturumunu oku (satın alma için)
+  // Kullanıcı oturumu
   try {
     const saved = localStorage.getItem("gv_user");
-    if (saved) window._gvUser = JSON.parse(saved);
+    if (saved) {
+      currentUser = JSON.parse(saved);
+      updateNavUI();
+    }
   } catch(e) {}
 
+  // Oyunları yükle
   try {
-    const res = await fetch(`${API}/api/games`);
+    const res = await fetch(`${API_GP}/api/games`);
     const data = await res.json();
     if (data.success) {
       ALL_GAMES_PAGE = data.games;
+      GAMES = data.games; // app.js'deki GAMES array'ini doldur (satın alma için)
       renderGamesPage(ALL_GAMES_PAGE);
     }
   } catch(e) {
@@ -142,9 +360,9 @@ function renderGamesPage(games) {
   }
 
   grid.innerHTML = games.map(g => `
-    <div class="game-card" onclick="goToMain('${g.id}')">
+    <div class="game-card" onclick="handleGameClick('${g.id}')">
       ${g.image
-        ? `<div class="game-thumb-img" style="background-image:url('${API}${g.image}')"></div>`
+        ? `<div class="game-thumb-img" style="background-image:url('${API_GP}${g.image}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
       <div class="game-body">
@@ -160,15 +378,9 @@ function renderGamesPage(games) {
 function filterGamesPage() {
   const q = document.getElementById("games-search").value.toLowerCase();
   const filtered = ALL_GAMES_PAGE.filter(g =>
-    g.name.toLowerCase().includes(q) || (g.platform||"").toLowerCase().includes(q)
+    g.name.toLowerCase().includes(q) || (g.platform || "").toLowerCase().includes(q)
   );
   renderGamesPage(filtered);
-}
-
-function goToMain(gameId) {
-  // Ana sayfaya yönlendir ve ilgili oyunu aç
-  localStorage.setItem("gv_pending_game", gameId);
-  window.location.href = "index.html";
 }
 </script>
 </body>
