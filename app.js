@@ -675,13 +675,13 @@ async function loadPurchaseHistory() {
 // DESTEK — kullanıcının oyunlarını da göster
 // =============================================
 function selectSupportType(btn, val) {
-  document.querySelectorAll(".support-type-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".support-type-btn-new").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   document.getElementById("support-type").value = val;
 }
 
 function selectSupportTypeByVal(val) {
-  document.querySelectorAll(".support-type-btn").forEach(b => {
+  document.querySelectorAll(".support-type-btn-new").forEach(b => {
     b.classList.toggle("active", b.dataset.val === val);
   });
   document.getElementById("support-type").value = val;
@@ -950,123 +950,141 @@ window.selectSupportType = function(btn, val) {
 // =============================================
 // CANLI DESTEK WIDGET
 // =============================================
-const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
-let lswOpen = false;
-let lswPollTimer = null;
+(function() {
+  const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
+  let lswOpen = false;
+  let lswPollTimer = null;
 
-// Tooltip göster/gizle
-setTimeout(() => {
-  const t = document.getElementById("lsw-tooltip");
-  if (t) t.style.display = "flex";
-}, 5000);
-setTimeout(() => {
-  const t = document.getElementById("lsw-tooltip");
-  if (t) t.style.display = "none";
-}, 12000);
+  // Tooltip: 5sn sonra göster, 12sn sonra gizle
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      const t = document.getElementById("lsw-tooltip");
+      if (t) { t.style.display = "flex"; }
+    }, 5000);
+    setTimeout(() => {
+      const t = document.getElementById("lsw-tooltip");
+      if (t) { t.style.display = "none"; }
+    }, 12000);
 
-window.toggleLiveSupport = function() {
-  lswOpen = !lswOpen;
-  const panel = document.getElementById("lsw-panel");
-  const chatIcon = document.querySelector(".lsw-icon-chat");
-  const closeIcon = document.querySelector(".lsw-icon-close");
-  const dot = document.getElementById("lsw-notif-dot");
-  const tooltip = document.getElementById("lsw-tooltip");
+    // Başlangıçta auth durumunu ayarla (sayfa yüklenince)
+    lswApplyAuth();
+  });
 
-  if (lswOpen) {
-    panel.classList.add("open");
-    if (chatIcon) chatIcon.style.display = "none";
-    if (closeIcon) closeIcon.style.display = "block";
-    if (dot) dot.style.display = "none";
-    if (tooltip) tooltip.style.display = "none";
-    lswCheckAuth();
-    lswLoadMessages();
-    lswStartPoll();
-    setTimeout(() => document.getElementById("lsw-input")?.focus(), 300);
-  } else {
-    panel.classList.remove("open");
-    if (chatIcon) chatIcon.style.display = "block";
-    if (closeIcon) closeIcon.style.display = "none";
+  // Giriş yapıldığında chat'i güncelle
+  document.addEventListener("gv_login", () => {
+    lswApplyAuth();
+    if (lswOpen) lswLoadMessages();
+  });
+
+  function lswApplyAuth() {
+    const inputArea = document.getElementById("lsw-input-area");
+    const loginNotice = document.getElementById("lsw-login-notice");
+    if (!inputArea || !loginNotice) return;
+    if (currentUser) {
+      inputArea.style.display = "flex";
+      loginNotice.style.display = "none";
+    } else {
+      inputArea.style.display = "none";
+      loginNotice.style.display = "block";
+    }
+  }
+
+  window.toggleLiveSupport = function() {
+    lswOpen = !lswOpen;
+    const panel    = document.getElementById("lsw-panel");
+    const chatIcon = document.querySelector(".lsw-icon-chat");
+    const closeIcon= document.querySelector(".lsw-icon-close");
+    const dot      = document.getElementById("lsw-notif-dot");
+    const tooltip  = document.getElementById("lsw-tooltip");
+
+    if (!panel) return;
+
+    if (lswOpen) {
+      panel.classList.add("open");
+      if (chatIcon)  chatIcon.style.display  = "none";
+      if (closeIcon) closeIcon.style.display = "block";
+      if (dot)       dot.style.display       = "none";
+      if (tooltip)   tooltip.style.display   = "none";
+      lswApplyAuth();
+      if (currentUser) {
+        lswLoadMessages();
+        lswStartPoll();
+      }
+      setTimeout(() => {
+        const inp = document.getElementById("lsw-input");
+        if (inp && currentUser) inp.focus();
+      }, 300);
+    } else {
+      panel.classList.remove("open");
+      if (chatIcon)  chatIcon.style.display  = "block";
+      if (closeIcon) closeIcon.style.display = "none";
+      lswStopPoll();
+    }
+  };
+
+  async function lswLoadMessages() {
+    if (!currentUser) return;
+    try {
+      const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(currentUser.username)}`);
+      const data = await res.json();
+      if (!data.success) return;
+      const container = document.getElementById("lsw-messages");
+      if (!container) return;
+      // Önceki DB mesajlarını temizle, welcome mesajını koru
+      container.querySelectorAll(".lsw-msg-db").forEach(el => el.remove());
+      data.messages.forEach(m => lswRenderMsg(m, container));
+      container.scrollTop = container.scrollHeight;
+    } catch(e) {}
+  }
+
+  function lswRenderMsg(m, container) {
+    const isAdmin = m.sender === "admin";
+    const el = document.createElement("div");
+    el.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
+    if (isAdmin) {
+      el.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
+    } else {
+      el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
+    }
+    container.appendChild(el);
+  }
+
+  function lswEsc(s) {
+    return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  window.lswSend = async function() {
+    if (!currentUser) return;
+    const inp = document.getElementById("lsw-input");
+    const msg = inp?.value.trim();
+    if (!msg) return;
+    inp.value = "";
+
+    // Anında göster
+    const container = document.getElementById("lsw-messages");
+    if (container) {
+      const el = document.createElement("div");
+      el.className = "lsw-msg lsw-msg-user lsw-msg-db";
+      el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(msg)}</div>`;
+      container.appendChild(el);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    try {
+      await fetch(`${LSW_API}/api/chat/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUser.username, message: msg, isAdmin: false })
+      });
+      setTimeout(lswLoadMessages, 400);
+    } catch(e) {}
+  };
+
+  function lswStartPoll() {
     lswStopPoll();
+    lswPollTimer = setInterval(lswLoadMessages, 800);
   }
-};
-
-function lswCheckAuth() {
-  const user = window.currentUser;
-  const inputArea = document.getElementById("lsw-input-area");
-  const loginNotice = document.getElementById("lsw-login-notice");
-  if (!user) {
-    if (inputArea) inputArea.style.display = "none";
-    if (loginNotice) loginNotice.style.display = "block";
-  } else {
-    if (inputArea) inputArea.style.display = "flex";
-    if (loginNotice) loginNotice.style.display = "none";
+  function lswStopPoll() {
+    if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
   }
-}
-
-async function lswLoadMessages() {
-  const user = window.currentUser;
-  if (!user) return;
-  try {
-    const res = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(user.username)}`);
-    const data = await res.json();
-    if (!data.success) return;
-    const c = document.getElementById("lsw-messages");
-    if (!c) return;
-    c.querySelectorAll(".lsw-msg-db").forEach(e => e.remove());
-    data.messages.forEach(m => lswRenderMsg(m));
-    c.scrollTop = c.scrollHeight;
-  } catch(e) {}
-}
-
-function lswRenderMsg(m) {
-  const c = document.getElementById("lsw-messages");
-  if (!c) return;
-  const isAdmin = m.sender === "admin";
-  const d = document.createElement("div");
-  d.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
-  if (isAdmin) {
-    d.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${escHtmlLsw(m.text)}</div>`;
-  } else {
-    d.innerHTML = `<div class="lsw-msg-bubble">${escHtmlLsw(m.text)}</div>`;
-  }
-  c.appendChild(d);
-}
-
-function escHtmlLsw(s) {
-  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-window.lswSend = async function() {
-  const user = window.currentUser;
-  const inp = document.getElementById("lsw-input");
-  const msg = inp?.value.trim();
-  if (!msg || !user) return;
-  inp.value = "";
-  // Anında UI'da göster
-  const c = document.getElementById("lsw-messages");
-  const d = document.createElement("div");
-  d.className = "lsw-msg lsw-msg-user lsw-msg-db";
-  d.innerHTML = `<div class="lsw-msg-bubble">${escHtmlLsw(msg)}</div>`;
-  if (c) { c.appendChild(d); c.scrollTop = c.scrollHeight; }
-  try {
-    await fetch(`${LSW_API}/api/chat/send`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ username: user.username, message: msg, isAdmin: false })
-    });
-    // Hemen sunucudan tekrar çek (echo düzeltmek için)
-    setTimeout(lswLoadMessages, 300);
-  } catch(e) {}
-};
-
-function lswStartPoll() {
-  lswStopPoll();
-  lswPollTimer = setInterval(lswLoadMessages, 800); // Anlık yazışma için hızlı poll
-}
-function lswStopPoll() {
-  if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
-}
-
-document.addEventListener("gv_login", () => {
-  if (lswOpen) { lswCheckAuth(); lswLoadMessages(); }
-});
+})();
