@@ -10,6 +10,7 @@ let GAMES = [];
 let DISPLAYED_COUNT = 10;
 const PAGE_SIZE = 10;
 let currentUser = null;
+window.currentUser = null; // window'a da bağla — her scope'tan erişim için
 let selectedGameForPurchase = null;
 let currentPurchaseId = null;
 let currentPurchaseForSupport = null;
@@ -403,17 +404,25 @@ function logout() {
 }
 
 function updateNavUI() {
+  // window.currentUser'ı senkronize et — her scope görebilsin
+  window.currentUser = currentUser;
+
   const authArea = document.getElementById("nav-auth-area");
   const userArea = document.getElementById("nav-user-area");
   if (currentUser) {
-    authArea.style.display = "none";
-    userArea.style.display = "flex";
-    document.getElementById("nav-username").textContent = currentUser.username;
-    document.getElementById("nav-balance").textContent = currentUser.balance;
+    if (authArea) authArea.style.display = "none";
+    if (userArea) { userArea.style.display = "flex"; }
+    const unEl = document.getElementById("nav-username");
+    const balEl = document.getElementById("nav-balance");
+    if (unEl) unEl.textContent = currentUser.username;
+    if (balEl) balEl.textContent = currentUser.balance;
   } else {
-    authArea.style.display = "flex";
-    userArea.style.display = "none";
+    if (authArea) authArea.style.display = "flex";
+    if (userArea) userArea.style.display = "none";
   }
+
+  // Canlı destek auth durumunu güncelle
+  if (typeof window._lswApplyAuth === "function") window._lswApplyAuth();
 }
 
 // =============================================
@@ -948,143 +957,140 @@ window.selectSupportType = function(btn, val) {
 };
 
 // =============================================
+// =============================================
 // CANLI DESTEK WIDGET
 // =============================================
-(function() {
-  const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
-  let lswOpen = false;
-  let lswPollTimer = null;
+const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
+let lswOpen = false;
+let lswPollTimer = null;
+
+function lswApplyAuth() {
+  const inputArea   = document.getElementById("lsw-input-area");
+  const loginNotice = document.getElementById("lsw-login-notice");
+  if (!inputArea || !loginNotice) return;
+  if (window.currentUser) {
+    inputArea.style.display   = "flex";
+    loginNotice.style.display = "none";
+  } else {
+    inputArea.style.display   = "none";
+    loginNotice.style.display = "block";
+  }
+}
+// updateNavUI'dan çağrılabilmesi için global yap
+window._lswApplyAuth = lswApplyAuth;
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Sayfa yüklenince auth durumunu uygula
+  lswApplyAuth();
 
   // Tooltip: 5sn sonra göster, 12sn sonra gizle
-  document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-      const t = document.getElementById("lsw-tooltip");
-      if (t) { t.style.display = "flex"; }
-    }, 5000);
-    setTimeout(() => {
-      const t = document.getElementById("lsw-tooltip");
-      if (t) { t.style.display = "none"; }
-    }, 12000);
+  setTimeout(() => {
+    const t = document.getElementById("lsw-tooltip");
+    if (t) t.style.display = "flex";
+  }, 5000);
+  setTimeout(() => {
+    const t = document.getElementById("lsw-tooltip");
+    if (t) t.style.display = "none";
+  }, 12000);
+});
 
-    // Başlangıçta auth durumunu ayarla (sayfa yüklenince)
+document.addEventListener("gv_login", () => {
+  lswApplyAuth();
+  if (lswOpen) lswLoadMessages();
+});
+
+window.toggleLiveSupport = function() {
+  lswOpen = !lswOpen;
+  const panel     = document.getElementById("lsw-panel");
+  const chatIcon  = document.querySelector(".lsw-icon-chat");
+  const closeIcon = document.querySelector(".lsw-icon-close");
+  const dot       = document.getElementById("lsw-notif-dot");
+  const tooltip   = document.getElementById("lsw-tooltip");
+
+  if (!panel) return;
+
+  if (lswOpen) {
+    panel.classList.add("open");
+    if (chatIcon)  chatIcon.style.display  = "none";
+    if (closeIcon) closeIcon.style.display = "block";
+    if (dot)       dot.style.display       = "none";
+    if (tooltip)   tooltip.style.display   = "none";
     lswApplyAuth();
-  });
-
-  // Giriş yapıldığında chat'i güncelle
-  document.addEventListener("gv_login", () => {
-    lswApplyAuth();
-    if (lswOpen) lswLoadMessages();
-  });
-
-  function lswApplyAuth() {
-    const inputArea = document.getElementById("lsw-input-area");
-    const loginNotice = document.getElementById("lsw-login-notice");
-    if (!inputArea || !loginNotice) return;
-    if (currentUser) {
-      inputArea.style.display = "flex";
-      loginNotice.style.display = "none";
-    } else {
-      inputArea.style.display = "none";
-      loginNotice.style.display = "block";
+    if (window.currentUser) {
+      lswLoadMessages();
+      lswStartPoll();
     }
-  }
-
-  window.toggleLiveSupport = function() {
-    lswOpen = !lswOpen;
-    const panel    = document.getElementById("lsw-panel");
-    const chatIcon = document.querySelector(".lsw-icon-chat");
-    const closeIcon= document.querySelector(".lsw-icon-close");
-    const dot      = document.getElementById("lsw-notif-dot");
-    const tooltip  = document.getElementById("lsw-tooltip");
-
-    if (!panel) return;
-
-    if (lswOpen) {
-      panel.classList.add("open");
-      if (chatIcon)  chatIcon.style.display  = "none";
-      if (closeIcon) closeIcon.style.display = "block";
-      if (dot)       dot.style.display       = "none";
-      if (tooltip)   tooltip.style.display   = "none";
-      lswApplyAuth();
-      if (currentUser) {
-        lswLoadMessages();
-        lswStartPoll();
-      }
-      setTimeout(() => {
-        const inp = document.getElementById("lsw-input");
-        if (inp && currentUser) inp.focus();
-      }, 300);
-    } else {
-      panel.classList.remove("open");
-      if (chatIcon)  chatIcon.style.display  = "block";
-      if (closeIcon) closeIcon.style.display = "none";
-      lswStopPoll();
-    }
-  };
-
-  async function lswLoadMessages() {
-    if (!currentUser) return;
-    try {
-      const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(currentUser.username)}`);
-      const data = await res.json();
-      if (!data.success) return;
-      const container = document.getElementById("lsw-messages");
-      if (!container) return;
-      // Önceki DB mesajlarını temizle, welcome mesajını koru
-      container.querySelectorAll(".lsw-msg-db").forEach(el => el.remove());
-      data.messages.forEach(m => lswRenderMsg(m, container));
-      container.scrollTop = container.scrollHeight;
-    } catch(e) {}
-  }
-
-  function lswRenderMsg(m, container) {
-    const isAdmin = m.sender === "admin";
-    const el = document.createElement("div");
-    el.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
-    if (isAdmin) {
-      el.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
-    } else {
-      el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
-    }
-    container.appendChild(el);
-  }
-
-  function lswEsc(s) {
-    return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
-
-  window.lswSend = async function() {
-    if (!currentUser) return;
-    const inp = document.getElementById("lsw-input");
-    const msg = inp?.value.trim();
-    if (!msg) return;
-    inp.value = "";
-
-    // Anında göster
-    const container = document.getElementById("lsw-messages");
-    if (container) {
-      const el = document.createElement("div");
-      el.className = "lsw-msg lsw-msg-user lsw-msg-db";
-      el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(msg)}</div>`;
-      container.appendChild(el);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    try {
-      await fetch(`${LSW_API}/api/chat/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUser.username, message: msg, isAdmin: false })
-      });
-      setTimeout(lswLoadMessages, 400);
-    } catch(e) {}
-  };
-
-  function lswStartPoll() {
+    setTimeout(() => {
+      const inp = document.getElementById("lsw-input");
+      if (inp && window.currentUser) inp.focus();
+    }, 300);
+  } else {
+    panel.classList.remove("open");
+    if (chatIcon)  chatIcon.style.display  = "block";
+    if (closeIcon) closeIcon.style.display = "none";
     lswStopPoll();
-    lswPollTimer = setInterval(lswLoadMessages, 800);
   }
-  function lswStopPoll() {
-    if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
+};
+
+async function lswLoadMessages() {
+  if (!window.currentUser) return;
+  try {
+    const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(window.currentUser.username)}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const container = document.getElementById("lsw-messages");
+    if (!container) return;
+    container.querySelectorAll(".lsw-msg-db").forEach(el => el.remove());
+    data.messages.forEach(m => lswRenderMsg(m, container));
+    container.scrollTop = container.scrollHeight;
+  } catch(e) {}
+}
+
+function lswRenderMsg(m, container) {
+  const isAdmin = m.sender === "admin";
+  const el = document.createElement("div");
+  el.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
+  el.innerHTML = isAdmin
+    ? `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`
+    : `<div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
+  container.appendChild(el);
+}
+
+function lswEsc(s) {
+  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+window.lswSend = async function() {
+  if (!window.currentUser) return;
+  const inp = document.getElementById("lsw-input");
+  const msg = inp?.value.trim();
+  if (!msg) return;
+  inp.value = "";
+
+  // Anında göster
+  const container = document.getElementById("lsw-messages");
+  if (container) {
+    const el = document.createElement("div");
+    el.className = "lsw-msg lsw-msg-user lsw-msg-db";
+    el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(msg)}</div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
   }
-})();
+
+  try {
+    await fetch(`${LSW_API}/api/chat/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: window.currentUser.username, message: msg, isAdmin: false })
+    });
+    setTimeout(lswLoadMessages, 400);
+  } catch(e) {}
+};
+
+function lswStartPoll() {
+  lswStopPoll();
+  lswPollTimer = setInterval(lswLoadMessages, 800);
+}
+function lswStopPoll() {
+  if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
+}
