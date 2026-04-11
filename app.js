@@ -963,6 +963,7 @@ window.selectSupportType = function(btn, val) {
 const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
 let lswOpen = false;
 let lswPollTimer = null;
+let lswLastAt = null; // Son bilinen mesaj zamanı
 
 function lswApplyAuth() {
   const inputArea   = document.getElementById("lsw-input-area");
@@ -976,14 +977,10 @@ function lswApplyAuth() {
     loginNotice.style.display = "block";
   }
 }
-// updateNavUI'dan çağrılabilmesi için global yap
 window._lswApplyAuth = lswApplyAuth;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Sayfa yüklenince auth durumunu uygula
   lswApplyAuth();
-
-  // Tooltip: 5sn sonra göster, 12sn sonra gizle
   setTimeout(() => {
     const t = document.getElementById("lsw-tooltip");
     if (t) t.style.display = "flex";
@@ -996,7 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("gv_login", () => {
   lswApplyAuth();
-  if (lswOpen) lswLoadMessages();
+  if (lswOpen) { lswLastAt = null; lswPing(); }
 });
 
 window.toggleLiveSupport = function() {
@@ -1006,7 +1003,6 @@ window.toggleLiveSupport = function() {
   const closeIcon = document.querySelector(".lsw-icon-close");
   const dot       = document.getElementById("lsw-notif-dot");
   const tooltip   = document.getElementById("lsw-tooltip");
-
   if (!panel) return;
 
   if (lswOpen) {
@@ -1017,6 +1013,7 @@ window.toggleLiveSupport = function() {
     if (tooltip)   tooltip.style.display   = "none";
     lswApplyAuth();
     if (window.currentUser) {
+      lswLastAt = null; // Açılınca tüm mesajları çek
       lswLoadMessages();
       lswStartPoll();
     }
@@ -1031,6 +1028,21 @@ window.toggleLiveSupport = function() {
     lswStopPoll();
   }
 };
+
+// PING: sadece lastAt değerini çek (1 Firestore okuma)
+// Değiştiyse mesajları getir
+async function lswPing() {
+  if (!window.currentUser || !lswOpen) return;
+  try {
+    const res  = await fetch(`${LSW_API}/api/chat/ping?username=${encodeURIComponent(window.currentUser.username)}`);
+    const data = await res.json();
+    if (!data.success) return;
+    if (data.lastAt !== lswLastAt) {
+      lswLastAt = data.lastAt;
+      await lswLoadMessages();
+    }
+  } catch(e) {}
+}
 
 async function lswLoadMessages() {
   if (!window.currentUser) return;
@@ -1067,7 +1079,7 @@ window.lswSend = async function() {
   if (!msg) return;
   inp.value = "";
 
-  // Anında göster
+  // Anında UI'da göster
   const container = document.getElementById("lsw-messages");
   if (container) {
     const el = document.createElement("div");
@@ -1078,18 +1090,21 @@ window.lswSend = async function() {
   }
 
   try {
-    await fetch(`${LSW_API}/api/chat/send`, {
+    const res = await fetch(`${LSW_API}/api/chat/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: window.currentUser.username, message: msg, isAdmin: false })
     });
-    setTimeout(lswLoadMessages, 400);
+    const data = await res.json();
+    // Sunucu yeni lastAt döndürür, güncelle
+    if (data.lastAt) lswLastAt = data.lastAt;
   } catch(e) {}
 };
 
 function lswStartPoll() {
   lswStopPoll();
-  lswPollTimer = setInterval(lswLoadMessages, 800);
+  // 3sn'de bir sadece ping at (1 okuma) — mesajlar değiştiyse çeker
+  lswPollTimer = setInterval(lswPing, 3000);
 }
 function lswStopPoll() {
   if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
