@@ -18,15 +18,23 @@ let currentPurchaseForSupport = null;
 // INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Her sayfada: oturumu yükle ve nav güncelle
+  const saved = localStorage.getItem("gv_user");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      updateNavUI();
+    } catch(e) {}
+  }
+
+  // Sadece index sayfasında çalışacak kodlar
+  const isIndexPage = !!document.getElementById("main-grid");
+  if (!isIndexPage) return;
+
   const seenIntro = sessionStorage.getItem("gv_intro_seen");
   if (!seenIntro) {
     showIntroAnimation();
     sessionStorage.setItem("gv_intro_seen", "1");
-  }
-  const saved = localStorage.getItem("gv_user");
-  if (saved) {
-    currentUser = JSON.parse(saved);
-    updateNavUI();
   }
   loadHeroReviews();
   loadPopularGames();
