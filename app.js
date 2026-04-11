@@ -958,12 +958,13 @@ window.selectSupportType = function(btn, val) {
 
 // =============================================
 // =============================================
-// CANLI DESTEK WIDGET
+// CANLI DESTEK WIDGET — SSE Push (Polling YOK)
 // =============================================
 const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
 let lswOpen = false;
-let lswPollTimer = null;
-let lswLastAt = null; // Son bilinen mesaj zamanı
+let lswPollTimer = null; // artık kullanılmıyor, compat için tutuldu
+let lswLastAt = null;
+let lswEventSource = null; // SSE bağlantısı
 
 function lswApplyAuth() {
   const inputArea   = document.getElementById("lsw-input-area");
@@ -981,19 +982,13 @@ window._lswApplyAuth = lswApplyAuth;
 
 document.addEventListener("DOMContentLoaded", () => {
   lswApplyAuth();
-  setTimeout(() => {
-    const t = document.getElementById("lsw-tooltip");
-    if (t) t.style.display = "flex";
-  }, 5000);
-  setTimeout(() => {
-    const t = document.getElementById("lsw-tooltip");
-    if (t) t.style.display = "none";
-  }, 12000);
+  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "flex"; }, 5000);
+  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "none"; }, 12000);
 });
 
 document.addEventListener("gv_login", () => {
   lswApplyAuth();
-  if (lswOpen) { lswLastAt = null; lswPing(); }
+  if (lswOpen) { lswLastAt = null; lswLoadMessages(); lswSubscribe(); }
 });
 
 window.toggleLiveSupport = function() {
@@ -1013,37 +1008,50 @@ window.toggleLiveSupport = function() {
     if (tooltip)   tooltip.style.display   = "none";
     lswApplyAuth();
     if (window.currentUser) {
-      lswLastAt = null; // Açılınca tüm mesajları çek
-      lswLoadMessages();
-      lswStartPoll();
+      lswLoadMessages();  // Geçmiş mesajları 1 kez çek
+      lswSubscribe();     // SSE bağlantısını aç (admin push için)
     }
-    setTimeout(() => {
-      const inp = document.getElementById("lsw-input");
-      if (inp && window.currentUser) inp.focus();
-    }, 300);
+    setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp && window.currentUser) inp.focus(); }, 300);
   } else {
     panel.classList.remove("open");
     if (chatIcon)  chatIcon.style.display  = "block";
     if (closeIcon) closeIcon.style.display = "none";
-    lswStopPoll();
+    lswUnsubscribe(); // Chat kapanınca SSE bağlantısını kapat
   }
 };
 
-// PING: sadece lastAt değerini çek (1 Firestore okuma)
-// Değiştiyse mesajları getir
-async function lswPing() {
-  if (!window.currentUser || !lswOpen) return;
-  try {
-    const res  = await fetch(`${LSW_API}/api/chat/ping?username=${encodeURIComponent(window.currentUser.username)}`);
-    const data = await res.json();
-    if (!data.success) return;
-    if (data.lastAt !== lswLastAt) {
-      lswLastAt = data.lastAt;
-      await lswLoadMessages();
+// SSE bağlantısı aç — admin mesaj atınca anında gelir, Firestore okuma YOK
+function lswSubscribe() {
+  lswUnsubscribe();
+  if (!window.currentUser) return;
+  const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(window.currentUser.username)}`;
+  lswEventSource = new EventSource(url);
+
+  lswEventSource.onmessage = function(e) {
+    try {
+      const msg = JSON.parse(e.data);
+      const container = document.getElementById("lsw-messages");
+      if (container) {
+        lswRenderMsg(msg, container);
+        container.scrollTop = container.scrollHeight;
+      }
+    } catch(_) {}
+  };
+
+  lswEventSource.onerror = function() {
+    // Bağlantı koptu, 5sn sonra tekrar dene
+    lswUnsubscribe();
+    if (lswOpen && window.currentUser) {
+      setTimeout(lswSubscribe, 5000);
     }
-  } catch(e) {}
+  };
 }
 
+function lswUnsubscribe() {
+  if (lswEventSource) { lswEventSource.close(); lswEventSource = null; }
+}
+
+// Geçmiş mesajları 1 kez çek (sayfa açılınca / chat açılınca)
 async function lswLoadMessages() {
   if (!window.currentUser) return;
   try {
@@ -1090,25 +1098,17 @@ window.lswSend = async function() {
   }
 
   try {
-    const res = await fetch(`${LSW_API}/api/chat/send`, {
+    await fetch(`${LSW_API}/api/chat/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: window.currentUser.username, message: msg, isAdmin: false })
     });
-    const data = await res.json();
-    // Sunucu yeni lastAt döndürür, güncelle
-    if (data.lastAt) lswLastAt = data.lastAt;
   } catch(e) {}
 };
 
-function lswStartPoll() {
-  lswStopPoll();
-  // 3sn'de bir sadece ping at (1 okuma) — mesajlar değiştiyse çeker
-  lswPollTimer = setInterval(lswPing, 3000);
-}
-function lswStopPoll() {
-  if (lswPollTimer) { clearInterval(lswPollTimer); lswPollTimer = null; }
-}
+// Eski polling fonksiyonları (artık kullanılmıyor, hata vermemesi için boş)
+function lswStartPoll() {}
+function lswStopPoll() {}
 
 // =============================================
 // MOBİL MENÜ
