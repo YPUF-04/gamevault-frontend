@@ -538,14 +538,27 @@ function openPurchaseOverlay(data) {
   document.getElementById("steam-instructions").style.display = "none";
   document.getElementById("po-extra-request").style.display = "none";
   document.getElementById("po-error").textContent = "";
-  document.getElementById("po-requests-info").textContent = "5 doğrulama talebi hakkın var.";
-  document.getElementById("po-get-code-btn").style.display = "block";
-  document.getElementById("po-get-code-btn").textContent = "🔑 Steam Doğrulama Kodu Al";
+
+  const codeBtn = document.getElementById("po-get-code-btn");
+  const reqInfo = document.getElementById("po-requests-info");
+
+  if (data.requiresCode === false) {
+    // Doğrulama kodu gerekmiyor
+    codeBtn.style.display = "none";
+    reqInfo.textContent = "✅ Bu oyun için Steam Guard kodu gerekmez.";
+    reqInfo.style.color = "var(--green)";
+    document.getElementById("steam-instructions").style.display = "block";
+  } else {
+    codeBtn.style.display = "block";
+    codeBtn.textContent = "🔑 Steam Doğrulama Kodu Al";
+    reqInfo.textContent = "5 doğrulama talebi hakkın var.";
+    reqInfo.style.color = "";
+  }
+
   showOverlay("purchase-overlay");
 }
 
-function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, requests) {
-  // Önce profil overlay'ini kapat
+function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, requests, requiresCode = true) {
   closeOverlay("account-overlay");
   currentPurchaseId = purchaseId;
   currentPurchaseForSupport = { purchaseId, gameName };
@@ -556,19 +569,31 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
   document.getElementById("po-loader").style.display = "none";
   document.getElementById("steam-instructions").style.display = "none";
   document.getElementById("po-error").textContent = "";
-  document.getElementById("po-requests-info").textContent = `Kalan talep hakkı: ${5 - requests}/5`;
-  const btn = document.getElementById("po-get-code-btn");
+
+  const btn   = document.getElementById("po-get-code-btn");
   const extra = document.getElementById("po-extra-request");
-  if (requests >= 5) {
-    btn.style.display = "none";
+  const info  = document.getElementById("po-requests-info");
+
+  if (!requiresCode) {
+    btn.style.display  = "none";
+    extra.style.display = "none";
+    info.textContent   = "✅ Bu oyun için Steam Guard kodu gerekmez.";
+    info.style.color   = "var(--green)";
+    document.getElementById("steam-instructions").style.display = "block";
+  } else if (requests >= 5) {
+    btn.style.display   = "none";
     extra.style.display = "block";
+    info.textContent    = "Maksimum talep hakkın doldu (5/5).";
+    info.style.color    = "";
     document.getElementById("po-error").textContent = "Maksimum talep hakkın doldu (5/5).";
   } else {
-    btn.style.display = "block";
-    btn.textContent = "🔑 Steam Doğrulama Kodu Al";
+    btn.style.display   = "block";
+    btn.textContent     = "🔑 Steam Doğrulama Kodu Al";
     extra.style.display = "none";
+    info.textContent    = `Kalan talep hakkı: ${5 - requests}/5`;
+    info.style.color    = "";
   }
-  // Kısa gecikme ile aç (kapanma animasyonu için)
+
   setTimeout(() => showOverlay("purchase-overlay"), 150);
 }
 
@@ -668,11 +693,16 @@ async function loadPurchaseHistory() {
           <div class="pi-requests-bar">
             <div class="pi-req-fill" style="width:${((p.steamCodeRequests||0)/5)*100}%"></div>
           </div>
-          <div class="pi-requests">${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı</div>
+          <div class="pi-requests">${p.requiresCode === false ? '✅ Kod gerekmez' : `${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı`}</div>
         </div>
-        <button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0})">
-          🔑 Kodu Al
-        </button>
+        ${p.requiresCode === false
+          ? `<button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0},false)">
+              🎮 Bilgileri Gör
+             </button>`
+          : `<button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0},true)">
+              🔑 Kodu Al
+             </button>`
+        }
       </div>
     `).join("");
   } catch (e) {
