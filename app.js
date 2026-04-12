@@ -535,24 +535,42 @@ function openPurchaseOverlay(data) {
   document.getElementById("po-steam-pass").textContent = data.steamPass || "—";
   document.getElementById("po-code-display").style.display = "none";
   document.getElementById("po-loader").style.display = "none";
-  document.getElementById("steam-instructions").style.display = "none";
   document.getElementById("po-extra-request").style.display = "none";
   document.getElementById("po-error").textContent = "";
 
   const codeBtn = document.getElementById("po-get-code-btn");
   const reqInfo = document.getElementById("po-requests-info");
+  const instructions = document.getElementById("steam-instructions");
 
   if (data.requiresCode === false) {
-    // Doğrulama kodu gerekmiyor
+    // Kullanıcı adı + şifre göster, kod butonu yok
     codeBtn.style.display = "none";
-    reqInfo.textContent = "✅ Bu oyun için Steam Guard kodu gerekmez.";
-    reqInfo.style.color = "var(--green)";
-    document.getElementById("steam-instructions").style.display = "block";
+    reqInfo.textContent   = "✅ Bu oyun için Steam Guard kodu gerekmez.";
+    reqInfo.style.color   = "var(--green)";
+    // Talimatları kod adımı olmadan göster
+    instructions.style.display = "block";
+    instructions.innerHTML = `
+      <p class="instr-title">Nasıl giriş yapılır?</p>
+      <ol>
+        <li>Steam'i aç ve <strong>Giriş Yap</strong>'a tıkla</li>
+        <li>Yukarıdaki kullanıcı adı ve şifreyi gir</li>
+        <li>Hesaba giriş yap ve oynamaya başla! 🎮</li>
+      </ol>
+    `;
   } else {
-    codeBtn.style.display = "block";
-    codeBtn.textContent = "🔑 Steam Doğrulama Kodu Al";
-    reqInfo.textContent = "5 doğrulama talebi hakkın var.";
-    reqInfo.style.color = "";
+    codeBtn.style.display  = "block";
+    codeBtn.textContent    = "🔑 Steam Doğrulama Kodu Al";
+    reqInfo.textContent    = "5 doğrulama talebi hakkın var.";
+    reqInfo.style.color    = "";
+    instructions.style.display = "none";
+    instructions.innerHTML = `
+      <p class="instr-title">Nasıl kullanılır?</p>
+      <ol>
+        <li>Steam'i aç, hesaba giriş yap (kullanıcı + şifre yukarıda)</li>
+        <li>Steam Guard doğrulama kodu isteyecek</li>
+        <li>Yukarıdaki kodu gir ve oynamaya başla!</li>
+      </ol>
+    `;
   }
 
   showOverlay("purchase-overlay");
@@ -567,24 +585,33 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
   document.getElementById("po-steam-pass").textContent = steamPass;
   document.getElementById("po-code-display").style.display = "none";
   document.getElementById("po-loader").style.display = "none";
-  document.getElementById("steam-instructions").style.display = "none";
   document.getElementById("po-error").textContent = "";
 
-  const btn   = document.getElementById("po-get-code-btn");
-  const extra = document.getElementById("po-extra-request");
-  const info  = document.getElementById("po-requests-info");
+  const btn         = document.getElementById("po-get-code-btn");
+  const extra       = document.getElementById("po-extra-request");
+  const info        = document.getElementById("po-requests-info");
+  const instructions = document.getElementById("steam-instructions");
 
   if (!requiresCode) {
-    btn.style.display  = "none";
+    btn.style.display   = "none";
     extra.style.display = "none";
-    info.textContent   = "✅ Bu oyun için Steam Guard kodu gerekmez.";
-    info.style.color   = "var(--green)";
-    document.getElementById("steam-instructions").style.display = "block";
+    info.textContent    = "✅ Bu oyun için Steam Guard kodu gerekmez.";
+    info.style.color    = "var(--green)";
+    instructions.style.display = "block";
+    instructions.innerHTML = `
+      <p class="instr-title">Nasıl giriş yapılır?</p>
+      <ol>
+        <li>Steam'i aç ve <strong>Giriş Yap</strong>'a tıkla</li>
+        <li>Yukarıdaki kullanıcı adı ve şifreyi gir</li>
+        <li>Hesaba giriş yap ve oynamaya başla! 🎮</li>
+      </ol>
+    `;
   } else if (requests >= 5) {
     btn.style.display   = "none";
     extra.style.display = "block";
     info.textContent    = "Maksimum talep hakkın doldu (5/5).";
     info.style.color    = "";
+    instructions.style.display = "none";
     document.getElementById("po-error").textContent = "Maksimum talep hakkın doldu (5/5).";
   } else {
     btn.style.display   = "block";
@@ -592,6 +619,15 @@ function openPurchaseFromHistory(purchaseId, gameName, steamUser, steamPass, req
     extra.style.display = "none";
     info.textContent    = `Kalan talep hakkı: ${5 - requests}/5`;
     info.style.color    = "";
+    instructions.style.display = "none";
+    instructions.innerHTML = `
+      <p class="instr-title">Nasıl kullanılır?</p>
+      <ol>
+        <li>Steam'i aç, hesaba giriş yap (kullanıcı + şifre yukarıda)</li>
+        <li>Steam Guard doğrulama kodu isteyecek</li>
+        <li>Yukarıdaki kodu gir ve oynamaya başla!</li>
+      </ol>
+    `;
   }
 
   setTimeout(() => showOverlay("purchase-overlay"), 150);
