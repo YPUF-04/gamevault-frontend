@@ -1879,3 +1879,21 @@ footer {
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,212,255,0.18);
 }
+
+/* ── Hızlı hak butonu ── */
+.btn-quick-grant {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0,232,122,0.35);
+  background: rgba(0,232,122,0.08);
+  color: var(--green);
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-quick-grant:hover {
+  background: rgba(0,232,122,0.18);
+  transform: translateY(-1px);
+}
