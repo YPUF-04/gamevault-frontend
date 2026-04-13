@@ -7,8 +7,8 @@ const API = "https://backendsite-production-6bcb.up.railway.app";
 // STATE
 // =============================================
 let GAMES = [];
-let DISPLAYED_COUNT = 10;
-const PAGE_SIZE = 10;
+let DISPLAYED_COUNT = 15;
+const PAGE_SIZE = 15;
 let currentUser = null;
 window.currentUser = null; // window'a da bağla — her scope'tan erişim için
 let selectedGameForPurchase = null;
@@ -252,8 +252,7 @@ function renderGames() {
 }
 
 function loadMoreGames() {
-  DISPLAYED_COUNT = Math.min(DISPLAYED_COUNT + PAGE_SIZE, GAMES.length);
-  renderGames();
+  window.location.href = "Games.html";
 }
 
 function gameCardHTML(g) {
@@ -726,14 +725,16 @@ async function loadPurchaseHistory() {
         <div class="pi-info">
           <div class="pi-name">${p.gameName}</div>
           <div class="pi-meta">${formatDate(p.purchasedAt)} • ${p.steamUser || ''}</div>
+          ${p.requiresCode !== false ? `
           <div class="pi-requests-bar">
             <div class="pi-req-fill" style="width:${((p.steamCodeRequests||0)/5)*100}%"></div>
           </div>
-          <div class="pi-requests">${p.requiresCode === false ? '✅ Kod gerekmez' : `${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı`}</div>
+          <div class="pi-requests">${p.steamCodeRequests||0}/5 doğrulama talebi kullanıldı</div>
+          ` : `<div class="pi-requests" style="color:var(--green);">✅ Steam Guard kodu gerekmez</div>`}
         </div>
         ${p.requiresCode === false
           ? `<button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0},false)">
-              🎮 Bilgileri Gör
+              🎮 Görüntüle
              </button>`
           : `<button class="btn-get-code-hist" onclick="openPurchaseFromHistory('${p.id}','${escHtml(p.gameName)}','${escHtml(p.steamUser)}','${escHtml(p.steamPass)}',${p.steamCodeRequests||0},true)">
               🔑 Kodu Al
@@ -1087,13 +1088,24 @@ window.toggleLiveSupport = function() {
 };
 
 // SSE bağlantısı aç — admin mesaj atınca anında gelir, Firestore okuma YOK
+let lswSseHeartbeat = null;
+let lswLastHeartbeat = 0;
+
 function lswSubscribe() {
   lswUnsubscribe();
   if (!window.currentUser) return;
   const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(window.currentUser.username)}`;
   lswEventSource = new EventSource(url);
+  lswLastHeartbeat = Date.now();
+
+  lswEventSource.onopen = function() {
+    lswLastHeartbeat = Date.now();
+  };
 
   lswEventSource.onmessage = function(e) {
+    lswLastHeartbeat = Date.now();
+    // keep-alive ping'i yoksay
+    if (!e.data || e.data.trim() === "") return;
     try {
       const msg = JSON.parse(e.data);
       const container = document.getElementById("lsw-messages");
@@ -1105,16 +1117,26 @@ function lswSubscribe() {
   };
 
   lswEventSource.onerror = function() {
-    // Bağlantı koptu, 5sn sonra tekrar dene
     lswUnsubscribe();
     if (lswOpen && window.currentUser) {
-      setTimeout(lswSubscribe, 5000);
+      setTimeout(lswSubscribe, 2000); // 2sn'de yeniden bağlan
     }
   };
+
+  // Her 35sn'de heartbeat kontrolü — bağlantı ölmüşse yeniden bağlan
+  lswSseHeartbeat = setInterval(() => {
+    if (!lswOpen || !window.currentUser) return;
+    if (Date.now() - lswLastHeartbeat > 35000) {
+      // 35sn'den uzun süre heartbeat gelmediyse reconnect
+      lswUnsubscribe();
+      lswSubscribe();
+    }
+  }, 10000);
 }
 
 function lswUnsubscribe() {
   if (lswEventSource) { lswEventSource.close(); lswEventSource = null; }
+  if (lswSseHeartbeat) { clearInterval(lswSseHeartbeat); lswSseHeartbeat = null; }
 }
 
 // Geçmiş mesajları 1 kez çek (sayfa açılınca / chat açılınca)
