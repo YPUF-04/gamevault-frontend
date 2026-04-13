@@ -361,19 +361,24 @@ function renderGamesPage(games) {
     const typeBadge  = isPersonal
       ? `<span class="gc-badge gc-badge-personal">🔒 Kişisel</span>`
       : `<span class="gc-badge gc-badge-general">⚡ Genel</span>`;
-    const guardBadge = g.requiresCode !== false
+    const hasGuard = g.requiresCode !== false;
+    const guardBadge = hasGuard
       ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
       : `<span class="gc-badge gc-badge-noguard">✉ Mail Onaysız</span>`;
-    const deliveryBadge = g.requiresCode !== false
-      ? `<span class="gc-badge gc-badge-manual">⏱ Manuel</span>`
+    const deliveryBadge = hasGuard
+      ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
       : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
+    const exclusiveBadge = g.exclusive
+      ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
+      : "";
+    const exclusiveClass = g.exclusive ? " exclusive-card" : "";
     return `
-    <div class="game-card" onclick="handleGameClick('${g.id}')">
+    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
-      <div class="gc-badges">${typeBadge}${guardBadge}${deliveryBadge}</div>
+      <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
       <div class="game-body">
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
