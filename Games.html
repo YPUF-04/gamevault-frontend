@@ -353,10 +353,14 @@ function renderGamesPage(games) {
     return;
   }
 
-  grid.innerHTML = games.map(g => `
+  grid.innerHTML = games.map(g => {
+    const imgSrc = g.image
+      ? (g.image.startsWith("http") ? g.image : `${API_GP}${g.image}`)
+      : null;
+    return `
     <div class="game-card" onclick="handleGameClick('${g.id}')">
-      ${g.image
-        ? `<div class="game-thumb-img" style="background-image:url('${API_GP}${g.image}')"></div>`
+      ${imgSrc
+        ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
       <div class="game-body">
@@ -366,7 +370,8 @@ function renderGamesPage(games) {
         <div class="game-buy-btn">Satın Al →</div>
       </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function filterGamesPage() {
