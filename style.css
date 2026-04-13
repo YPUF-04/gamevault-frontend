@@ -474,6 +474,23 @@ body {
   transition: opacity 0.2s;
 }
 .game-card:hover .game-buy-btn { opacity: 0.9; }
+
+/* ── Hesap Türü Badge'leri ── */
+.gc-badges {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 8px 12px 0;
+}
+.gc-badge {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.4px;
+  padding: 3px 7px; border-radius: 20px;
+  text-transform: uppercase; white-space: nowrap;
+}
+.gc-badge-personal  { background: rgba(0,232,122,0.12); color: #00e87a; border: 1px solid rgba(0,232,122,0.25); }
+.gc-badge-general   { background: rgba(255,140,0,0.12);  color: #ff8c00; border: 1px solid rgba(255,140,0,0.25); }
+.gc-badge-guard     { background: rgba(0,212,255,0.10);  color: #00d4ff; border: 1px solid rgba(0,212,255,0.22); }
+.gc-badge-noguard   { background: rgba(160,120,255,0.12);color: #a078ff; border: 1px solid rgba(160,120,255,0.25); }
+.gc-badge-manual    { background: rgba(255,80,80,0.10);  color: #ff6060; border: 1px solid rgba(255,80,80,0.22); }
+.gc-badge-instant   { background: rgba(0,232,122,0.10);  color: #00e87a; border: 1px solid rgba(0,232,122,0.22); }
 .loading-state { color: var(--text2); padding: 3rem; text-align: center; grid-column: 1/-1; }
 
 /* ===================== OVERLAY ===================== */
