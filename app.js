@@ -268,15 +268,18 @@ function gameCardHTML(g) {
   const exclusiveBadge = g.exclusive
     ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
     : "";
-  const guardBadge = g.requiresCode !== false
+  // Steam Guard varsa otomatik olarak "Guard Aktif" + "Manuel" göster
+  const hasGuard = g.requiresCode !== false;
+  const guardBadge = hasGuard
     ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
     : `<span class="gc-badge gc-badge-noguard">✉ Mail Onaysız</span>`;
-  const deliveryBadge = g.requiresCode !== false
+  const deliveryBadge = hasGuard
     ? `<span class="gc-badge gc-badge-manual">⏱ Manuel</span>`
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
+  const exclusiveClass = g.exclusive ? " exclusive-card" : "";
 
   return `
-    <div class="game-card" onclick="handleGameClick('${g.id}')">
+    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
