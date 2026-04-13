@@ -256,14 +256,13 @@ function loadMoreGames() {
 }
 
 function gameCardHTML(g) {
-  // Görsel: Cloudinary URL'si tam URL olarak kaydediliyor, API prefix ekleme
-  const imgUrl = g.image
+  const imgSrc = g.image
     ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`)
     : null;
   return `
     <div class="game-card" onclick="handleGameClick('${g.id}')">
-      ${imgUrl
-        ? `<div class="game-thumb-img" style="background-image:url('${imgUrl}')"></div>`
+      ${imgSrc
+        ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
       <div class="game-body">
