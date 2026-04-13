@@ -256,10 +256,14 @@ function loadMoreGames() {
 }
 
 function gameCardHTML(g) {
+  // Görsel: Cloudinary URL'si tam URL olarak kaydediliyor, API prefix ekleme
+  const imgUrl = g.image
+    ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`)
+    : null;
   return `
     <div class="game-card" onclick="handleGameClick('${g.id}')">
-      ${g.image
-        ? `<div class="game-thumb-img" style="background-image:url('${API}${g.image}')"></div>`
+      ${imgUrl
+        ? `<div class="game-thumb-img" style="background-image:url('${imgUrl}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
       <div class="game-body">
@@ -471,7 +475,8 @@ function handleGameClick(gameId) {
 
   const imgEl = document.getElementById("bco-game-image");
   if (game.image) {
-    imgEl.style.backgroundImage = `url('${API}${game.image}')`;
+    const imgSrc = game.image.startsWith("http") ? game.image : `${API}${game.image}`;
+    imgEl.style.backgroundImage = `url('${imgSrc}')`;
     imgEl.className = "bco-image bco-image-real";
   } else {
     imgEl.style.backgroundImage = "";
