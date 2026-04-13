@@ -265,6 +265,9 @@ function gameCardHTML(g) {
   const typeBadge  = isPersonal
     ? `<span class="gc-badge gc-badge-personal">🔒 Kişisel</span>`
     : `<span class="gc-badge gc-badge-general">⚡ Genel</span>`;
+  const exclusiveBadge = g.exclusive
+    ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
+    : "";
   const guardBadge = g.requiresCode !== false
     ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
     : `<span class="gc-badge gc-badge-noguard">✉ Mail Onaysız</span>`;
@@ -278,7 +281,7 @@ function gameCardHTML(g) {
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
       }
-      <div class="gc-badges">${typeBadge}${guardBadge}${deliveryBadge}</div>
+      <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
       <div class="game-body">
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
@@ -467,9 +470,22 @@ async function redeemCode() {
       currentUser.balance = data.balance;
       localStorage.setItem("gv_user", JSON.stringify(currentUser));
       updateNavUI();
-      errEl.style.color = "var(--green)";
-      errEl.textContent = `✓ ${data.added} oyun hakkı yüklendi! Yeni bakiye: ${data.balance}`;
       document.getElementById("redeem-code-input").value = "";
+      if (data.exclusive) {
+        // Exclusive kod: oyun verildi, kod overlay'i kapat ve satın alma ekranını göster
+        errEl.style.color = "var(--green)";
+        errEl.textContent = `✓ Özel kod geçerli! ${data.gameEmoji || "🎮"} ${data.gameName} hesabınıza eklendi.`;
+        setTimeout(() => {
+          closeOverlay("code-overlay");
+          // Satın alma detay ekranını aç
+          selectedGameForPurchase = { name: data.gameName, emoji: data.gameEmoji };
+          openPurchaseOverlay({ ...data, purchaseId: data.purchaseId });
+          currentPurchaseId = data.purchaseId;
+        }, 1200);
+      } else {
+        errEl.style.color = "var(--green)";
+        errEl.textContent = `✓ ${data.added} oyun hakkı yüklendi! Yeni bakiye: ${data.balance}`;
+      }
     } else {
       errEl.style.color = "var(--red)";
       errEl.textContent = data.message;
@@ -509,6 +525,11 @@ async function confirmPurchase() {
   if (!currentUser || !selectedGameForPurchase) return;
   const errEl = document.getElementById("bco-error");
 
+  if (selectedGameForPurchase.exclusive) {
+    errEl.style.color = "var(--red)";
+    errEl.textContent = "💎 Bu özel oyun normal bakiye ile alınamaz. Özel kod yüklemen gerekiyor.";
+    return;
+  }
   if (currentUser.balance <= 0) {
     errEl.style.color = "var(--red)";
     errEl.textContent = "Bakiye yetersiz! Önce kod yükle.";
