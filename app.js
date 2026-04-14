@@ -596,14 +596,12 @@ function selectSupportTypeByVal(val) {
 async function openSupport() {
   document.getElementById("support-message").value = "";
   document.getElementById("support-error").textContent = "";
-  // Kullanıcı adını ve emaili otomatik doldur
   const nameEl = document.getElementById("support-name");
   const emailEl = document.getElementById("support-email");
-  if (nameEl) nameEl.value = "Ziyaretçi" || "";
-  if (emailEl && currentUser.email) emailEl.value = currentUser.email;
+  if (nameEl) nameEl.value = "";
+  if (emailEl) emailEl.value = "";
   selectSupportTypeByVal("steam_code");
   showOverlay("support-overlay");
-  loadSupportData();
 }
 
 async function loadSupportData() {
@@ -687,10 +685,17 @@ function fillSupportFromGame(gameName, purchaseId) {
 }
 
 async function sendSupportRequest() {
-  if (false) return;
   const message = document.getElementById("support-message").value.trim();
   const type = document.getElementById("support-type").value;
+  const emailVal = document.getElementById("support-email")?.value.trim();
+  const nameVal = document.getElementById("support-name")?.value.trim();
   const errEl = document.getElementById("support-error");
+  if (!emailVal || !emailVal.includes("@")) {
+    errEl.textContent = "Lütfen geçerli bir e-posta adresi girin.";
+    errEl.style.color = "var(--red)";
+    document.getElementById("support-email")?.focus();
+    return;
+  }
   if (!message) { errEl.textContent = "Mesaj boş olamaz."; errEl.style.color = "var(--red)"; return; }
   errEl.textContent = "Gönderiliyor...";
   errEl.style.color = "var(--text2)";
@@ -698,12 +703,12 @@ async function sendSupportRequest() {
     const res = await fetch(`${API}/api/support-request`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "Ziyaretçi", message, type })
+      body: JSON.stringify({ username: nameVal || emailVal, email: emailVal, message, type })
     });
     const data = await res.json();
     if (data.success) {
       errEl.style.color = "var(--green)";
-      errEl.textContent = "✓ Talebiniz alındı! En kısa sürede dönüş yapılacak.";
+      errEl.textContent = "✓ Talebiniz alındı! Yanıt e-posta adresinize gönderilecek.";
       document.getElementById("support-message").value = "";
       setTimeout(() => { errEl.textContent = ""; }, 4000);
     } else {
@@ -715,7 +720,6 @@ async function sendSupportRequest() {
     errEl.textContent = "Sunucu hatası.";
   }
 }
-
 // =============================================
 // SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
 // =============================================
@@ -854,24 +858,33 @@ window.selectSupportType = function(btn, val) {
 
 // =============================================
 // =============================================
-// CANLI DESTEK WIDGET — SSE Push (Polling YOK)
+// CANLI DESTEK WIDGET — E-posta Zorunlu
 // =============================================
 const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
 let lswOpen = false;
-let lswPollTimer = null; // artık kullanılmıyor, compat için tutuldu
+let lswPollTimer = null;
 let lswLastAt = null;
-let lswEventSource = null; // SSE bağlantısı
+let lswEventSource = null;
+let lswEmail = null; // Kullanıcının girdiği e-posta
+let lswSseHeartbeat = null;
+let lswLastHeartbeat = 0;
 
 function lswApplyAuth() {
   const inputArea   = document.getElementById("lsw-input-area");
   const loginNotice = document.getElementById("lsw-login-notice");
+  const emailGate   = document.getElementById("lsw-email-gate");
   if (!inputArea || !loginNotice) return;
-  if (window.currentUser) {
+
+  if (lswEmail) {
+    // E-posta girilmiş — chat aktif
+    if (emailGate) emailGate.style.display = "none";
     inputArea.style.display   = "flex";
     loginNotice.style.display = "none";
   } else {
+    // E-posta girilmemiş — gate göster
     inputArea.style.display   = "none";
-    loginNotice.style.display = "block";
+    loginNotice.style.display = "none";
+    if (emailGate) emailGate.style.display = "flex";
   }
 }
 window._lswApplyAuth = lswApplyAuth;
@@ -884,7 +897,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("gv_login", () => {
   lswApplyAuth();
-  if (lswOpen) { lswLastAt = null; lswLoadMessages(); lswSubscribe(); }
+  if (lswOpen && lswEmail) { lswLastAt = null; lswLoadMessages(); lswSubscribe(); }
 });
 
 window.toggleLiveSupport = function() {
@@ -903,27 +916,50 @@ window.toggleLiveSupport = function() {
     if (dot)       dot.style.display       = "none";
     if (tooltip)   tooltip.style.display   = "none";
     lswApplyAuth();
-    if (window.currentUser) {
-      lswLoadMessages();  // Geçmiş mesajları 1 kez çek
-      lswSubscribe();     // SSE bağlantısını aç (admin push için)
+    if (lswEmail) {
+      lswLoadMessages();
+      lswSubscribe();
     }
-    setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp && window.currentUser) inp.focus(); }, 300);
+    setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp && lswEmail) inp.focus(); }, 300);
   } else {
     panel.classList.remove("open");
     if (chatIcon)  chatIcon.style.display  = "block";
     if (closeIcon) closeIcon.style.display = "none";
-    lswUnsubscribe(); // Chat kapanınca SSE bağlantısını kapat
+    lswUnsubscribe();
   }
 };
 
-// SSE bağlantısı aç — admin mesaj atınca anında gelir, Firestore okuma YOK
-let lswSseHeartbeat = null;
-let lswLastHeartbeat = 0;
+// E-posta ile başla
+window.lswStartWithEmail = function() {
+  const emailInput = document.getElementById("lsw-email-input");
+  if (!emailInput) return;
+  const email = emailInput.value.trim();
+  if (!email || !email.includes("@")) {
+    const err = document.getElementById("lsw-email-error");
+    if (err) { err.textContent = "Geçerli bir e-posta girin."; err.style.display = "block"; }
+    return;
+  }
+  lswEmail = email;
+  lswApplyAuth();
+  // Hoş geldin mesajı
+  const container = document.getElementById("lsw-messages");
+  if (container) {
+    const el = document.createElement("div");
+    el.className = "lsw-msg lsw-msg-bot lsw-msg-db";
+    el.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">Merhaba <strong>${lswEsc(email)}</strong>! 👋 Size nasıl yardımcı olabiliriz?</div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+  lswLoadMessages();
+  lswSubscribe();
+  setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp) inp.focus(); }, 200);
+};
 
+// SSE bağlantısı aç — admin mesaj atınca anında gelir, Firestore okuma YOK
 function lswSubscribe() {
   lswUnsubscribe();
-  if (!window.currentUser) return;
-  const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(window."Ziyaretçi")}`;
+  if (!lswEmail) return;
+  const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(lswEmail)}`;
   lswEventSource = new EventSource(url);
   lswLastHeartbeat = Date.now();
 
@@ -970,9 +1006,9 @@ function lswUnsubscribe() {
 
 // Geçmiş mesajları 1 kez çek (sayfa açılınca / chat açılınca)
 async function lswLoadMessages() {
-  if (!window.currentUser) return;
+  if (!lswEmail) return;
   try {
-    const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(window."Ziyaretçi")}`);
+    const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(lswEmail)}`);
     const data = await res.json();
     if (!data.success) return;
     const container = document.getElementById("lsw-messages");
@@ -998,7 +1034,7 @@ function lswEsc(s) {
 }
 
 window.lswSend = async function() {
-  if (!window.currentUser) return;
+  if (!lswEmail) return;
   const inp = document.getElementById("lsw-input");
   const msg = inp?.value.trim();
   if (!msg) return;
@@ -1018,7 +1054,7 @@ window.lswSend = async function() {
     await fetch(`${LSW_API}/api/chat/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: window."Ziyaretçi", message: msg, isAdmin: false })
+      body: JSON.stringify({ username: lswEmail, message: msg, isAdmin: false })
     });
   } catch(e) {}
 };
