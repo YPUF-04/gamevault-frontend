@@ -12,69 +12,33 @@
 <div id="toast-container"></div>
 <div id="purchase-notification"></div>
 
-<!-- ===== OVERLAY: Giriş / Kayıt ===== -->
-<div id="auth-overlay" class="overlay">
-  <div class="overlay-box">
-    <button class="overlay-close" onclick="closeAuthOverlay()">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
-    </div>
-    <div id="login-form">
-      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="login-username" placeholder="kullaniciadiniz" autocomplete="username"></div>
-      <div class="field-group"><label>Şifre</label><div class="pass-wrap"><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"><button class="pass-toggle" onclick="togglePass('login-password', this)" type="button">👁</button></div></div>
-      <button class="btn-primary" onclick="login()">Giriş Yap</button>
-      <div id="login-error" class="error-msg"></div>
-    </div>
-    <div id="register-form" style="display:none;">
-      <div class="field-group"><label>Kullanıcı Adı</label><input type="text" id="reg-username" placeholder="benzersiz bir ad seç" autocomplete="username"></div>
-      <div class="field-group"><label>E-posta Adresi</label><input type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email"></div>
-      <div class="field-group">
-        <label>Şifre</label>
-        <div class="pass-wrap"><input type="password" id="reg-password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password', this)" type="button">👁</button></div>
-        <div class="pass-strength-bar"><div id="pass-strength-fill"></div></div>
-        <div id="pass-strength-label" class="pass-strength-label"></div>
-      </div>
-      <div class="field-group"><label>Şifreyi Tekrar Gir</label><div class="pass-wrap"><input type="password" id="reg-password2" placeholder="••••••••" autocomplete="new-password"><button class="pass-toggle" onclick="togglePass('reg-password2', this)" type="button">👁</button></div></div>
-      <button class="btn-primary" onclick="register()">Kayıt Ol</button>
-      <div id="reg-error" class="error-msg"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== OVERLAY: Kod Yükle ===== -->
+<!-- ===== OVERLAY: Kod Gir ===== -->
 <div id="code-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
     <div class="overlay-logo">⬡ GameVault</div>
-    <h2>Kodu Yükle</h2>
-    <p>Satın aldığın erişim kodunu girerek bakiyeni yükle.</p>
-    <div class="field-group"><label>Erişim Kodu</label><input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX" maxlength="35"></div>
-    <button class="btn-primary" onclick="redeemCode()">Bakiyeyi Yükle</button>
+    <h2>🔑 Kodunu Gir</h2>
+    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
+    <div class="field-group">
+      <label>Erişim Kodu</label>
+      <input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="35" style="text-transform:uppercase;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.25rem;">
+      <button class="btn-primary" onclick="handleCodeEnter()">🎮 Devam Et</button>
+    </div>
     <div id="redeem-error" class="error-msg"></div>
   </div>
 </div>
 
-<!-- ===== OVERLAY: Satın Alma Onayı ===== -->
-<div id="buy-confirm-overlay" class="overlay">
-  <div class="overlay-box">
-    <button class="overlay-close" onclick="closeOverlay('buy-confirm-overlay')">✕</button>
+<!-- ===== OVERLAY: Oyun Seç (kod doğrulandıktan sonra) ===== -->
+<div id="game-select-overlay" class="overlay">
+  <div class="overlay-box wide">
+    <button class="overlay-close" onclick="closeOverlay('game-select-overlay')">✕</button>
     <div class="overlay-logo">⬡ GameVault</div>
-    <div id="bco-game-image" class="bco-image"></div>
-    <h2 id="bco-game-name" class="bco-title">Oyun Adı</h2>
-    <div class="bco-meta"><span id="bco-platform" class="bco-platform-badge">PC / Steam</span></div>
-    <div class="bco-balance-row">
-      <span class="bco-bal-label">Bakiyen</span>
-      <span class="bco-bal-val" id="bco-balance">0</span>
-      <span class="bco-bal-label">oyun hakkı</span>
-    </div>
-    <p class="bco-confirm-text">Bu oyunu satın almak istiyor musun?<br><span class="bco-cost-note">1 oyun hakkı düşülecek.</span></p>
-    <div class="bco-btns">
-      <button class="btn-primary" onclick="confirmPurchase()">🎮 Satın Al</button>
-      <button class="bco-cancel" onclick="closeOverlay('buy-confirm-overlay')">İptal</button>
-    </div>
-    <div id="bco-error" class="error-msg" style="text-align:center;"></div>
+    <h2>🎮 Oyun Seç</h2>
+    <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1.25rem;">Kodun doğrulandı! Almak istediğin oyunu seç.</p>
+    <div id="gso-games-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;max-height:420px;overflow-y:auto;padding:4px;"></div>
+    <div id="gso-error" class="error-msg" style="margin-top:0.75rem;"></div>
   </div>
 </div>
 
@@ -108,28 +72,6 @@
       <button class="btn-extra-req" onclick="openSupportFromPurchase()">💬 Destek Talebi Gönder</button>
     </div>
     <div id="po-error" class="error-msg"></div>
-  </div>
-</div>
-
-<!-- ===== OVERLAY: Hesabım ===== -->
-<div id="account-overlay" class="overlay">
-  <div class="overlay-box wide">
-    <button class="overlay-close" onclick="closeOverlay('account-overlay')">✕</button>
-    <div class="account-overlay-hero">
-      <div class="acc-avatar-new" id="acc-avatar-letter">U</div>
-      <div class="acc-info-new">
-        <div class="acc-username-new" id="acc-display-username">—</div>
-        <div class="acc-email-new" id="acc-display-email">—</div>
-        <div class="acc-balance-chip"><span class="balance-icon">⬡</span><span id="acc-display-balance">0</span> oyun hakkı</div>
-      </div>
-    </div>
-    <div class="acc-stats-row">
-      <div class="acc-stat-card"><div class="acc-stat-val" id="acc-total-games">0</div><div class="acc-stat-lbl">Satın Alınan</div></div>
-      <div class="acc-stat-card"><div class="acc-stat-val" style="color:#a78bfa;">7/24</div><div class="acc-stat-lbl">Destek Hattı</div></div>
-    </div>
-    <div class="acc-games-title">Satın Aldığım Oyunlar</div>
-    <div id="purchases-list" class="purchases-list"><div class="empty-state">Henüz satın alım yok.</div></div>
-    <button class="acc-logout-btn" onclick="logout()">↩ Çıkış Yap</button>
   </div>
 </div>
 
@@ -211,19 +153,11 @@
     <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
-      <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
+      <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Gir</a>
       <a href="#" onclick="openSupport(); return false;">Destek</a>
     </div>
-    <div class="nav-right" id="nav-auth-area">
-      <button class="btn-nav-login" onclick="showOverlay('auth-overlay')">Giriş Yap</button>
-      <button class="btn-nav-register" onclick="switchAuthTab('register'); showOverlay('auth-overlay')">Kayıt Ol</button>
-    </div>
-    <div class="nav-right nav-user-area" id="nav-user-area" style="display:none;">
-      <div class="nav-balance">⬡ <span id="nav-balance">0</span></div>
-      <button class="btn-nav-account" onclick="openAccount()">👤 <span id="nav-username">—</span></button>
-      <button class="btn-nav-logout" onclick="logout()" title="Çıkış Yap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+    <div class="nav-right">
+      <button class="btn-nav-login" onclick="showOverlay('code-overlay')" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;">🔑 Kodu Gir</button>
     </div>
     <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
       <span></span><span></span><span></span>
@@ -240,7 +174,7 @@
     <p>Güvenli ödeme, Steam'e anında aktarım.<br>Binlerce oyun, tek platform.</p>
     <div class="hero-btns">
       <button class="hero-btn-primary" onclick="smoothScrollToGames()">Oyunları Keşfet</button>
-      <button class="hero-btn-secondary" onclick="handleCodeBtn()">🔑 Kod Yükle</button>
+      <button class="hero-btn-secondary" onclick="showOverlay('code-overlay')">🔑 Kodu Gir</button>
     </div>
   </div>
   <div class="hero-reviews" id="hero-reviews">
@@ -253,7 +187,7 @@
 
 <!-- ===== İSTATİSTİKLER ===== -->
 <section class="stats-bar">
-  <div class="stat-item"><div class="stat-icon">👥</div><div class="stat-info"><div class="stat-value" id="stat-users">137</div><div class="stat-label">Kayıtlı Kullanıcı</div></div></div>
+  <div class="stat-item"><div class="stat-icon">👥</div><div class="stat-info"><div class="stat-value" id="stat-users">137</div><div class="stat-label">Mutlu Kullanıcı</div></div></div>
   <div class="stat-divider"></div>
   <div class="stat-item"><div class="stat-icon">🎮</div><div class="stat-info"><div class="stat-value" id="stat-games">0</div><div class="stat-label">Mevcut Oyun</div></div></div>
   <div class="stat-divider"></div>
@@ -340,7 +274,7 @@
             <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
             <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
             <a href="#" onclick="openSupport(); return false;">Destek</a>
-            <a href="#" onclick="openAccount(); return false;">Profil</a>
+
           </div>
         </div>
         <div>
@@ -386,9 +320,7 @@
       <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
     </div>
   </div>
-  <div id="lsw-login-notice">
-    Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
-  </div>
+  <div id="lsw-login-notice" style="display:none;"></div>
   <div class="lsw-input-area" id="lsw-input-area">
     <input type="text" id="lsw-input" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') lswSend()">
     <button class="lsw-send-btn" onclick="lswSend()">
