@@ -1897,3 +1897,19 @@ footer {
   background: rgba(0,232,122,0.18);
   transform: translateY(-1px);
 }
+
+/* ── Satın Alımlar — Hak Ekle butonu ── */
+.btn-grant-req {
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0,232,122,0.35);
+  background: rgba(0,232,122,0.08);
+  color: var(--green);
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s, opacity 0.2s;
+}
+.btn-grant-req:hover  { background: rgba(0,232,122,0.18); transform: translateY(-1px); }
+.btn-grant-req:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
