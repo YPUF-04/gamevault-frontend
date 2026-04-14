@@ -1913,3 +1913,93 @@ footer {
 }
 .btn-grant-req:hover  { background: rgba(0,232,122,0.18); transform: translateY(-1px); }
 .btn-grant-req:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+/* ===== CANLI DESTEK — E-posta Gate ===== */
+.lsw-email-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+  flex: 1;
+}
+.lsw-email-gate-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+}
+.lsw-email-icon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.85;
+}
+.lsw-email-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.lsw-email-sub {
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin: 0;
+}
+.lsw-email-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.lsw-email-input:focus {
+  border-color: var(--accent);
+}
+.lsw-email-input::placeholder { color: var(--text3); }
+.lsw-email-error {
+  font-size: 0.78rem;
+  color: var(--red);
+  width: 100%;
+  text-align: left;
+}
+.lsw-email-btn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 0.25rem;
+}
+.lsw-email-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Games.html handleCodeBtn fix */
+.btn-code-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-code-access:hover { opacity: 0.88; }
