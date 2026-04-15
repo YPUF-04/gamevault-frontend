@@ -1,3 +1,4 @@
+// app.js
 // =============================================
 // CONFIG
 // =============================================
@@ -9,16 +10,16 @@ const API = "https://backendsite-production-6bcb.up.railway.app";
 let GAMES = [];
 let DISPLAYED_COUNT = 15;
 const PAGE_SIZE = 15;
-let activeCode = null;      // Doğrulanmış kod (oyun seçim ekranında)
+let activeCode = null;      // Doğrulanmış kod 
 let activeCodeType = null;  // "normal" | "exclusive"
 let currentPurchaseId = null;
 let selectedGameForPurchase = null;
+let isSelectionMode = false; // Normal kod girildikten sonra ana ekrandan seçim modu
 
 // =============================================
 // INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Sadece index sayfasında çalışacak kodlar
   const isIndexPage = !!document.getElementById("main-grid");
   if (!isIndexPage) return;
 
@@ -33,11 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStats();
   showRecentPurchaseNotifs();
   animateUserCount();
-  const pendingGame = localStorage.getItem("gv_pending_game");
-  if (pendingGame) {
-    localStorage.removeItem("gv_pending_game");
-    setTimeout(() => { if (GAMES.find(x => x.id === pendingGame)) handleGameClick(pendingGame); }, 1200);
-  }
 });
 
 // =============================================
@@ -111,40 +107,6 @@ function showIntroAnimation() {
 }
 
 // =============================================
-// SATIN ALMA BİLDİRİMİ — 5sn göster, 10sn gizle
-// =============================================
-async function showRecentPurchaseNotifs() {
-  let pool = [], idx = 0;
-  try {
-    const res = await fetch(`${API}/api/recent-purchases`);
-    const data = await res.json();
-    if (data.success && data.purchases && data.purchases.length) pool = data.purchases;
-  } catch(e) { return; }
-  if (!pool.length) return;
-
-  function next() {
-    const n = pool[idx % pool.length];
-    showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
-    idx++;
-    setTimeout(next, 15000); // 5sn göster + 10sn gizle = 15sn döngü
-  }
-  setTimeout(next, 8000);
-}
-
-function showPurchaseNotification(username, gameName, emoji) {
-  const el = document.getElementById("purchase-notification");
-  if (!el) return;
-  const short = username.length > 8 ? username.substring(0,5)+"***" : username;
-  el.innerHTML = `<span class="pn-emoji">${emoji||'🎮'}</span><span><strong>${short}</strong> az önce <em>${gameName}</em> aldı!</span>`;
-  el.style.cssText = "display:flex;opacity:1;transform:translateX(0);transition:opacity 0.5s,transform 0.5s;";
-  setTimeout(() => {
-    el.style.opacity = "0";
-    el.style.transform = "translateX(-30px)";
-    setTimeout(() => { el.style.display = "none"; }, 500);
-  }, 5000);
-}
-
-// =============================================
 // İSTATİSTİKLER
 // =============================================
 async function loadStats() {
@@ -200,7 +162,7 @@ function animateUserCount() {
 }
 
 // =============================================
-// OYUNLARI YÜKLE (lazy — 10'ar 10'ar)
+// OYUNLARI YÜKLE
 // =============================================
 async function loadGames() {
   try {
@@ -222,9 +184,25 @@ function renderGames() {
   const grid = document.getElementById("main-grid");
   const loadMoreWrap = document.getElementById("load-more-wrap");
 
+  // Önceki seçim modu afişini temizle
+  const oldBanner = document.getElementById("selection-mode-banner");
+  if (oldBanner) oldBanner.remove();
+
+  if (isSelectionMode) {
+    const banner = document.createElement("div");
+    banner.id = "selection-mode-banner";
+    banner.className = "selection-banner";
+    banner.innerHTML = `
+      <h2>🎮 Oyun Seçin</h2>
+      <p>Kodunuz onaylandı. Lütfen almak istediğiniz oyunu seçin.<br><small style="color:var(--text2);">(Özel oyunlar bu kodla alınamaz)</small></p>
+      <button class="btn-cancel-sel" onclick="cancelSelectionMode()">Seçimi İptal Et</button>
+    `;
+    grid.parentNode.insertBefore(banner, grid);
+  }
+
   if (!GAMES.length) {
     grid.innerHTML = "<div class='loading-state'>Henüz oyun eklenmemiş.</div>";
-    loadMoreWrap.style.display = "none";
+    if (loadMoreWrap) loadMoreWrap.style.display = "none";
     return;
   }
 
@@ -232,17 +210,24 @@ function renderGames() {
   grid.innerHTML = visible.map(g => gameCardHTML(g)).join("");
 
   if (DISPLAYED_COUNT < GAMES.length) {
-    loadMoreWrap.style.display = "block";
+    if (loadMoreWrap) loadMoreWrap.style.display = "block";
     const remaining = GAMES.length - DISPLAYED_COUNT;
     const countEl = document.getElementById("blm-count");
     if (countEl) countEl.textContent = `+${remaining} oyun`;
   } else {
-    loadMoreWrap.style.display = "none";
+    if (loadMoreWrap) loadMoreWrap.style.display = "none";
   }
 }
 
 function loadMoreGames() {
   window.location.href = "Games.html";
+}
+
+function cancelSelectionMode() {
+  isSelectionMode = false;
+  activeCode = null;
+  activeCodeType = null;
+  renderGames();
 }
 
 function gameCardHTML(g) {
@@ -265,11 +250,13 @@ function gameCardHTML(g) {
     ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
 
-  // Normal ekranda tüm oyunlar aynı görünür — exclusive dahil
-  const exclusiveClass = g.exclusive ? " exclusive-card" : "";
+  let extraClass = g.exclusive ? " exclusive-card" : "";
+  if (isSelectionMode && g.exclusive) {
+    extraClass += " locked-selection-card";
+  }
 
   return `
-    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
+    <div class="game-card${extraClass}" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
@@ -279,76 +266,63 @@ function gameCardHTML(g) {
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
         <div class="game-price">${g.price || 'Hesap'}</div>
-        <div class="game-buy-btn">Satın Al →</div>
+        <div class="game-buy-btn">${isSelectionMode ? 'Seç' : 'Satın Al →'}</div>
       </div>
     </div>
   `;
 }
 
 // =============================================
-// SMOOTH SCROLL TO GAMES (effectli geçiş)
+// SMOOTH SCROLL
 // =============================================
-function smoothScrollToGames(e) {
-  if (e) e.preventDefault();
+function scrollToGames() {
   const gamesSection = document.getElementById("games");
-  if (!gamesSection) return;
-  gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (gamesSection) gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // =============================================
-// AUTH
-// =============================================
-
-
-// =============================================
 // KOD GİRİŞ SİSTEMİ (anonim)
 // =============================================
-
 async function handleCodeEnter() {
   const code = document.getElementById("redeem-code-input").value.trim().toUpperCase();
   const errEl = document.getElementById("redeem-error");
   if (!code) { errEl.textContent = "Kod girin."; errEl.style.color = "var(--red)"; return; }
   errEl.style.color = "var(--text2)";
   errEl.textContent = "Doğrulanıyor...";
+  
   try {
     const res = await fetch(`${API}/api/verify-code`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code })
     });
     const data = await res.json();
+    
     if (data.success) {
       if (data.type === "exclusive") {
-        // Exclusive kod: Bu kodun hangi oyun için olduğunu göster
         errEl.style.color = "var(--text2)";
         errEl.textContent = "⏳ Özel kod işleniyor...";
         document.getElementById("redeem-code-input").value = "";
         closeOverlay("code-overlay");
-        // Exclusive oyun seçim overlay'ini aç (tek oyun, bilgi ekranı)
-        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId);
-        openExclusiveConfirmOverlay(code, data.exclusiveGameId, exclusiveGame);
+        
+        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId) || {name: data.exclusiveGameName};
+        showCustomConfirm(exclusiveGame, async () => {
+          await purchaseWithCode(code, data.exclusiveGameId);
+        });
       } else {
         activeCode = code;
         activeCodeType = "normal";
         errEl.textContent = "";
         document.getElementById("redeem-code-input").value = "";
         closeOverlay("code-overlay");
-        // Oyun seçim ekranını aç (karta tıklayarak geldiyse o oyun pre-selected)
-        if (window._pendingGameId) {
-          const pid = window._pendingGameId;
-          window._pendingGameId = null;
-          openGameSelectOverlay();
-          // Kısa delay sonra o kartı seç
-          setTimeout(() => selectGsoCard(pid), 80);
-        } else {
-          openGameSelectOverlay();
-        }
+
+        isSelectionMode = true;
+        scrollToGames();
+        renderGames();
       }
     } else {
-      // Kod kullanılmış olabilir — satın alınan oyunu göster
       if (data.message && data.message.includes("zaten kullanılmış")) {
         errEl.style.color = "var(--text2)";
         errEl.textContent = "Kod daha önce kullanılmış, oyunun açılıyor...";
@@ -365,7 +339,6 @@ async function handleCodeEnter() {
 }
 
 async function purchaseWithCode(code, gameId) {
-  const errEl = document.getElementById("redeem-error");
   try {
     const res = await fetch(`${API}/api/purchase-with-code`, {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -375,19 +348,15 @@ async function purchaseWithCode(code, gameId) {
     if (data.success) {
       activeCode = null;
       document.getElementById("redeem-code-input").value = "";
-      errEl.textContent = "";
       closeOverlay("code-overlay");
-      closeOverlay("game-select-overlay");
       currentPurchaseId = data.purchaseId;
       selectedGameForPurchase = GAMES.find(g => g.id === gameId) || { name: data.gameName, emoji: "🎮" };
       openPurchaseOverlay(data);
     } else {
-      errEl.style.color = "var(--red)";
-      errEl.textContent = data.message;
+      showToast(data.message, "error");
     }
   } catch(e) {
-    errEl.style.color = "var(--red)";
-    errEl.textContent = "Sunucu hatası.";
+    showToast("Sunucu hatası.", "error");
   }
 }
 
@@ -416,187 +385,85 @@ async function viewPurchaseByCode(code) {
   }
 }
 
-function openGameSelectOverlay() {
-  const grid = document.getElementById("gso-games-grid");
-  const errEl = document.getElementById("gso-error");
-  const titleEl = document.getElementById("gso-title");
-  const subtitleEl = document.getElementById("gso-subtitle");
-  if (!grid) return;
-  errEl.textContent = "";
-
-  // Başlık güncelle
-  if (titleEl) titleEl.textContent = "🎮 Oyununu Seç";
-  if (subtitleEl) subtitleEl.innerHTML = `
-    <div class="gso-info-banner">
-      <span class="gso-info-icon">🔑</span>
-      <span>Bu kod sana aşağıdaki oyunlardan <strong>1 tanesinin</strong> hesabını almana yardımcı olur. İstediğin oyunu seç!</span>
-    </div>
-  `;
-
-  if (!GAMES.length) {
-    grid.innerHTML = "<div style='color:var(--text3);text-align:center;padding:2rem;'>Şu an mevcut oyun yok.</div>";
-    showOverlay("game-select-overlay");
-    return;
-  }
-
-  grid.innerHTML = GAMES.map(g => {
-    const imgSrc = g.image ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`) : null;
-
-    if (g.exclusive) {
-      // Exclusive oyunlar: gri/kilitli
-      return `
-        <div class="gso-card gso-card-locked" title="Bu oyun özel kodla satın alınabilir">
-          ${imgSrc
-            ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
-            : `<div class="gso-card-emoji">${g.emoji||'🎮'}</div>`
-          }
-          <div class="gso-card-body">
-            <div class="gso-card-platform">${g.platform||'PC / Steam'}</div>
-            <div class="gso-card-name">${g.name}</div>
-            <div class="gso-card-locked-label">🔒 Özel Kod</div>
-          </div>
-        </div>
-      `;
-    }
-
-    // Normal oyunlar: seçilebilir
-    return `
-      <div class="gso-card gso-card-available" id="gso-card-${g.id}" onclick="selectGsoCard('${g.id}')">
-        ${imgSrc
-          ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
-          : `<div class="gso-card-emoji">${g.emoji||'🎮'}</div>`
-        }
-        <div class="gso-card-body">
-          <div class="gso-card-platform">${g.platform||'PC / Steam'}</div>
-          <div class="gso-card-name">${g.name}</div>
-          <div class="gso-card-select-hint">Seçmek için tıkla</div>
-        </div>
-        <div class="gso-card-check">✓</div>
-      </div>
-    `;
-  }).join("");
-
-  showOverlay("game-select-overlay");
-}
-
-let _gsoSelectedId = null;
-
-function selectGsoCard(gameId) {
-  // Önceki seçimi kaldır
-  document.querySelectorAll(".gso-card-available").forEach(el => {
-    el.classList.remove("gso-card-selected");
-  });
-  // Yeni seçimi işaretle
-  const card = document.getElementById(`gso-card-${gameId}`);
-  if (card) card.classList.add("gso-card-selected");
-  _gsoSelectedId = gameId;
-
-  // Satın al butonunu göster / güncelle
-  const btn = document.getElementById("gso-buy-btn");
-  const game = GAMES.find(g => g.id === gameId);
-  if (btn && game) {
-    btn.style.display = "block";
-    btn.textContent = `🛒 "${game.name}" Hesabını Al`;
-  }
-}
-
-async function confirmGsoPurchase() {
-  if (!_gsoSelectedId) return;
-  const errEl = document.getElementById("gso-error");
-  const btn = document.getElementById("gso-buy-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ İşleniyor..."; }
-  errEl.textContent = "";
-  errEl.style.color = "var(--text2)";
-  await purchaseWithCode(activeCode, _gsoSelectedId);
-  if (btn) { btn.disabled = false; }
-  _gsoSelectedId = null;
-}
-
-// Exclusive kod için: tek oyun onay ekranı
-function openExclusiveConfirmOverlay(code, gameId, game) {
-  const titleEl = document.getElementById("gso-title");
-  const subtitleEl = document.getElementById("gso-subtitle");
-  const grid = document.getElementById("gso-games-grid");
-  const errEl = document.getElementById("gso-error");
-  const btn = document.getElementById("gso-buy-btn");
-  if (!grid) {
-    // Fallback: direkt satın al
-    purchaseWithCode(code, gameId);
-    return;
-  }
-  errEl.textContent = "";
-  _gsoSelectedId = gameId;
-
-  const gameName = game ? game.name : "Oyun";
-  const gameEmoji = game ? (game.emoji || "🎮") : "🎮";
-  const imgSrc = game && game.image
-    ? (game.image.startsWith("http") ? game.image : `${API}${game.image}`)
-    : null;
-
-  if (titleEl) titleEl.textContent = "💎 Özel Kod";
-  if (subtitleEl) subtitleEl.innerHTML = `
-    <div class="gso-info-banner gso-info-exclusive">
-      <span class="gso-info-icon">💎</span>
-      <span>Bu kod sana <strong>"${gameName}"</strong> oyununun hesabını almanı sağlar.</span>
-    </div>
-  `;
-
-  grid.innerHTML = `
-    <div class="gso-card gso-card-selected gso-exclusive-single" style="max-width:220px;margin:0 auto;">
-      ${imgSrc
-        ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
-        : `<div class="gso-card-emoji" style="font-size:3.5rem;">${gameEmoji}</div>`
-      }
-      <div class="gso-card-body">
-        <div class="gso-card-platform">${game ? (game.platform||'PC / Steam') : 'PC / Steam'}</div>
-        <div class="gso-card-name">${gameName}</div>
-        <div class="gso-card-select-hint" style="color:var(--accent);">✓ Seçili</div>
-      </div>
-      <div class="gso-card-check">✓</div>
-    </div>
-  `;
-
-  if (btn) {
-    btn.style.display = "block";
-    btn.textContent = `🛒 "${gameName}" Hesabını Al`;
-    // Exclusive için kodu kullan
-    btn.onclick = async () => {
-      btn.disabled = true;
-      btn.textContent = "⏳ İşleniyor...";
-      await purchaseWithCode(code, gameId);
-      btn.disabled = false;
-      btn.onclick = confirmGsoPurchase;
-    };
-  }
-
-  showOverlay("game-select-overlay");
-}
-
 // =============================================
-// OYUN SATIN ALMA — direkt onay ekranı
+// OYUN TIKLAMA / SATIN ALMA ONAYI
 // =============================================
 function handleGameClick(gameId) {
   const game = GAMES.find(g => g.id === gameId);
   if (!game) return;
 
-  // Exclusive oyun: normal kodla alınamaz, özel kod gerekir
+  if (isSelectionMode) {
+    if (game.exclusive) return; // Seçim modunda özel oyunlara tıklanamaz
+    showCustomConfirm(game, async () => {
+      await purchaseWithCode(activeCode, gameId);
+      isSelectionMode = false;
+      renderGames();
+    });
+    return;
+  }
+
   if (game.exclusive) {
     showToast(`"${game.name}" özel bir koddur. Bu oyuna özel kodunla erişebilirsin.`, "info");
     return;
   }
 
-  // Aktif normal kod varsa direkt satın al
   if (activeCode) {
-    selectGameWithCode(gameId);
+    showCustomConfirm(game, async () => {
+      await purchaseWithCode(activeCode, gameId);
+    });
   } else {
-    // Kod yok: kod giriş ekranını aç, bu oyunu beklet
     activeCode = null;
     showOverlay("code-overlay");
     const errEl = document.getElementById("redeem-error");
-    errEl.style.color = "var(--text2)";
-    errEl.textContent = `"${game.name}" için kodunu gir.`;
-    window._pendingGameId = gameId;
+    if(errEl) {
+      errEl.style.color = "var(--text2)";
+      errEl.textContent = `"${game.name}" için kodunu gir.`;
+    }
   }
+}
+
+// Özel Özel Onay Modalı Oluşturucu
+function showCustomConfirm(game, onConfirm) {
+  let overlay = document.getElementById("custom-confirm-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "custom-confirm-overlay";
+    overlay.className = "custom-confirm-overlay";
+    overlay.innerHTML = `
+      <div class="custom-confirm-box">
+        <div class="custom-confirm-icon">⚠️</div>
+        <div class="custom-confirm-title">Emin misiniz?</div>
+        <div class="custom-confirm-desc" id="cc-desc"></div>
+        <div class="custom-confirm-btns">
+          <button class="btn-cc-cancel" onclick="closeCustomConfirm()">İptal</button>
+          <button class="btn-cc-confirm" id="cc-confirm-btn">Evet, Onaylıyorum</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  document.getElementById("cc-desc").innerHTML = `<strong>${game.name}</strong> oyununu seçtiniz.<br><br><span style="color:var(--red);">Seçimi onayladıktan sonra oyunu değiştiremezsiniz!</span>`;
+
+  const confirmBtn = document.getElementById("cc-confirm-btn");
+  const newBtn = confirmBtn.cloneNode(true);
+  confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+  newBtn.addEventListener("click", async () => {
+    newBtn.disabled = true;
+    newBtn.textContent = "İşleniyor...";
+    await onConfirm();
+    closeCustomConfirm();
+    newBtn.disabled = false;
+    newBtn.textContent = "Evet, Onaylıyorum";
+  });
+
+  overlay.classList.add("active");
+}
+
+window.closeCustomConfirm = function() {
+  const overlay = document.getElementById("custom-confirm-overlay");
+  if (overlay) overlay.classList.remove("active");
 }
 
 // =============================================
@@ -616,11 +483,9 @@ function openPurchaseOverlay(data) {
   const instructions = document.getElementById("steam-instructions");
 
   if (data.requiresCode === false) {
-    // Kullanıcı adı + şifre göster, kod butonu yok
     codeBtn.style.display = "none";
     reqInfo.textContent   = "✅ Bu oyun için Steam Guard kodu gerekmez.";
     reqInfo.style.color   = "var(--green)";
-    // Talimatları kod adımı olmadan göster
     instructions.style.display = "block";
     instructions.innerHTML = `
       <p class="instr-title">Nasıl giriş yapılır?</p>
@@ -648,7 +513,6 @@ function openPurchaseOverlay(data) {
 
   showOverlay("purchase-overlay");
 }
-
 
 async function requestSteamCode() {
   if (!currentPurchaseId) return;
@@ -706,7 +570,7 @@ function openSupportFromPurchase() {
 }
 
 // =============================================
-// DESTEK — kullanıcının oyunlarını da göster
+// DESTEK
 // =============================================
 function selectSupportType(btn, val) {
   document.querySelectorAll(".support-type-btn-new").forEach(b => b.classList.remove("active"));
@@ -732,84 +596,9 @@ async function openSupport() {
   showOverlay("support-overlay");
 }
 
-async function loadSupportData() {
-  // Kullanıcının aldığı oyunları yükle
-  try {
-    const res = await fetch(`${API}/api/my-purchases?username=${encodeURIComponent("Ziyaretçi")}`);
-    const data = await res.json();
-    const section = document.getElementById("support-purchases-section");
-    const listEl = document.getElementById("support-purchases-list");
-    if (data.success && data.purchases && data.purchases.length) {
-      section.style.display = "block";
-      listEl.innerHTML = data.purchases.map(p => {
-        const used = p.steamCodeRequests || 0;
-        const pct = (used / 5) * 100;
-        const isLow = used >= 4;
-        return `
-          <div class="support-purchase-item spi-clickable" onclick="fillSupportFromGame('${escHtml(p.gameName)}', '${p.id}')">
-            <span class="spi-emoji">${p.gameEmoji || '🎮'}</span>
-            <div class="spi-details">
-              <span class="spi-name">${p.gameName}</span>
-              <div class="spi-bar-wrap">
-                <div class="spi-bar"><div class="spi-bar-fill" style="width:${pct}%; background:${isLow ? 'var(--red)' : 'linear-gradient(90deg,var(--accent),var(--accent2))'}"></div></div>
-                <span class="spi-requests ${isLow ? 'spi-req-warn' : ''}">${used}/5 hak</span>
-              </div>
-            </div>
-            ${used >= 5 ? '<span class="spi-extra-btn">Hak Talep Et →</span>' : ''}
-          </div>
-        `;
-      }).join("");
-    } else {
-      section.style.display = "none";
-    }
-  } catch(e) {
-    document.getElementById("support-purchases-section").style.display = "none";
-  }
-
-  // Admin yanıtlarını yükle
-  try {
-    const res = await fetch(`${API}/api/my-support?username=${encodeURIComponent("Ziyaretçi")}`);
-    const data = await res.json();
-    const section = document.getElementById("support-replies-section");
-    const listEl = document.getElementById("support-replies-list");
-    if (data.success && data.tickets && data.tickets.length) {
-      const withReplies = data.tickets.filter(t => t.adminReply);
-      if (withReplies.length) {
-        section.style.display = "block";
-        listEl.innerHTML = withReplies.map(t => `
-          <div class="support-reply-item-new">
-            <div class="sri-header">
-              <div class="sri-avatar">GV</div>
-              <div class="sri-meta">
-                <span class="sri-name">GameVault Destek</span>
-                <span class="sri-time">${formatDate(t.repliedAt || t.createdAt)}</span>
-              </div>
-              ${t.extraGranted ? '<span class="sri-grant-badge">+3 Hak Verildi ✓</span>' : ''}
-            </div>
-            <div class="sri-body">${t.adminReply}</div>
-            <div class="sri-subject">📌 Konu: ${typeLabel2(t.type)}</div>
-          </div>
-        `).join("");
-      } else {
-        section.style.display = "none";
-      }
-    } else {
-      section.style.display = "none";
-    }
-  } catch(e) {
-    document.getElementById("support-replies-section").style.display = "none";
-  }
-}
-
 function typeLabel2(t) {
   const m = { steam_code: "Steam Kodu", extra_code: "Ekstra Kod Talebi", account: "Hesap Sorunu", general: "Genel" };
   return m[t] || t || "Genel";
-}
-
-function fillSupportFromGame(gameName, purchaseId) {
-  selectSupportTypeByVal("extra_code");
-  const msgEl = document.getElementById("support-message");
-  if (msgEl) msgEl.value = `Oyun: ${gameName}\nPurchase ID: ${purchaseId}\n\n5 hak bitti, ekstra kod talep ediyorum.`;
 }
 
 async function sendSupportRequest() {
@@ -848,28 +637,22 @@ async function sendSupportRequest() {
     errEl.textContent = "Sunucu hatası.";
   }
 }
+
 // =============================================
-// SATIN ALMA BİLDİRİMİ — gerçek satın alımları göster
+// SATIN ALMA BİLDİRİMİ
 // =============================================
 async function showRecentPurchaseNotifs() {
   let pool = [];
   let idx = 0;
-
   try {
     const res = await fetch(`${API}/api/recent-purchases`);
     const data = await res.json();
     if (data.success && data.purchases && data.purchases.length > 0) {
-      // Gerçek verileri kullan
       pool = data.purchases;
     }
-  } catch(e) {
-    // API'ye ulaşamazsa hiç gösterme
-    return;
-  }
+  } catch(e) { return; }
 
   if (!pool.length) return;
-
-  // Karıştır ki her seferinde farklı sırayla gözüksün
   pool = pool.sort(() => Math.random() - 0.5);
 
   function next() {
@@ -877,16 +660,15 @@ async function showRecentPurchaseNotifs() {
     const n = pool[idx % pool.length];
     showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
     idx++;
-    // Seyrek: 30-60 saniye aralık
     const delay = 30000 + Math.random() * 30000;
     setTimeout(next, delay);
   }
-  // İlk bildirimi 18 saniye sonra göster
   setTimeout(next, 18000);
 }
 
 function showPurchaseNotification(username, gameName, emoji) {
   const el = document.getElementById("purchase-notification");
+  if(!el) return;
   const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
   el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
   el.classList.add("show");
@@ -907,18 +689,15 @@ function closeOverlay(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove("active");
   setTimeout(() => {
-    if (!document.querySelector(".overlay.active")) {
+    if (!document.querySelector(".overlay.active") && !document.querySelector(".custom-confirm-overlay.active")) {
       document.body.style.overflow = "";
     }
   }, 50);
 }
 
-function scrollToGames() {
-  document.getElementById("games").scrollIntoView({ behavior: "smooth" });
-}
-
 function showToast(msg, type = "info") {
   const c = document.getElementById("toast-container");
+  if(!c) return;
   const t = document.createElement("div");
   t.className = `toast toast-${type}`;
   t.textContent = msg;
@@ -927,45 +706,11 @@ function showToast(msg, type = "info") {
   setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 3500);
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" });
-}
-
 function escHtml(str) {
   return (str || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
-// =============================================
-// HOW SECTION SCROLL ANIMATION
-// =============================================
+
 (function() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const steps = document.querySelectorAll('.how-step');
-        steps.forEach((step, i) => {
-          setTimeout(() => {
-            step.style.opacity = '1';
-            step.style.transform = 'translateY(0)';
-            step.classList.add('step-active');
-            setTimeout(() => step.classList.remove('step-active'), 1000);
-          }, i * 200);
-        });
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.how-step').forEach(step => {
-      step.style.opacity = '0';
-      step.style.transform = 'translateY(30px)';
-      step.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s';
-    });
-    const howSection = document.getElementById('how-section');
-    if (howSection) observer.observe(howSection);
-  });
-
   document.addEventListener('click', function(e) {
     const card = e.target.closest('.game-card');
     if (card) {
@@ -975,225 +720,6 @@ function escHtml(str) {
   });
 })();
 
-// =============================================
-// SUPPORT TYPE SELECT (yeni butonlar için)
-// =============================================
-window.selectSupportType = function(btn, val) {
-  document.querySelectorAll('.support-type-btn-new').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('support-type').value = val;
-};
-
-// =============================================
-// =============================================
-// CANLI DESTEK WIDGET — E-posta Zorunlu
-// =============================================
-const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
-let lswOpen = false;
-let lswPollTimer = null;
-let lswLastAt = null;
-let lswEventSource = null;
-let lswEmail = null; // Kullanıcının girdiği e-posta
-let lswSseHeartbeat = null;
-let lswLastHeartbeat = 0;
-
-function lswApplyAuth() {
-  const inputArea   = document.getElementById("lsw-input-area");
-  const loginNotice = document.getElementById("lsw-login-notice");
-  const emailGate   = document.getElementById("lsw-email-gate");
-  if (!inputArea) return;
-
-  // Login notice hiçbir zaman gösterilmez (e-posta sistemi kullanıyoruz)
-  if (loginNotice) loginNotice.style.display = "none";
-
-  if (lswEmail) {
-    // E-posta girilmiş — chat aktif
-    if (emailGate) emailGate.style.display = "none";
-    inputArea.style.display   = "flex";
-  } else {
-    // E-posta girilmemiş — gate göster
-    inputArea.style.display   = "none";
-    if (emailGate) emailGate.style.display = "flex";
-  }
-}
-window._lswApplyAuth = lswApplyAuth;
-
-document.addEventListener("DOMContentLoaded", () => {
-  lswApplyAuth();
-  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "flex"; }, 5000);
-  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "none"; }, 12000);
-});
-
-document.addEventListener("gv_login", () => {
-  lswApplyAuth();
-  if (lswOpen && lswEmail) { lswLastAt = null; lswLoadMessages(); lswSubscribe(); }
-});
-
-window.toggleLiveSupport = function() {
-  lswOpen = !lswOpen;
-  const panel     = document.getElementById("lsw-panel");
-  const chatIcon  = document.querySelector(".lsw-icon-chat");
-  const closeIcon = document.querySelector(".lsw-icon-close");
-  const dot       = document.getElementById("lsw-notif-dot");
-  const tooltip   = document.getElementById("lsw-tooltip");
-  if (!panel) return;
-
-  if (lswOpen) {
-    panel.classList.add("open");
-    if (chatIcon)  chatIcon.style.display  = "none";
-    if (closeIcon) closeIcon.style.display = "block";
-    if (dot)       dot.style.display       = "none";
-    if (tooltip)   tooltip.style.display   = "none";
-    lswApplyAuth();
-    if (lswEmail) {
-      lswLoadMessages();
-      lswSubscribe();
-    }
-    setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp && lswEmail) inp.focus(); }, 300);
-  } else {
-    panel.classList.remove("open");
-    if (chatIcon)  chatIcon.style.display  = "block";
-    if (closeIcon) closeIcon.style.display = "none";
-    lswUnsubscribe();
-  }
-};
-
-// E-posta ile başla
-window.lswStartWithEmail = function() {
-  const emailInput = document.getElementById("lsw-email-input");
-  if (!emailInput) return;
-  const email = emailInput.value.trim();
-  if (!email || !email.includes("@")) {
-    const err = document.getElementById("lsw-email-error");
-    if (err) { err.textContent = "Geçerli bir e-posta girin."; err.style.display = "block"; }
-    return;
-  }
-  lswEmail = email;
-  lswApplyAuth();
-  // Hoş geldin mesajı
-  const container = document.getElementById("lsw-messages");
-  if (container) {
-    const el = document.createElement("div");
-    el.className = "lsw-msg lsw-msg-bot lsw-msg-db";
-    el.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">Merhaba <strong>${lswEsc(email)}</strong>! 👋 Size nasıl yardımcı olabiliriz?</div>`;
-    container.appendChild(el);
-    container.scrollTop = container.scrollHeight;
-  }
-  lswLoadMessages();
-  lswSubscribe();
-  setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp) inp.focus(); }, 200);
-};
-
-// SSE bağlantısı aç — admin mesaj atınca anında gelir, Firestore okuma YOK
-function lswSubscribe() {
-  lswUnsubscribe();
-  if (!lswEmail) return;
-  const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(lswEmail)}`;
-  lswEventSource = new EventSource(url);
-  lswLastHeartbeat = Date.now();
-
-  lswEventSource.onopen = function() {
-    lswLastHeartbeat = Date.now();
-  };
-
-  lswEventSource.onmessage = function(e) {
-    lswLastHeartbeat = Date.now();
-    // keep-alive ping'i yoksay
-    if (!e.data || e.data.trim() === "") return;
-    try {
-      const msg = JSON.parse(e.data);
-      const container = document.getElementById("lsw-messages");
-      if (container) {
-        lswRenderMsg(msg, container);
-        container.scrollTop = container.scrollHeight;
-      }
-    } catch(_) {}
-  };
-
-  lswEventSource.onerror = function() {
-    lswUnsubscribe();
-    if (lswOpen && lswEmail) {
-      setTimeout(lswSubscribe, 2000); // 2sn'de yeniden bağlan
-    }
-  };
-
-  // Her 35sn'de heartbeat kontrolü — bağlantı ölmüşse yeniden bağlan
-  lswSseHeartbeat = setInterval(() => {
-    if (!lswOpen || !lswEmail) return;
-    if (Date.now() - lswLastHeartbeat > 35000) {
-      lswUnsubscribe();
-      lswSubscribe();
-    }
-  }, 10000);
-}
-
-function lswUnsubscribe() {
-  if (lswEventSource) { lswEventSource.close(); lswEventSource = null; }
-  if (lswSseHeartbeat) { clearInterval(lswSseHeartbeat); lswSseHeartbeat = null; }
-}
-
-// Geçmiş mesajları 1 kez çek (sayfa açılınca / chat açılınca)
-async function lswLoadMessages() {
-  if (!lswEmail) return;
-  try {
-    const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(lswEmail)}`);
-    const data = await res.json();
-    if (!data.success) return;
-    const container = document.getElementById("lsw-messages");
-    if (!container) return;
-    container.querySelectorAll(".lsw-msg-db").forEach(el => el.remove());
-    data.messages.forEach(m => lswRenderMsg(m, container));
-    container.scrollTop = container.scrollHeight;
-  } catch(e) {}
-}
-
-function lswRenderMsg(m, container) {
-  const isAdmin = m.sender === "admin";
-  const el = document.createElement("div");
-  el.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
-  el.innerHTML = isAdmin
-    ? `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`
-    : `<div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
-  container.appendChild(el);
-}
-
-function lswEsc(s) {
-  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-window.lswSend = async function() {
-  if (!lswEmail) return;
-  const inp = document.getElementById("lsw-input");
-  const msg = inp?.value.trim();
-  if (!msg) return;
-  inp.value = "";
-
-  // Anında UI'da göster
-  const container = document.getElementById("lsw-messages");
-  if (container) {
-    const el = document.createElement("div");
-    el.className = "lsw-msg lsw-msg-user lsw-msg-db";
-    el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(msg)}</div>`;
-    container.appendChild(el);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  try {
-    await fetch(`${LSW_API}/api/chat/send`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: lswEmail, message: msg, isAdmin: false })
-    });
-  } catch(e) {}
-};
-
-// Eski polling fonksiyonları (artık kullanılmıyor, hata vermemesi için boş)
-function lswStartPoll() {}
-function lswStopPoll() {}
-
-// =============================================
-// MOBİL MENÜ
-// =============================================
 window.toggleMobileMenu = function() {
   const links = document.getElementById("nav-links");
   const hamburger = document.getElementById("hamburger");
@@ -1202,7 +728,6 @@ window.toggleMobileMenu = function() {
   if (hamburger) hamburger.classList.toggle("active", isOpen);
 };
 
-// Dışarı tıklayınca menüyü kapat
 document.addEventListener("click", function(e) {
   const links = document.getElementById("nav-links");
   const hamburger = document.getElementById("hamburger");
