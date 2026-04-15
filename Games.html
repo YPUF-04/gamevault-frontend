@@ -86,18 +86,7 @@
   </div>
 </div>
 
-<!-- ===== OVERLAY: Oyun Seç (kod doğrulandıktan sonra) ===== -->
-<div id="game-select-overlay" class="overlay">
-  <div class="overlay-box wide">
-    <button class="overlay-close" onclick="closeOverlay('game-select-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
-    <h2 id="gso-title">🎮 Oyununu Seç</h2>
-    <div id="gso-subtitle"></div>
-    <div id="gso-games-grid" class="gso-grid"></div>
-    <button id="gso-buy-btn" class="gso-buy-btn" style="display:none;" onclick="confirmGsoPurchase()">🛒 Hesabı Al</button>
-    <div id="gso-error" class="error-msg" style="margin-top:0.75rem;"></div>
-  </div>
-</div>
+<!-- game-select-overlay kaldırıldı, yeni sistem: banner + confirm modal -->
 
 <!-- ===== OVERLAY: Steam Detay / 2FA ===== -->
 <div id="purchase-overlay" class="overlay">
@@ -312,7 +301,7 @@ function renderGamesPage(games) {
     // Normal ekranda tüm oyunlar normal görünür
     const exclusiveClass = g.exclusive ? " exclusive-card" : "";
     return `
-    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
+    <div class="game-card${exclusiveClass}" data-game-id="${g.id}" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
