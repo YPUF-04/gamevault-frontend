@@ -227,9 +227,7 @@
       <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
     </div>
   </div>
-  <div id="lsw-login-notice">
-    Mesaj göndermek için <a href="#" onclick="showOverlay('auth-overlay'); toggleLiveSupport(); return false;">giriş yapın</a>
-  </div>
+  <div id="lsw-login-notice" style="display:none;"></div>
   <div id="lsw-email-gate" class="lsw-email-gate" style="display:none;">
     <div class="lsw-email-gate-inner">
       <div class="lsw-email-icon">✉</div>
@@ -310,19 +308,34 @@ function renderGamesPage(games) {
     const exclusiveBadge = g.exclusive
       ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
       : "";
-    const exclusiveClass = g.exclusive ? " exclusive-card" : "";
+    if (g.exclusive) {
+      return `
+      <div class="game-card exclusive-card game-card-unavailable" onclick="showExclusiveNotice(this.dataset.name)" data-name="${g.name}">
+        ${imgSrc
+          ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
+          : `<div class="game-thumb-emoji">${g.emoji || '\U0001F3AE'}</div>`
+        }
+        <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
+        <div class="game-body">
+          <div class="game-platform">${g.platform || 'PC / Steam'}</div>
+          <div class="game-name">${g.name}</div>
+          <div class="game-price">${g.price || 'Hesap'}</div>
+          <div class="game-buy-btn game-buy-btn-locked">\U0001F512 \u00D6zel Kod Gerekli</div>
+        </div>
+      </div>`;
+    }
     return `
-    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
+    <div class="game-card game-card-available" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
-        : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
+        : `<div class="game-thumb-emoji">${g.emoji || '\U0001F3AE'}</div>`
       }
       <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
       <div class="game-body">
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
         <div class="game-price">${g.price || 'Hesap'}</div>
-        <div class="game-buy-btn">Satın Al →</div>
+        <div class="game-buy-btn">Sat\u0131n Al \u2192</div>
       </div>
     </div>
   `;
@@ -341,6 +354,10 @@ function filterGamesPage() {
 window.handleCodeBtn = function() {
   showOverlay('code-overlay');
 };
+
+function showExclusiveNotice(gameName) {
+  showToast('"' + gameName + '" özel kodla erişilebilir. Kodu varsa "Kodu Gir" butonunu kullan.', 'info');
+}
 </script>
 </body>
 </html>
