@@ -447,6 +447,29 @@ body {
   transform: translateY(-6px);
   box-shadow: 0 16px 50px rgba(0,212,255,0.12);
 }
+/* ── Exclusive (Özel) kart — altın kenarlık + parıltı ── */
+.game-card.exclusive-card {
+  border-color: rgba(250,189,0,0.55);
+  box-shadow: 0 0 0 1px rgba(250,189,0,0.18), 0 4px 24px rgba(250,189,0,0.10);
+}
+.game-card.exclusive-card:hover {
+  border-color: #fabd00;
+  box-shadow: 0 0 0 1px rgba(250,189,0,0.35), 0 16px 50px rgba(250,189,0,0.22);
+  transform: translateY(-6px);
+}
+.game-card.exclusive-card .game-buy-btn {
+  background: linear-gradient(135deg, #fabd00, #f59e0b);
+  color: #1a1200;
+}
+/* altın üst şerit */
+.game-card.exclusive-card::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #fabd00, #f59e0b, #fabd00);
+  position: relative;
+  z-index: 1;
+}
 .game-thumb-img {
   width: 100%; height: 260px;
   background-size: cover; background-position: center;
@@ -490,7 +513,8 @@ body {
 .gc-badge-guard     { background: rgba(0,212,255,0.10);  color: #00d4ff; border: 1px solid rgba(0,212,255,0.22); }
 .gc-badge-noguard   { background: rgba(160,120,255,0.12);color: #a078ff; border: 1px solid rgba(160,120,255,0.25); }
 .gc-badge-manual    { background: rgba(255,80,80,0.10);  color: #ff6060; border: 1px solid rgba(255,80,80,0.22); }
-.gc-badge-instant   { background: rgba(0,232,122,0.10);  color: #00e87a; border: 1px solid rgba(0,232,122,0.22); }
+.gc-badge-instant   { background: rgba(255,55,95,0.13);  color: #ff3f5f; border: 1px solid rgba(255,55,95,0.35); font-weight: 700; }
+.gc-badge-exclusive { background: rgba(250,189,0,0.15); color: #fabd00; border: 1px solid rgba(250,189,0,0.40); font-weight: 700; letter-spacing: 0.3px; }
 .loading-state { color: var(--text2); padding: 3rem; text-align: center; grid-column: 1/-1; }
 
 /* ===================== OVERLAY ===================== */
@@ -1532,6 +1556,148 @@ footer {
 }
 .game-card-clicked { animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1); }
 
+/* ===================== OYUN SEÇİM OVERLAY (GSO) ===================== */
+.gso-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px 2px;
+  margin-bottom: 1rem;
+}
+.gso-grid::-webkit-scrollbar { width: 4px; }
+.gso-grid::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* Info banner */
+.gso-info-banner {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.83rem; color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 1.1rem;
+}
+.gso-info-banner.gso-info-exclusive {
+  background: rgba(250,189,0,0.08);
+  border-color: rgba(250,189,0,0.25);
+}
+.gso-info-banner strong { color: var(--text); }
+.gso-info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* Kart — temel */
+.gso-card {
+  border-radius: 14px; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.07);
+  background: var(--surface);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+/* Seçilebilir kart */
+.gso-card-available {
+  cursor: pointer;
+}
+.gso-card-available:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,212,255,0.15);
+}
+.gso-card-available:hover .gso-card-select-hint {
+  color: var(--accent);
+}
+
+/* Seçili kart */
+.gso-card-selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.25), 0 8px 30px rgba(0,212,255,0.18) !important;
+  transform: translateY(-3px);
+}
+.gso-card-selected .gso-card-select-hint {
+  color: var(--accent) !important;
+  font-weight: 800 !important;
+}
+.gso-card-selected .gso-card-check {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+/* Kilitli (exclusive) kart */
+.gso-card-locked {
+  cursor: not-allowed;
+  filter: grayscale(0.65) brightness(0.5) saturate(0.35);
+  opacity: 0.55;
+  border-color: rgba(255,255,255,0.04) !important;
+}
+
+/* Exclusive tek oyun büyük kart */
+.gso-exclusive-single .gso-card-emoji { height: 110px; font-size: 3.5rem; }
+
+/* Kart görseli */
+.gso-card-img {
+  width: 100%; height: 95px;
+  background-size: cover; background-position: center;
+  flex-shrink: 0;
+}
+.gso-card-emoji {
+  width: 100%; height: 95px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, var(--surface2), var(--bg));
+}
+
+/* Kart body */
+.gso-card-body {
+  padding: 9px 11px 11px;
+}
+.gso-card-platform {
+  font-size: 9px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 3px;
+}
+.gso-card-name {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  line-height: 1.3; margin-bottom: 4px;
+}
+.gso-card-select-hint {
+  font-size: 9px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  transition: color 0.2s;
+}
+.gso-card-locked-label {
+  font-size: 9px; font-weight: 700; color: #3a4258;
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+/* Seçim check işareti */
+.gso-card-check {
+  position: absolute; top: 7px; right: 7px;
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: #000;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Satın Al butonu */
+.gso-buy-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 14px; font-weight: 800;
+  border: none; border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 0.25rem;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.2px;
+}
+.gso-buy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.gso-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
 /* ===================== SCROLL HIGHLIGHT (inline'dan taşındı) ===================== */
 @keyframes gameHighlight {
   0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.5); }
@@ -1796,7 +1962,7 @@ footer {
 
 /* Login notice */
 #lsw-login-notice {
-  display: block; /* Başlangıçta görünür — JS giriş yapılmışsa gizler */
+  display: none; /* E-posta sistemi kullanıldığı için gizli */
   padding: 0.75rem 1rem;
   background: rgba(0,210,255,0.06);
   border-top: 1px solid rgba(255,255,255,0.05);
@@ -1855,3 +2021,127 @@ footer {
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,212,255,0.18);
 }
+
+/* ── Hızlı hak butonu ── */
+.btn-quick-grant {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0,232,122,0.35);
+  background: rgba(0,232,122,0.08);
+  color: var(--green);
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-quick-grant:hover {
+  background: rgba(0,232,122,0.18);
+  transform: translateY(-1px);
+}
+
+/* ── Satın Alımlar — Hak Ekle butonu ── */
+.btn-grant-req {
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0,232,122,0.35);
+  background: rgba(0,232,122,0.08);
+  color: var(--green);
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s, opacity 0.2s;
+}
+.btn-grant-req:hover  { background: rgba(0,232,122,0.18); transform: translateY(-1px); }
+.btn-grant-req:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+/* ===== CANLI DESTEK — E-posta Gate ===== */
+.lsw-email-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+  flex: 1;
+}
+.lsw-email-gate-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+}
+.lsw-email-icon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.85;
+}
+.lsw-email-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.lsw-email-sub {
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin: 0;
+}
+.lsw-email-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.lsw-email-input:focus {
+  border-color: var(--accent);
+}
+.lsw-email-input::placeholder { color: var(--text3); }
+.lsw-email-error {
+  font-size: 0.78rem;
+  color: var(--red);
+  width: 100%;
+  text-align: left;
+}
+.lsw-email-btn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 0.25rem;
+}
+.lsw-email-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Games.html handleCodeBtn fix */
+.btn-code-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-code-access:hover { opacity: 0.88; }
