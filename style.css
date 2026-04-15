@@ -1556,6 +1556,35 @@ footer {
 }
 .game-card-clicked { animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1); }
 
+/* ── Satın alınabilir kart — parlak ── */
+.game-card.game-card-available {
+  filter: brightness(1.08) saturate(1.1);
+  border-color: rgba(0,212,255,0.18);
+}
+.game-card.game-card-available:hover {
+  filter: brightness(1.15) saturate(1.2);
+  box-shadow: 0 16px 50px rgba(0,212,255,0.18);
+}
+
+/* ── Satın alınamaz (exclusive) kart — soluk/grimsi ── */
+.game-card.game-card-unavailable {
+  filter: grayscale(0.55) brightness(0.7) saturate(0.5);
+  opacity: 0.72;
+  border-color: rgba(255,255,255,0.06) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+.game-card.game-card-unavailable:hover {
+  transform: none !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+  filter: grayscale(0.4) brightness(0.78) saturate(0.6);
+}
+.game-buy-btn-locked {
+  background: rgba(80,80,100,0.5) !important;
+  color: rgba(180,180,200,0.7) !important;
+  cursor: not-allowed;
+}
+
 /* ===================== SCROLL HIGHLIGHT (inline'dan taşındı) ===================== */
 @keyframes gameHighlight {
   0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.5); }
@@ -1820,7 +1849,7 @@ footer {
 
 /* Login notice */
 #lsw-login-notice {
-  display: block; /* Başlangıçta görünür — JS giriş yapılmışsa gizler */
+  display: none; /* E-posta sistemi kullanıldığı için gizli */
   padding: 0.75rem 1rem;
   background: rgba(0,210,255,0.06);
   border-top: 1px solid rgba(255,255,255,0.05);
