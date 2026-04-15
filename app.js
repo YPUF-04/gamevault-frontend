@@ -1,4 +1,3 @@
-// app.js
 // =============================================
 // CONFIG
 // =============================================
@@ -10,16 +9,17 @@ const API = "https://backendsite-production-6bcb.up.railway.app";
 let GAMES = [];
 let DISPLAYED_COUNT = 15;
 const PAGE_SIZE = 15;
-let activeCode = null;      // Doğrulanmış kod 
+let activeCode = null;      // Doğrulanmış kod
 let activeCodeType = null;  // "normal" | "exclusive"
 let currentPurchaseId = null;
 let selectedGameForPurchase = null;
-let isSelectionMode = false; // Normal kod girildikten sonra ana ekrandan seçim modu
+let isSelectionMode = false; // Ana ekrandan seçim modu
 
 // =============================================
 // INIT
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Sadece index sayfasında çalışacak kodlar
   const isIndexPage = !!document.getElementById("main-grid");
   if (!isIndexPage) return;
 
@@ -107,6 +107,45 @@ function showIntroAnimation() {
 }
 
 // =============================================
+// SATIN ALMA BİLDİRİMİ — 5sn göster, 10sn gizle
+// =============================================
+async function showRecentPurchaseNotifs() {
+  let pool = [];
+  let idx = 0;
+
+  try {
+    const res = await fetch(`${API}/api/recent-purchases`);
+    const data = await res.json();
+    if (data.success && data.purchases && data.purchases.length > 0) {
+      pool = data.purchases;
+    }
+  } catch(e) { return; }
+
+  if (!pool.length) return;
+
+  pool = pool.sort(() => Math.random() - 0.5);
+
+  function next() {
+    if (!pool.length) return;
+    const n = pool[idx % pool.length];
+    showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
+    idx++;
+    const delay = 30000 + Math.random() * 30000;
+    setTimeout(next, delay);
+  }
+  setTimeout(next, 18000);
+}
+
+function showPurchaseNotification(username, gameName, emoji) {
+  const el = document.getElementById("purchase-notification");
+  if (!el) return;
+  const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
+  el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 5000);
+}
+
+// =============================================
 // İSTATİSTİKLER
 // =============================================
 async function loadStats() {
@@ -188,13 +227,14 @@ function renderGames() {
   const oldBanner = document.getElementById("selection-mode-banner");
   if (oldBanner) oldBanner.remove();
 
+  // Seçim modundaysa üste bilgilendirme afişi ekle
   if (isSelectionMode) {
     const banner = document.createElement("div");
     banner.id = "selection-mode-banner";
     banner.className = "selection-banner";
     banner.innerHTML = `
       <h2>🎮 Oyun Seçin</h2>
-      <p>Kodunuz onaylandı. Lütfen almak istediğiniz oyunu seçin.<br><small style="color:var(--text2);">(Özel oyunlar bu kodla alınamaz)</small></p>
+      <p>Kodunuz onaylandı. Lütfen almak istediğiniz oyunu aşağıdan seçin.<br><small style="color:var(--text2);">(Özel oyunlar bu kodla alınamaz)</small></p>
       <button class="btn-cancel-sel" onclick="cancelSelectionMode()">Seçimi İptal Et</button>
     `;
     grid.parentNode.insertBefore(banner, grid);
@@ -251,6 +291,8 @@ function gameCardHTML(g) {
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
 
   let extraClass = g.exclusive ? " exclusive-card" : "";
+  
+  // Seçim modundayken özel oyunları kilitle (gri yap)
   if (isSelectionMode && g.exclusive) {
     extraClass += " locked-selection-card";
   }
@@ -273,18 +315,21 @@ function gameCardHTML(g) {
 }
 
 // =============================================
-// SMOOTH SCROLL
+// SMOOTH SCROLL TO GAMES
 // =============================================
-function scrollToGames() {
+function smoothScrollToGames(e) {
+  if (e) e.preventDefault();
   const gamesSection = document.getElementById("games");
-  if (gamesSection) gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!gamesSection) return;
+  gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // =============================================
-// KOD GİRİŞ SİSTEMİ (anonim)
+// KOD GİRİŞ SİSTEMİ
 // =============================================
 async function handleCodeEnter() {
   const code = document.getElementById("redeem-code-input").value.trim().toUpperCase();
@@ -307,7 +352,8 @@ async function handleCodeEnter() {
         document.getElementById("redeem-code-input").value = "";
         closeOverlay("code-overlay");
         
-        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId) || {name: data.exclusiveGameName};
+        // Özel oyun için direkt onay penceresini aç
+        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId) || {name: data.exclusiveGameName || "Özel Oyun"};
         showCustomConfirm(exclusiveGame, async () => {
           await purchaseWithCode(code, data.exclusiveGameId);
         });
@@ -318,8 +364,9 @@ async function handleCodeEnter() {
         document.getElementById("redeem-code-input").value = "";
         closeOverlay("code-overlay");
 
+        // Ana ekran oyun seçimine geç
         isSelectionMode = true;
-        scrollToGames();
+        smoothScrollToGames();
         renderGames();
       }
     } else {
@@ -386,14 +433,15 @@ async function viewPurchaseByCode(code) {
 }
 
 // =============================================
-// OYUN TIKLAMA / SATIN ALMA ONAYI
+// OYUN TIKLAMA & SATIN ALMA ONAYI
 // =============================================
 function handleGameClick(gameId) {
   const game = GAMES.find(g => g.id === gameId);
   if (!game) return;
 
+  // Ana sayfada kod girildiyse ve seçim yapılıyorsa
   if (isSelectionMode) {
-    if (game.exclusive) return; // Seçim modunda özel oyunlara tıklanamaz
+    if (game.exclusive) return; // Özel oyunlara tıklanmaz (gri)
     showCustomConfirm(game, async () => {
       await purchaseWithCode(activeCode, gameId);
       isSelectionMode = false;
@@ -402,16 +450,19 @@ function handleGameClick(gameId) {
     return;
   }
 
+  // Kod girilmeden bir karta tıklanırsa
   if (game.exclusive) {
     showToast(`"${game.name}" özel bir koddur. Bu oyuna özel kodunla erişebilirsin.`, "info");
     return;
   }
 
   if (activeCode) {
+    // Halihazırda kodu varsa
     showCustomConfirm(game, async () => {
       await purchaseWithCode(activeCode, gameId);
     });
   } else {
+    // Kodu yoksa kodu girmesini iste
     activeCode = null;
     showOverlay("code-overlay");
     const errEl = document.getElementById("redeem-error");
@@ -422,7 +473,7 @@ function handleGameClick(gameId) {
   }
 }
 
-// Özel Özel Onay Modalı Oluşturucu
+// Özel "Emin Misiniz?" Onay Modalı Oluşturucu
 function showCustomConfirm(game, onConfirm) {
   let overlay = document.getElementById("custom-confirm-overlay");
   if (!overlay) {
@@ -445,6 +496,7 @@ function showCustomConfirm(game, onConfirm) {
 
   document.getElementById("cc-desc").innerHTML = `<strong>${game.name}</strong> oyununu seçtiniz.<br><br><span style="color:var(--red);">Seçimi onayladıktan sonra oyunu değiştiremezsiniz!</span>`;
 
+  // Mevcut event listener'ları temizlemek için butonu kopyalıyoruz
   const confirmBtn = document.getElementById("cc-confirm-btn");
   const newBtn = confirmBtn.cloneNode(true);
   confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
@@ -572,11 +624,11 @@ function openSupportFromPurchase() {
 // =============================================
 // DESTEK
 // =============================================
-function selectSupportType(btn, val) {
-  document.querySelectorAll(".support-type-btn-new").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById("support-type").value = val;
-}
+window.selectSupportType = function(btn, val) {
+  document.querySelectorAll('.support-type-btn-new').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('support-type').value = val;
+};
 
 function selectSupportTypeByVal(val) {
   document.querySelectorAll(".support-type-btn-new").forEach(b => {
@@ -596,9 +648,82 @@ async function openSupport() {
   showOverlay("support-overlay");
 }
 
+async function loadSupportData() {
+  try {
+    const res = await fetch(`${API}/api/my-purchases?username=${encodeURIComponent("Ziyaretçi")}`);
+    const data = await res.json();
+    const section = document.getElementById("support-purchases-section");
+    const listEl = document.getElementById("support-purchases-list");
+    if (data.success && data.purchases && data.purchases.length) {
+      section.style.display = "block";
+      listEl.innerHTML = data.purchases.map(p => {
+        const used = p.steamCodeRequests || 0;
+        const pct = (used / 5) * 100;
+        const isLow = used >= 4;
+        return `
+          <div class="support-purchase-item spi-clickable" onclick="fillSupportFromGame('${escHtml(p.gameName)}', '${p.id}')">
+            <span class="spi-emoji">${p.gameEmoji || '🎮'}</span>
+            <div class="spi-details">
+              <span class="spi-name">${p.gameName}</span>
+              <div class="spi-bar-wrap">
+                <div class="spi-bar"><div class="spi-bar-fill" style="width:${pct}%; background:${isLow ? 'var(--red)' : 'linear-gradient(90deg,var(--accent),var(--accent2))'}"></div></div>
+                <span class="spi-requests ${isLow ? 'spi-req-warn' : ''}">${used}/5 hak</span>
+              </div>
+            </div>
+            ${used >= 5 ? '<span class="spi-extra-btn">Hak Talep Et →</span>' : ''}
+          </div>
+        `;
+      }).join("");
+    } else {
+      section.style.display = "none";
+    }
+  } catch(e) {
+    document.getElementById("support-purchases-section").style.display = "none";
+  }
+
+  try {
+    const res = await fetch(`${API}/api/my-support?username=${encodeURIComponent("Ziyaretçi")}`);
+    const data = await res.json();
+    const section = document.getElementById("support-replies-section");
+    const listEl = document.getElementById("support-replies-list");
+    if (data.success && data.tickets && data.tickets.length) {
+      const withReplies = data.tickets.filter(t => t.adminReply);
+      if (withReplies.length) {
+        section.style.display = "block";
+        listEl.innerHTML = withReplies.map(t => `
+          <div class="support-reply-item-new">
+            <div class="sri-header">
+              <div class="sri-avatar">GV</div>
+              <div class="sri-meta">
+                <span class="sri-name">GameVault Destek</span>
+                <span class="sri-time">${formatDate(t.repliedAt || t.createdAt)}</span>
+              </div>
+              ${t.extraGranted ? '<span class="sri-grant-badge">+3 Hak Verildi ✓</span>' : ''}
+            </div>
+            <div class="sri-body">${t.adminReply}</div>
+            <div class="sri-subject">📌 Konu: ${typeLabel2(t.type)}</div>
+          </div>
+        `).join("");
+      } else {
+        section.style.display = "none";
+      }
+    } else {
+      section.style.display = "none";
+    }
+  } catch(e) {
+    document.getElementById("support-replies-section").style.display = "none";
+  }
+}
+
 function typeLabel2(t) {
   const m = { steam_code: "Steam Kodu", extra_code: "Ekstra Kod Talebi", account: "Hesap Sorunu", general: "Genel" };
   return m[t] || t || "Genel";
+}
+
+function fillSupportFromGame(gameName, purchaseId) {
+  selectSupportTypeByVal("extra_code");
+  const msgEl = document.getElementById("support-message");
+  if (msgEl) msgEl.value = `Oyun: ${gameName}\nPurchase ID: ${purchaseId}\n\n5 hak bitti, ekstra kod talep ediyorum.`;
 }
 
 async function sendSupportRequest() {
@@ -639,43 +764,6 @@ async function sendSupportRequest() {
 }
 
 // =============================================
-// SATIN ALMA BİLDİRİMİ
-// =============================================
-async function showRecentPurchaseNotifs() {
-  let pool = [];
-  let idx = 0;
-  try {
-    const res = await fetch(`${API}/api/recent-purchases`);
-    const data = await res.json();
-    if (data.success && data.purchases && data.purchases.length > 0) {
-      pool = data.purchases;
-    }
-  } catch(e) { return; }
-
-  if (!pool.length) return;
-  pool = pool.sort(() => Math.random() - 0.5);
-
-  function next() {
-    if (!pool.length) return;
-    const n = pool[idx % pool.length];
-    showPurchaseNotification(n.username, n.gameName, n.gameEmoji);
-    idx++;
-    const delay = 30000 + Math.random() * 30000;
-    setTimeout(next, delay);
-  }
-  setTimeout(next, 18000);
-}
-
-function showPurchaseNotification(username, gameName, emoji) {
-  const el = document.getElementById("purchase-notification");
-  if(!el) return;
-  const shortName = username.length > 8 ? username.substring(0, 5) + "***" : username;
-  el.innerHTML = `<span class="pn-emoji">${emoji || '🎮'}</span><span><strong>${shortName}</strong> az önce <em>${gameName}</em> aldı!</span>`;
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 5000);
-}
-
-// =============================================
 // YARDIMCILAR
 // =============================================
 function showOverlay(id) {
@@ -697,7 +785,7 @@ function closeOverlay(id) {
 
 function showToast(msg, type = "info") {
   const c = document.getElementById("toast-container");
-  if(!c) return;
+  if (!c) return;
   const t = document.createElement("div");
   t.className = `toast toast-${type}`;
   t.textContent = msg;
@@ -706,11 +794,46 @@ function showToast(msg, type = "info") {
   setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 3500);
 }
 
+function formatDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" });
+}
+
 function escHtml(str) {
   return (str || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
 
+// =============================================
+// HOW SECTION SCROLL ANIMATION
+// =============================================
 (function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const steps = document.querySelectorAll('.how-step');
+        steps.forEach((step, i) => {
+          setTimeout(() => {
+            step.style.opacity = '1';
+            step.style.transform = 'translateY(0)';
+            step.classList.add('step-active');
+            setTimeout(() => step.classList.remove('step-active'), 1000);
+          }, i * 200);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.how-step').forEach(step => {
+      step.style.opacity = '0';
+      step.style.transform = 'translateY(30px)';
+      step.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, box-shadow 0.4s';
+    });
+    const howSection = document.getElementById('how-section');
+    if (howSection) observer.observe(howSection);
+  });
+
   document.addEventListener('click', function(e) {
     const card = e.target.closest('.game-card');
     if (card) {
@@ -720,6 +843,197 @@ function escHtml(str) {
   });
 })();
 
+// =============================================
+// CANLI DESTEK WIDGET — E-posta Zorunlu
+// =============================================
+const LSW_API = "https://backendsite-production-6bcb.up.railway.app";
+let lswOpen = false;
+let lswPollTimer = null;
+let lswLastAt = null;
+let lswEventSource = null;
+let lswEmail = null; 
+let lswSseHeartbeat = null;
+let lswLastHeartbeat = 0;
+
+function lswApplyAuth() {
+  const inputArea   = document.getElementById("lsw-input-area");
+  const loginNotice = document.getElementById("lsw-login-notice");
+  const emailGate   = document.getElementById("lsw-email-gate");
+  if (!inputArea) return;
+
+  if (loginNotice) loginNotice.style.display = "none";
+
+  if (lswEmail) {
+    if (emailGate) emailGate.style.display = "none";
+    inputArea.style.display   = "flex";
+  } else {
+    inputArea.style.display   = "none";
+    if (emailGate) emailGate.style.display = "flex";
+  }
+}
+window._lswApplyAuth = lswApplyAuth;
+
+document.addEventListener("DOMContentLoaded", () => {
+  lswApplyAuth();
+  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "flex"; }, 5000);
+  setTimeout(() => { const t = document.getElementById("lsw-tooltip"); if (t) t.style.display = "none"; }, 12000);
+});
+
+window.toggleLiveSupport = function() {
+  lswOpen = !lswOpen;
+  const panel     = document.getElementById("lsw-panel");
+  const chatIcon  = document.querySelector(".lsw-icon-chat");
+  const closeIcon = document.querySelector(".lsw-icon-close");
+  const dot       = document.getElementById("lsw-notif-dot");
+  const tooltip   = document.getElementById("lsw-tooltip");
+  if (!panel) return;
+
+  if (lswOpen) {
+    panel.classList.add("open");
+    if (chatIcon)  chatIcon.style.display  = "none";
+    if (closeIcon) closeIcon.style.display = "block";
+    if (dot)       dot.style.display       = "none";
+    if (tooltip)   tooltip.style.display   = "none";
+    lswApplyAuth();
+    if (lswEmail) {
+      lswLoadMessages();
+      lswSubscribe();
+    }
+    setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp && lswEmail) inp.focus(); }, 300);
+  } else {
+    panel.classList.remove("open");
+    if (chatIcon)  chatIcon.style.display  = "block";
+    if (closeIcon) closeIcon.style.display = "none";
+    lswUnsubscribe();
+  }
+};
+
+window.lswStartWithEmail = function() {
+  const emailInput = document.getElementById("lsw-email-input");
+  if (!emailInput) return;
+  const email = emailInput.value.trim();
+  if (!email || !email.includes("@")) {
+    const err = document.getElementById("lsw-email-error");
+    if (err) { err.textContent = "Geçerli bir e-posta girin."; err.style.display = "block"; }
+    return;
+  }
+  lswEmail = email;
+  lswApplyAuth();
+  
+  const container = document.getElementById("lsw-messages");
+  if (container) {
+    const el = document.createElement("div");
+    el.className = "lsw-msg lsw-msg-bot lsw-msg-db";
+    el.innerHTML = `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">Merhaba <strong>${lswEsc(email)}</strong>! 👋 Size nasıl yardımcı olabiliriz?</div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+  lswLoadMessages();
+  lswSubscribe();
+  setTimeout(() => { const inp = document.getElementById("lsw-input"); if (inp) inp.focus(); }, 200);
+};
+
+function lswSubscribe() {
+  lswUnsubscribe();
+  if (!lswEmail) return;
+  const url = `${LSW_API}/api/chat/subscribe?username=${encodeURIComponent(lswEmail)}`;
+  lswEventSource = new EventSource(url);
+  lswLastHeartbeat = Date.now();
+
+  lswEventSource.onopen = function() {
+    lswLastHeartbeat = Date.now();
+  };
+
+  lswEventSource.onmessage = function(e) {
+    lswLastHeartbeat = Date.now();
+    if (!e.data || e.data.trim() === "") return;
+    try {
+      const msg = JSON.parse(e.data);
+      const container = document.getElementById("lsw-messages");
+      if (container) {
+        lswRenderMsg(msg, container);
+        container.scrollTop = container.scrollHeight;
+      }
+    } catch(_) {}
+  };
+
+  lswEventSource.onerror = function() {
+    lswUnsubscribe();
+    if (lswOpen && lswEmail) {
+      setTimeout(lswSubscribe, 2000);
+    }
+  };
+
+  lswSseHeartbeat = setInterval(() => {
+    if (!lswOpen || !lswEmail) return;
+    if (Date.now() - lswLastHeartbeat > 35000) {
+      lswUnsubscribe();
+      lswSubscribe();
+    }
+  }, 10000);
+}
+
+function lswUnsubscribe() {
+  if (lswEventSource) { lswEventSource.close(); lswEventSource = null; }
+  if (lswSseHeartbeat) { clearInterval(lswSseHeartbeat); lswSseHeartbeat = null; }
+}
+
+async function lswLoadMessages() {
+  if (!lswEmail) return;
+  try {
+    const res  = await fetch(`${LSW_API}/api/chat/messages?username=${encodeURIComponent(lswEmail)}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const container = document.getElementById("lsw-messages");
+    if (!container) return;
+    container.querySelectorAll(".lsw-msg-db").forEach(el => el.remove());
+    data.messages.forEach(m => lswRenderMsg(m, container));
+    container.scrollTop = container.scrollHeight;
+  } catch(e) {}
+}
+
+function lswRenderMsg(m, container) {
+  const isAdmin = m.sender === "admin";
+  const el = document.createElement("div");
+  el.className = `lsw-msg ${isAdmin ? "lsw-msg-bot" : "lsw-msg-user"} lsw-msg-db`;
+  el.innerHTML = isAdmin
+    ? `<div class="lsw-msg-avatar">GV</div><div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`
+    : `<div class="lsw-msg-bubble">${lswEsc(m.text)}</div>`;
+  container.appendChild(el);
+}
+
+function lswEsc(s) {
+  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+window.lswSend = async function() {
+  if (!lswEmail) return;
+  const inp = document.getElementById("lsw-input");
+  const msg = inp?.value.trim();
+  if (!msg) return;
+  inp.value = "";
+
+  const container = document.getElementById("lsw-messages");
+  if (container) {
+    const el = document.createElement("div");
+    el.className = "lsw-msg lsw-msg-user lsw-msg-db";
+    el.innerHTML = `<div class="lsw-msg-bubble">${lswEsc(msg)}</div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  try {
+    await fetch(`${LSW_API}/api/chat/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: lswEmail, message: msg, isAdmin: false })
+    });
+  } catch(e) {}
+};
+
+// =============================================
+// MOBİL MENÜ
+// =============================================
 window.toggleMobileMenu = function() {
   const links = document.getElementById("nav-links");
   const hamburger = document.getElementById("hamburger");
