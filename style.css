@@ -1556,147 +1556,7 @@ footer {
 }
 .game-card-clicked { animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1); }
 
-/* ===================== OYUN SEÇİM OVERLAY (GSO) ===================== */
-.gso-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 0.75rem;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 4px 2px;
-  margin-bottom: 1rem;
-}
-.gso-grid::-webkit-scrollbar { width: 4px; }
-.gso-grid::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
-/* Info banner */
-.gso-info-banner {
-  display: flex; align-items: flex-start; gap: 0.6rem;
-  background: rgba(0,212,255,0.07);
-  border: 1px solid rgba(0,212,255,0.18);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  font-size: 0.83rem; color: var(--text2);
-  line-height: 1.5;
-  margin-bottom: 1.1rem;
-}
-.gso-info-banner.gso-info-exclusive {
-  background: rgba(250,189,0,0.08);
-  border-color: rgba(250,189,0,0.25);
-}
-.gso-info-banner strong { color: var(--text); }
-.gso-info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-
-/* Kart — temel */
-.gso-card {
-  border-radius: 14px; overflow: hidden;
-  border: 2px solid rgba(255,255,255,0.07);
-  background: var(--surface);
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-  position: relative;
-}
-
-/* Seçilebilir kart */
-.gso-card-available {
-  cursor: pointer;
-}
-.gso-card-available:hover {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0,212,255,0.15);
-}
-.gso-card-available:hover .gso-card-select-hint {
-  color: var(--accent);
-}
-
-/* Seçili kart */
-.gso-card-selected {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 2px rgba(0,212,255,0.25), 0 8px 30px rgba(0,212,255,0.18) !important;
-  transform: translateY(-3px);
-}
-.gso-card-selected .gso-card-select-hint {
-  color: var(--accent) !important;
-  font-weight: 800 !important;
-}
-.gso-card-selected .gso-card-check {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-}
-
-/* Kilitli (exclusive) kart */
-.gso-card-locked {
-  cursor: not-allowed;
-  filter: grayscale(0.65) brightness(0.5) saturate(0.35);
-  opacity: 0.55;
-  border-color: rgba(255,255,255,0.04) !important;
-}
-
-/* Exclusive tek oyun büyük kart */
-.gso-exclusive-single .gso-card-emoji { height: 110px; font-size: 3.5rem; }
-
-/* Kart görseli */
-.gso-card-img {
-  width: 100%; height: 95px;
-  background-size: cover; background-position: center;
-  flex-shrink: 0;
-}
-.gso-card-emoji {
-  width: 100%; height: 95px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.4rem;
-  background: linear-gradient(135deg, var(--surface2), var(--bg));
-}
-
-/* Kart body */
-.gso-card-body {
-  padding: 9px 11px 11px;
-}
-.gso-card-platform {
-  font-size: 9px; font-weight: 800; color: var(--accent);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 3px;
-}
-.gso-card-name {
-  font-size: 12px; font-weight: 700; color: var(--text);
-  line-height: 1.3; margin-bottom: 4px;
-}
-.gso-card-select-hint {
-  font-size: 9px; font-weight: 700; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.8px;
-  transition: color 0.2s;
-}
-.gso-card-locked-label {
-  font-size: 9px; font-weight: 700; color: #3a4258;
-  text-transform: uppercase; letter-spacing: 0.8px;
-}
-
-/* Seçim check işareti */
-.gso-card-check {
-  position: absolute; top: 7px; right: 7px;
-  width: 22px; height: 22px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 900; color: #000;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1);
-}
-
-/* Satın Al butonu */
-.gso-buy-btn {
-  width: 100%; padding: 13px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-size: 14px; font-weight: 800;
-  border: none; border-radius: 12px;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  margin-top: 0.25rem;
-  font-family: 'DM Sans', sans-serif;
-  letter-spacing: 0.2px;
-}
-.gso-buy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.gso-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* ===================== SCROLL HIGHLIGHT (inline'dan taşındı) ===================== */
 @keyframes gameHighlight {
@@ -2145,3 +2005,178 @@ footer {
   transition: opacity 0.2s;
 }
 .btn-code-access:hover { opacity: 0.88; }
+/* ===================== SEÇİM BANNER ===================== */
+#gv-selection-banner {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0;
+  z-index: 999;
+  animation: bannerSlideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes bannerSlideIn {
+  from { opacity:0; transform:translateY(-12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.gv-sel-banner {
+  background: linear-gradient(135deg, rgba(0,212,255,0.13), rgba(123,94,248,0.10));
+  border-bottom: 1px solid rgba(0,212,255,0.25);
+  backdrop-filter: blur(16px);
+}
+.gv-sel-banner-inner {
+  max-width: 1300px; margin: 0 auto;
+  padding: 0.75rem 2rem;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem;
+}
+.gv-sel-banner-left {
+  display: flex; align-items: center; gap: 0.85rem;
+}
+.gv-sel-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+.gv-sel-banner-title {
+  font-size: 0.88rem; font-weight: 800;
+  color: var(--text); letter-spacing: 0.2px;
+  margin-bottom: 2px;
+}
+.gv-sel-banner-sub {
+  font-size: 0.78rem; color: var(--text2); line-height: 1.4;
+}
+.gv-sel-banner-sub strong { color: var(--accent); }
+.gv-sel-banner-cancel {
+  background: rgba(255,63,92,0.1);
+  border: 1px solid rgba(255,63,92,0.25);
+  color: var(--red); font-size: 0.78rem; font-weight: 700;
+  padding: 6px 14px; border-radius: 8px;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.gv-sel-banner-cancel:hover { background: rgba(255,63,92,0.2); }
+
+/* Kart efektleri seçim modunda */
+.game-card.gv-card-dimmed {
+  filter: grayscale(0.6) brightness(0.5) saturate(0.4) !important;
+  opacity: 0.55 !important;
+  pointer-events: none;
+  transition: filter 0.3s, opacity 0.3s !important;
+}
+.game-card.gv-card-lit {
+  filter: brightness(1.08) saturate(1.12) !important;
+  border-color: rgba(0,212,255,0.2) !important;
+  transition: filter 0.3s !important;
+}
+.game-card.gv-card-lit:hover {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.18), 0 12px 40px rgba(0,212,255,0.15) !important;
+  transform: translateY(-6px) !important;
+}
+.game-card.gv-card-target {
+  border-color: #fabd00 !important;
+  box-shadow: 0 0 0 2px rgba(250,189,0,0.3), 0 12px 40px rgba(250,189,0,0.18) !important;
+  animation: targetPulse 2s ease-in-out infinite;
+  filter: brightness(1.1) saturate(1.15) !important;
+  transition: none !important;
+}
+@keyframes targetPulse {
+  0%,100% { box-shadow: 0 0 0 2px rgba(250,189,0,0.3), 0 12px 40px rgba(250,189,0,0.18); }
+  50%      { box-shadow: 0 0 0 4px rgba(250,189,0,0.5), 0 16px 50px rgba(250,189,0,0.28); }
+}
+
+/* ===================== ONAY MODALI ===================== */
+.gv-confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  animation: overlayFadeIn 0.25s ease;
+}
+@keyframes overlayFadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+.gv-confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 420px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  animation: confirmBoxIn 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes confirmBoxIn {
+  from { opacity:0; transform:scale(0.92) translateY(16px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.gv-confirm-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.gv-confirm-img {
+  width: 72px; height: 72px; border-radius: 12px;
+  background-size: cover; background-position: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+}
+.gv-confirm-emoji {
+  width: 72px; height: 72px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--surface2), var(--bg));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  border: 1px solid var(--border2);
+}
+.gv-confirm-platform {
+  font-size: 10px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;
+}
+.gv-confirm-name {
+  font-size: 18px; font-weight: 800; color: var(--text);
+  line-height: 1.2;
+}
+.gv-confirm-warning {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  background: rgba(255,200,0,0.07);
+  border: 1px solid rgba(255,200,0,0.2);
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.gv-confirm-warn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.gv-confirm-warn-title {
+  font-size: 0.88rem; font-weight: 800; color: #ffd700;
+  margin-bottom: 3px;
+}
+.gv-confirm-warn-text {
+  font-size: 0.8rem; color: var(--text2); line-height: 1.5;
+}
+.gv-confirm-warn-text strong { color: var(--text); }
+.gv-confirm-actions {
+  display: flex; gap: 0.75rem;
+}
+.gv-confirm-btn-cancel {
+  flex: 1; padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 12px; color: var(--text2);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.gv-confirm-btn-cancel:hover { border-color: var(--text2); color: var(--text); }
+.gv-confirm-btn-ok {
+  flex: 2; padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.gv-confirm-btn-ok:hover { opacity: 0.88; transform: translateY(-1px); }
+.gv-confirm-btn-ok:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Banner varsa içeriği aşağı it */
+body.has-sel-banner .hero,
+body.has-sel-banner #games,
+body.has-sel-banner .games-page-main {
+  margin-top: 52px;
+}
