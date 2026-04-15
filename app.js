@@ -266,10 +266,28 @@ function gameCardHTML(g) {
   const deliveryBadge = hasGuard
     ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
-  const exclusiveClass = g.exclusive ? " exclusive-card" : "";
+
+  // Exclusive kartlar: satın alınamaz, soluk görünüm
+  if (g.exclusive) {
+    return `
+      <div class="game-card exclusive-card game-card-unavailable" onclick="showExclusiveNotice('${escHtml(g.name)}')">
+        ${imgSrc
+          ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
+          : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
+        }
+        <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
+        <div class="game-body">
+          <div class="game-platform">${g.platform || 'PC / Steam'}</div>
+          <div class="game-name">${g.name}</div>
+          <div class="game-price">${g.price || 'Hesap'}</div>
+          <div class="game-buy-btn game-buy-btn-locked">🔒 Özel Kod Gerekli</div>
+        </div>
+      </div>
+    `;
+  }
 
   return `
-    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
+    <div class="game-card game-card-available" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
@@ -283,6 +301,10 @@ function gameCardHTML(g) {
       </div>
     </div>
   `;
+}
+
+function showExclusiveNotice(gameName) {
+  showToast(`"${gameName}" özel kodla erişilebilir. Kodu varsa "Kodu Gir" butonunu kullan.`, "info");
 }
 
 // =============================================
@@ -873,17 +895,18 @@ function lswApplyAuth() {
   const inputArea   = document.getElementById("lsw-input-area");
   const loginNotice = document.getElementById("lsw-login-notice");
   const emailGate   = document.getElementById("lsw-email-gate");
-  if (!inputArea || !loginNotice) return;
+  if (!inputArea) return;
+
+  // Login notice hiçbir zaman gösterilmez (e-posta sistemi kullanıyoruz)
+  if (loginNotice) loginNotice.style.display = "none";
 
   if (lswEmail) {
     // E-posta girilmiş — chat aktif
     if (emailGate) emailGate.style.display = "none";
     inputArea.style.display   = "flex";
-    loginNotice.style.display = "none";
   } else {
     // E-posta girilmemiş — gate göster
     inputArea.style.display   = "none";
-    loginNotice.style.display = "none";
     if (emailGate) emailGate.style.display = "flex";
   }
 }
@@ -983,16 +1006,15 @@ function lswSubscribe() {
 
   lswEventSource.onerror = function() {
     lswUnsubscribe();
-    if (lswOpen && window.currentUser) {
+    if (lswOpen && lswEmail) {
       setTimeout(lswSubscribe, 2000); // 2sn'de yeniden bağlan
     }
   };
 
   // Her 35sn'de heartbeat kontrolü — bağlantı ölmüşse yeniden bağlan
   lswSseHeartbeat = setInterval(() => {
-    if (!lswOpen || !window.currentUser) return;
+    if (!lswOpen || !lswEmail) return;
     if (Date.now() - lswLastHeartbeat > 35000) {
-      // 35sn'den uzun süre heartbeat gelmediyse reconnect
       lswUnsubscribe();
       lswSubscribe();
     }
