@@ -1556,34 +1556,147 @@ footer {
 }
 .game-card-clicked { animation: cardClickPulse 0.35s cubic-bezier(0.16,1,0.3,1); }
 
-/* ── Satın alınabilir kart — parlak ── */
-.game-card.game-card-available {
-  filter: brightness(1.08) saturate(1.1);
-  border-color: rgba(0,212,255,0.18);
+/* ===================== OYUN SEÇİM OVERLAY (GSO) ===================== */
+.gso-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px 2px;
+  margin-bottom: 1rem;
 }
-.game-card.game-card-available:hover {
-  filter: brightness(1.15) saturate(1.2);
-  box-shadow: 0 16px 50px rgba(0,212,255,0.18);
+.gso-grid::-webkit-scrollbar { width: 4px; }
+.gso-grid::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* Info banner */
+.gso-info-banner {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.83rem; color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 1.1rem;
+}
+.gso-info-banner.gso-info-exclusive {
+  background: rgba(250,189,0,0.08);
+  border-color: rgba(250,189,0,0.25);
+}
+.gso-info-banner strong { color: var(--text); }
+.gso-info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* Kart — temel */
+.gso-card {
+  border-radius: 14px; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.07);
+  background: var(--surface);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
 }
 
-/* ── Satın alınamaz (exclusive) kart — soluk/grimsi ── */
-.game-card.game-card-unavailable {
-  filter: grayscale(0.55) brightness(0.7) saturate(0.5);
-  opacity: 0.72;
-  border-color: rgba(255,255,255,0.06) !important;
-  box-shadow: none !important;
+/* Seçilebilir kart */
+.gso-card-available {
+  cursor: pointer;
+}
+.gso-card-available:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,212,255,0.15);
+}
+.gso-card-available:hover .gso-card-select-hint {
+  color: var(--accent);
+}
+
+/* Seçili kart */
+.gso-card-selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.25), 0 8px 30px rgba(0,212,255,0.18) !important;
+  transform: translateY(-3px);
+}
+.gso-card-selected .gso-card-select-hint {
+  color: var(--accent) !important;
+  font-weight: 800 !important;
+}
+.gso-card-selected .gso-card-check {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+/* Kilitli (exclusive) kart */
+.gso-card-locked {
   cursor: not-allowed;
+  filter: grayscale(0.65) brightness(0.5) saturate(0.35);
+  opacity: 0.55;
+  border-color: rgba(255,255,255,0.04) !important;
 }
-.game-card.game-card-unavailable:hover {
-  transform: none !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-  filter: grayscale(0.4) brightness(0.78) saturate(0.6);
+
+/* Exclusive tek oyun büyük kart */
+.gso-exclusive-single .gso-card-emoji { height: 110px; font-size: 3.5rem; }
+
+/* Kart görseli */
+.gso-card-img {
+  width: 100%; height: 95px;
+  background-size: cover; background-position: center;
+  flex-shrink: 0;
 }
-.game-buy-btn-locked {
-  background: rgba(80,80,100,0.5) !important;
-  color: rgba(180,180,200,0.7) !important;
-  cursor: not-allowed;
+.gso-card-emoji {
+  width: 100%; height: 95px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, var(--surface2), var(--bg));
 }
+
+/* Kart body */
+.gso-card-body {
+  padding: 9px 11px 11px;
+}
+.gso-card-platform {
+  font-size: 9px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 3px;
+}
+.gso-card-name {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  line-height: 1.3; margin-bottom: 4px;
+}
+.gso-card-select-hint {
+  font-size: 9px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  transition: color 0.2s;
+}
+.gso-card-locked-label {
+  font-size: 9px; font-weight: 700; color: #3a4258;
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+/* Seçim check işareti */
+.gso-card-check {
+  position: absolute; top: 7px; right: 7px;
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: #000;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Satın Al butonu */
+.gso-buy-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 14px; font-weight: 800;
+  border: none; border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 0.25rem;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.2px;
+}
+.gso-buy-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.gso-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* ===================== SCROLL HIGHLIGHT (inline'dan taşındı) ===================== */
 @keyframes gameHighlight {
