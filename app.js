@@ -250,7 +250,6 @@ function gameCardHTML(g) {
     ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`)
     : null;
 
-  // Hesap türü badge'leri
   const isPersonal = !g.accountType || g.accountType === "personal";
   const typeBadge  = isPersonal
     ? `<span class="gc-badge gc-badge-personal">🔒 Kişisel</span>`
@@ -258,7 +257,6 @@ function gameCardHTML(g) {
   const exclusiveBadge = g.exclusive
     ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
     : "";
-  // Steam Guard varsa: kod otomatik IMAP ile çekilir — "Otomatik" badge
   const hasGuard = g.requiresCode !== false;
   const guardBadge = hasGuard
     ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
@@ -267,27 +265,11 @@ function gameCardHTML(g) {
     ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
 
-  // Exclusive kartlar: satın alınamaz, soluk görünüm
-  if (g.exclusive) {
-    return `
-      <div class="game-card exclusive-card game-card-unavailable" onclick="showExclusiveNotice('${escHtml(g.name)}')">
-        ${imgSrc
-          ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
-          : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
-        }
-        <div class="gc-badges">${exclusiveBadge}${typeBadge}${guardBadge}${deliveryBadge}</div>
-        <div class="game-body">
-          <div class="game-platform">${g.platform || 'PC / Steam'}</div>
-          <div class="game-name">${g.name}</div>
-          <div class="game-price">${g.price || 'Hesap'}</div>
-          <div class="game-buy-btn game-buy-btn-locked">🔒 Özel Kod Gerekli</div>
-        </div>
-      </div>
-    `;
-  }
+  // Normal ekranda tüm oyunlar aynı görünür — exclusive dahil
+  const exclusiveClass = g.exclusive ? " exclusive-card" : "";
 
   return `
-    <div class="game-card game-card-available" onclick="handleGameClick('${g.id}')">
+    <div class="game-card${exclusiveClass}" onclick="handleGameClick('${g.id}')">
       ${imgSrc
         ? `<div class="game-thumb-img" style="background-image:url('${imgSrc}')"></div>`
         : `<div class="game-thumb-emoji">${g.emoji || '🎮'}</div>`
@@ -301,10 +283,6 @@ function gameCardHTML(g) {
       </div>
     </div>
   `;
-}
-
-function showExclusiveNotice(gameName) {
-  showToast(`"${gameName}" özel kodla erişilebilir. Kodu varsa "Kodu Gir" butonunu kullan.`, "info");
 }
 
 // =============================================
@@ -344,23 +322,28 @@ async function handleCodeEnter() {
     const data = await res.json();
     if (data.success) {
       if (data.type === "exclusive") {
-        // Exclusive: oyun seçimi yok, direkt satın al
+        // Exclusive kod: Bu kodun hangi oyun için olduğunu göster
         errEl.style.color = "var(--text2)";
         errEl.textContent = "⏳ Özel kod işleniyor...";
-        await purchaseWithCode(code, data.exclusiveGameId);
+        document.getElementById("redeem-code-input").value = "";
+        closeOverlay("code-overlay");
+        // Exclusive oyun seçim overlay'ini aç (tek oyun, bilgi ekranı)
+        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId);
+        openExclusiveConfirmOverlay(code, data.exclusiveGameId, exclusiveGame);
       } else {
         activeCode = code;
         activeCodeType = "normal";
         errEl.textContent = "";
         document.getElementById("redeem-code-input").value = "";
-        // Eğer karta tıklayarak geldiyse direkt o oyunu al
+        closeOverlay("code-overlay");
+        // Oyun seçim ekranını aç (karta tıklayarak geldiyse o oyun pre-selected)
         if (window._pendingGameId) {
           const pid = window._pendingGameId;
           window._pendingGameId = null;
-          closeOverlay("code-overlay");
-          await purchaseWithCode(code, pid);
+          openGameSelectOverlay();
+          // Kısa delay sonra o kartı seç
+          setTimeout(() => selectGsoCard(pid), 80);
         } else {
-          closeOverlay("code-overlay");
           openGameSelectOverlay();
         }
       }
@@ -436,38 +419,157 @@ async function viewPurchaseByCode(code) {
 function openGameSelectOverlay() {
   const grid = document.getElementById("gso-games-grid");
   const errEl = document.getElementById("gso-error");
+  const titleEl = document.getElementById("gso-title");
+  const subtitleEl = document.getElementById("gso-subtitle");
   if (!grid) return;
   errEl.textContent = "";
-  // Exclusive olmayan oyunları göster
-  const available = GAMES.filter(g => !g.exclusive);
-  if (!available.length) {
+
+  // Başlık güncelle
+  if (titleEl) titleEl.textContent = "🎮 Oyununu Seç";
+  if (subtitleEl) subtitleEl.innerHTML = `
+    <div class="gso-info-banner">
+      <span class="gso-info-icon">🔑</span>
+      <span>Bu kod sana aşağıdaki oyunlardan <strong>1 tanesinin</strong> hesabını almana yardımcı olur. İstediğin oyunu seç!</span>
+    </div>
+  `;
+
+  if (!GAMES.length) {
     grid.innerHTML = "<div style='color:var(--text3);text-align:center;padding:2rem;'>Şu an mevcut oyun yok.</div>";
-  } else {
-    grid.innerHTML = available.map(g => {
-      const imgSrc = g.image ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`) : null;
+    showOverlay("game-select-overlay");
+    return;
+  }
+
+  grid.innerHTML = GAMES.map(g => {
+    const imgSrc = g.image ? (g.image.startsWith("http") ? g.image : `${API}${g.image}`) : null;
+
+    if (g.exclusive) {
+      // Exclusive oyunlar: gri/kilitli
       return `
-        <div onclick="selectGameWithCode('${g.id}')" style="cursor:pointer;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:var(--surface);transition:border-color 0.2s,transform 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.transform=''">
+        <div class="gso-card gso-card-locked" title="Bu oyun özel kodla satın alınabilir">
           ${imgSrc
-            ? `<div style="height:100px;background-image:url('${imgSrc}');background-size:cover;background-position:center;"></div>`
-            : `<div style="height:100px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,var(--surface2),var(--bg));">${g.emoji||'🎮'}</div>`
+            ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
+            : `<div class="gso-card-emoji">${g.emoji||'🎮'}</div>`
           }
-          <div style="padding:10px 12px 12px;">
-            <div style="font-size:11px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">${g.platform||'PC / Steam'}</div>
-            <div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.3;">${g.name}</div>
+          <div class="gso-card-body">
+            <div class="gso-card-platform">${g.platform||'PC / Steam'}</div>
+            <div class="gso-card-name">${g.name}</div>
+            <div class="gso-card-locked-label">🔒 Özel Kod</div>
           </div>
         </div>
       `;
-    }).join("");
-  }
+    }
+
+    // Normal oyunlar: seçilebilir
+    return `
+      <div class="gso-card gso-card-available" id="gso-card-${g.id}" onclick="selectGsoCard('${g.id}')">
+        ${imgSrc
+          ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
+          : `<div class="gso-card-emoji">${g.emoji||'🎮'}</div>`
+        }
+        <div class="gso-card-body">
+          <div class="gso-card-platform">${g.platform||'PC / Steam'}</div>
+          <div class="gso-card-name">${g.name}</div>
+          <div class="gso-card-select-hint">Seçmek için tıkla</div>
+        </div>
+        <div class="gso-card-check">✓</div>
+      </div>
+    `;
+  }).join("");
+
   showOverlay("game-select-overlay");
 }
 
-async function selectGameWithCode(gameId) {
+let _gsoSelectedId = null;
+
+function selectGsoCard(gameId) {
+  // Önceki seçimi kaldır
+  document.querySelectorAll(".gso-card-available").forEach(el => {
+    el.classList.remove("gso-card-selected");
+  });
+  // Yeni seçimi işaretle
+  const card = document.getElementById(`gso-card-${gameId}`);
+  if (card) card.classList.add("gso-card-selected");
+  _gsoSelectedId = gameId;
+
+  // Satın al butonunu göster / güncelle
+  const btn = document.getElementById("gso-buy-btn");
+  const game = GAMES.find(g => g.id === gameId);
+  if (btn && game) {
+    btn.style.display = "block";
+    btn.textContent = `🛒 "${game.name}" Hesabını Al`;
+  }
+}
+
+async function confirmGsoPurchase() {
+  if (!_gsoSelectedId) return;
   const errEl = document.getElementById("gso-error");
-  errEl.textContent = "İşleniyor...";
+  const btn = document.getElementById("gso-buy-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ İşleniyor..."; }
+  errEl.textContent = "";
   errEl.style.color = "var(--text2)";
-  await purchaseWithCode(activeCode, gameId);
-  if (errEl.textContent === "İşleniyor...") errEl.textContent = "";
+  await purchaseWithCode(activeCode, _gsoSelectedId);
+  if (btn) { btn.disabled = false; }
+  _gsoSelectedId = null;
+}
+
+// Exclusive kod için: tek oyun onay ekranı
+function openExclusiveConfirmOverlay(code, gameId, game) {
+  const titleEl = document.getElementById("gso-title");
+  const subtitleEl = document.getElementById("gso-subtitle");
+  const grid = document.getElementById("gso-games-grid");
+  const errEl = document.getElementById("gso-error");
+  const btn = document.getElementById("gso-buy-btn");
+  if (!grid) {
+    // Fallback: direkt satın al
+    purchaseWithCode(code, gameId);
+    return;
+  }
+  errEl.textContent = "";
+  _gsoSelectedId = gameId;
+
+  const gameName = game ? game.name : "Oyun";
+  const gameEmoji = game ? (game.emoji || "🎮") : "🎮";
+  const imgSrc = game && game.image
+    ? (game.image.startsWith("http") ? game.image : `${API}${game.image}`)
+    : null;
+
+  if (titleEl) titleEl.textContent = "💎 Özel Kod";
+  if (subtitleEl) subtitleEl.innerHTML = `
+    <div class="gso-info-banner gso-info-exclusive">
+      <span class="gso-info-icon">💎</span>
+      <span>Bu kod sana <strong>"${gameName}"</strong> oyununun hesabını almanı sağlar.</span>
+    </div>
+  `;
+
+  grid.innerHTML = `
+    <div class="gso-card gso-card-selected gso-exclusive-single" style="max-width:220px;margin:0 auto;">
+      ${imgSrc
+        ? `<div class="gso-card-img" style="background-image:url('${imgSrc}')"></div>`
+        : `<div class="gso-card-emoji" style="font-size:3.5rem;">${gameEmoji}</div>`
+      }
+      <div class="gso-card-body">
+        <div class="gso-card-platform">${game ? (game.platform||'PC / Steam') : 'PC / Steam'}</div>
+        <div class="gso-card-name">${gameName}</div>
+        <div class="gso-card-select-hint" style="color:var(--accent);">✓ Seçili</div>
+      </div>
+      <div class="gso-card-check">✓</div>
+    </div>
+  `;
+
+  if (btn) {
+    btn.style.display = "block";
+    btn.textContent = `🛒 "${gameName}" Hesabını Al`;
+    // Exclusive için kodu kullan
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = "⏳ İşleniyor...";
+      await purchaseWithCode(code, gameId);
+      btn.disabled = false;
+      btn.onclick = confirmGsoPurchase;
+    };
+  }
+
+  showOverlay("game-select-overlay");
 }
 
 // =============================================
@@ -476,19 +578,23 @@ async function selectGameWithCode(gameId) {
 function handleGameClick(gameId) {
   const game = GAMES.find(g => g.id === gameId);
   if (!game) return;
-  // Kodu yoksa kod giriş ekranını aç
-  // Kod ekranından oyun seçiliyorsa direkt satın al
+
+  // Exclusive oyun: normal kodla alınamaz, özel kod gerekir
+  if (game.exclusive) {
+    showToast(`"${game.name}" özel bir koddur. Bu oyuna özel kodunla erişebilirsin.`, "info");
+    return;
+  }
+
+  // Aktif normal kod varsa direkt satın al
   if (activeCode) {
     selectGameWithCode(gameId);
   } else {
-    // Kod olmadan tıklandı: kodu sor, sonra bu oyunu seç
+    // Kod yok: kod giriş ekranını aç, bu oyunu beklet
     activeCode = null;
     showOverlay("code-overlay");
-    // Kod girilince bu oyunu otomatik seçmek için bekle
     const errEl = document.getElementById("redeem-error");
     errEl.style.color = "var(--text2)";
     errEl.textContent = `"${game.name}" için kodunu gir.`;
-    // Devam Et butonunu override et
     window._pendingGameId = gameId;
   }
 }
