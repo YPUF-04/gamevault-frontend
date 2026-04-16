@@ -65,46 +65,7 @@
   </div>
 </div>
 
-<!-- ===== OVERLAY: Destek ===== -->
-<div id="support-overlay" class="overlay">
-  <div class="overlay-box support-box-new">
-    <button class="overlay-close" onclick="closeOverlay('support-overlay')">✕</button>
-    <div class="support-hero-bar">
-      <div class="support-hero-icon">🎧</div>
-      <div>
-        <div class="support-hero-title">Destek Merkezi</div>
-        <div class="support-hero-sub">Sorununu bize anlat, hızlıca çözelim.</div>
-      </div>
-      <div class="support-resp-badge">
-        <div class="resp-time">~15dk</div>
-        <div class="resp-lbl">Ort. Yanıt</div>
-      </div>
-    </div>
-    <div id="support-purchases-section" style="display:none;">
-      <div class="support-field-label" style="margin-bottom:0.6rem;">📦 İlgili Oyun</div>
-      <div id="support-purchases-list" class="support-purchases-list" style="margin-bottom:1.25rem;"></div>
-    </div>
-    <div class="support-field-label" style="margin-bottom:0.6rem;">📋 Talep Türü</div>
-    <div class="support-type-grid-new">
-      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')"><div class="stn-icon">🔑</div><div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div></button>
-      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')"><div class="stn-icon">🔄</div><div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div></button>
-      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')"><div class="stn-icon">👤</div><div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div></button>
-      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')"><div class="stn-icon">💬</div><div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div></button>
-    </div>
-    <input type="hidden" id="support-type" value="steam_code">
-    <div class="support-input-row">
-      <div class="support-field"><label>Adınız / Kullanıcı Adı</label><input type="text" id="support-name" placeholder="Kullanıcı adınız"></div>
-      <div class="support-field"><label>E-posta <span style="color:#00d2ff;">*</span></label><input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field"><div class="support-mail-note"><span>⚠</span> Yanıt bu adrese gönderilir</div></div>
-    </div>
-    <div class="support-field"><label>Mesajınız</label><textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın..." rows="5"></textarea></div>
-    <button class="support-send-btn-new" onclick="sendSupportRequest()">Gönder →</button>
-    <div id="support-error" class="error-msg"></div>
-    <div id="support-replies-section" style="display:none;" class="support-prev-tickets">
-      <div class="support-field-label">💬 Önceki Yanıtlarım</div>
-      <div id="support-replies-list" class="support-replies-list"></div>
-    </div>
-  </div>
-</div>
+<!-- Destek overlay kaldırıldı — Canlı Destek widget kullanılıyor -->
 
 <!-- ===== OVERLAY: Gizlilik ===== -->
 <div id="privacy-overlay" class="overlay">
@@ -144,7 +105,6 @@
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
       <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Gir</a>
-      <a href="#" onclick="openSupport(); return false;">Destek</a>
     </div>
     <div class="nav-right">
       <button class="btn-nav-login" onclick="showOverlay('code-overlay')" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;">🔑 Kodu Gir</button>
@@ -159,12 +119,29 @@
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <div class="hero-badge">⚡ ANLIK TESLİMAT</div>
-    <h1>Dijital Oyunlar,<br><span>Anında Teslim.</span></h1>
-    <p>Güvenli ödeme, Steam'e anında aktarım.<br>Binlerce oyun, tek platform.</p>
+    <div class="hero-badge">⚡ ANLIK TESLİMAT · %100 GÜVENLİ</div>
+    <h1>Steam Hesabı,<br><span>Saniyeler İçinde.</span></h1>
+    <p class="hero-desc">
+      Erişim kodunu gir, oyununu seç — Steam kullanıcı adı ve şifresi anında sana iletilir.<br>
+      Kurulum yok, bekleme yok. Sadece oyna.
+    </p>
+    <div class="hero-steps-inline">
+      <div class="hsi-step"><span class="hsi-num">1</span><span class="hsi-txt">Kodu Gir</span></div>
+      <div class="hsi-arrow">→</div>
+      <div class="hsi-step"><span class="hsi-num">2</span><span class="hsi-txt">Oyun Seç</span></div>
+      <div class="hsi-arrow">→</div>
+      <div class="hsi-step"><span class="hsi-num">3</span><span class="hsi-txt">Oyna!</span></div>
+    </div>
     <div class="hero-btns">
-      <button class="hero-btn-primary" onclick="smoothScrollToGames()">Oyunları Keşfet</button>
-      <button class="hero-btn-secondary" onclick="showOverlay('code-overlay')">🔑 Kodu Gir</button>
+      <button class="hero-btn-primary" onclick="smoothScrollToGames()">🎮 Oyunları Keşfet</button>
+      <button class="hero-btn-secondary" onclick="showOverlay('code-overlay')">🔑 Kodumu Gir</button>
+    </div>
+    <div class="hero-trust">
+      <span class="trust-item">✓ Anında teslimat</span>
+      <span class="trust-sep">·</span>
+      <span class="trust-item">✓ 7/24 canlı destek</span>
+      <span class="trust-sep">·</span>
+      <span class="trust-item">✓ Güvenli altyapı</span>
     </div>
   </div>
   <div class="hero-reviews" id="hero-reviews">
@@ -263,7 +240,6 @@
           <div class="footer-col-links">
             <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
             <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
-            <a href="#" onclick="openSupport(); return false;">Destek</a>
 
           </div>
         </div>
