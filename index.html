@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GameVault | Dijital Oyun Mağazası</title>
+<title>Gearly | Steam Hesap Mağazası</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +16,7 @@
 <div id="code-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>🔑 Kodunu Gir</h2>
     <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
     <div class="field-group">
@@ -36,7 +36,7 @@
 <div id="purchase-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('purchase-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <div class="steam-icon">♨</div>
     <h2 id="po-game-name">Oyun Adı</h2>
     <div class="account-info-box">
@@ -71,10 +71,10 @@
 <div id="privacy-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('privacy-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
-      <p>GameVault olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
+      <p>Gearly olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
       <h4>Toplanan Veriler</h4><p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
       <h4>Veri Güvenliği</h4><p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
       <h4>Çerezler</h4><p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
@@ -86,11 +86,11 @@
 <div id="terms-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('terms-overlay')">✕</button>
-    <div class="overlay-logo">⬡ GameVault</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>Kullanım Şartları</h2>
     <div class="legal-content">
-      <p>GameVault platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
-      <h4>Hizmet Kapsamı</h4><p>GameVault, dijital oyun erişimi sağlayan bir platformdur.</p>
+      <p>Gearly platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
+      <h4>Hizmet Kapsamı</h4><p>Gearly, dijital oyun erişimi sağlayan bir platformdur.</p>
       <h4>Kullanıcı Sorumluluğu</h4><p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
       <h4>İade Politikası</h4><p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
     </div>
@@ -100,7 +100,7 @@
 <!-- ===== NAV ===== -->
 <nav id="main-nav">
   <div class="nav-inner">
-    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">⬡ GameVault</div>
+    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">◈ Gearly</div>
     <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
@@ -116,38 +116,61 @@
 </nav>
 
 <!-- ===== HERO ===== -->
-<section class="hero">
+<section class="hero hero-v2">
   <div class="hero-bg"></div>
+
+  <!-- Sol: metin -->
   <div class="hero-content">
-    <div class="hero-badge">⚡ ANLIK TESLİMAT · %100 GÜVENLİ</div>
-    <h1>Steam Hesabı,<br><span>Saniyeler İçinde.</span></h1>
-    <p class="hero-desc">
-      Erişim kodunu gir, oyununu seç — Steam kullanıcı adı ve şifresi anında sana iletilir.<br>
-      Kurulum yok, bekleme yok. Sadece oyna.
+    <div class="hero-pill-row">
+      <span class="hero-pill hero-pill-green">⚡ Anında Teslimat</span>
+      <span class="hero-pill hero-pill-blue">🔒 Güvenli</span>
+      <span class="hero-pill hero-pill-purple">7/24 Destek</span>
+    </div>
+
+    <h1 class="hero-title-v2">
+      <span class="ht-line1">Steam Hesabı Al,</span>
+      <span class="ht-line2">Dakikalar İçinde <em>Oyna.</em></span>
+    </h1>
+
+    <p class="hero-desc-v2">
+      Gearly üzerinden erişim kodunu gir, istediğin oyunu seç.<br>
+      Steam kullanıcı adı ve şifresi <strong>anında</strong> sana iletilir —<br>
+      indirme yok, kurulum yok, bekleme yok.
     </p>
-    <div class="hero-steps-inline">
-      <div class="hsi-step"><span class="hsi-num">1</span><span class="hsi-txt">Kodu Gir</span></div>
-      <div class="hsi-arrow">→</div>
-      <div class="hsi-step"><span class="hsi-num">2</span><span class="hsi-txt">Oyun Seç</span></div>
-      <div class="hsi-arrow">→</div>
-      <div class="hsi-step"><span class="hsi-num">3</span><span class="hsi-txt">Oyna!</span></div>
+
+    <div class="hero-flow">
+      <div class="hf-item">
+        <div class="hf-icon">🔑</div>
+        <div class="hf-label">Kodunu Gir</div>
+      </div>
+      <div class="hf-divider"></div>
+      <div class="hf-item">
+        <div class="hf-icon">🎮</div>
+        <div class="hf-label">Oyununu Seç</div>
+      </div>
+      <div class="hf-divider"></div>
+      <div class="hf-item">
+        <div class="hf-icon">🚀</div>
+        <div class="hf-label">Hemen Oyna</div>
+      </div>
     </div>
-    <div class="hero-btns">
-      <button class="hero-btn-primary" onclick="smoothScrollToGames()">🎮 Oyunları Keşfet</button>
-      <button class="hero-btn-secondary" onclick="showOverlay('code-overlay')">🔑 Kodumu Gir</button>
-    </div>
-    <div class="hero-trust">
-      <span class="trust-item">✓ Anında teslimat</span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item">✓ 7/24 canlı destek</span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item">✓ Güvenli altyapı</span>
+
+    <div class="hero-cta-row">
+      <button class="hero-cta-main" onclick="smoothScrollToGames()">Oyunlara Göz At →</button>
+      <button class="hero-cta-code" onclick="showOverlay('code-overlay')">🔑 Kodum Var</button>
     </div>
   </div>
-  <div class="hero-reviews" id="hero-reviews">
-    <div class="hero-reviews-label">⭐ Kullanıcı Yorumları</div>
-    <div class="hero-reviews-list" id="hero-reviews-list">
-      <div class="hero-review-loading">Yükleniyor...</div>
+
+  <!-- Sağ: yorumlar -->
+  <div class="hero-right">
+    <div class="hero-reviews-card" id="hero-reviews">
+      <div class="hrc-header">
+        <span class="hrc-star">★</span>
+        <span class="hrc-title">Kullanıcı Yorumları</span>
+      </div>
+      <div class="hrc-list" id="hero-reviews-list">
+        <div class="hero-review-loading">Yükleniyor...</div>
+      </div>
     </div>
   </div>
 </section>
@@ -195,7 +218,7 @@
     <div class="how-steps" id="how-steps">
       <div class="how-step" id="how-step-1">
         <div class="how-num">01</div><div class="how-icon-wrap">🔑</div>
-        <h4>Kod Satın Al</h4><p>GameVault erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
+        <h4>Kod Satın Al</h4><p>Gearly erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
         <div class="how-step-glow"></div>
       </div>
       <div class="how-connector"><div class="how-connector-line"><div class="how-connector-arrow"></div></div></div>
@@ -231,8 +254,8 @@
   <div class="footer-inner">
     <div class="footer-top-row">
       <div class="footer-brand">
-        <div class="footer-logo">⬡ GameVault</div>
-        <p class="footer-desc">Dijital oyun dünyasının güvenilir adresi. Hızlı, güvenli, 7/24.</p>
+        <div class="footer-logo">◈ Gearly</div>
+        <p class="footer-desc">Steam hesabı almanın en hızlı ve güvenilir yolu.</p>
       </div>
       <div class="footer-cols">
         <div>
@@ -262,7 +285,7 @@
       </div>
     </div>
     <div class="footer-bottom-row">
-      <div class="footer-copy">© 2026 GameVault. Tüm hakları saklıdır.</div>
+      <div class="footer-copy">© 2026 Gearly. Tüm hakları saklıdır.</div>
       <div class="footer-made">by <strong>ott01</strong></div>
     </div>
   </div>
@@ -272,9 +295,9 @@
 <div class="lsw-panel" id="lsw-panel">
   <div class="lsw-panel-header">
     <div class="lsw-header-info">
-      <div class="lsw-header-avatar">GV</div>
+      <div class="lsw-header-avatar">GR</div>
       <div>
-        <div class="lsw-header-name">GameVault Destek</div>
+        <div class="lsw-header-name">Gearly Destek</div>
         <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
       </div>
     </div>
@@ -282,8 +305,8 @@
   </div>
   <div class="lsw-messages" id="lsw-messages">
     <div class="lsw-msg lsw-msg-bot">
-      <div class="lsw-msg-avatar">GV</div>
-      <div class="lsw-msg-bubble">Merhaba! 👋 GameVault destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
+      <div class="lsw-msg-avatar">GR</div>
+      <div class="lsw-msg-bubble">Merhaba! 👋 Gearly destek hattına hoş geldiniz. Mesajınızı yazın, en kısa sürede yanıtlayalım.</div>
     </div>
   </div>
   <div id="lsw-login-notice" style="display:none;"></div>
