@@ -121,37 +121,7 @@
   </div>
 </div>
 
-<!-- ===== OVERLAY: Destek ===== -->
-<div id="support-overlay" class="overlay">
-  <div class="overlay-box support-box-new">
-    <button class="overlay-close" onclick="closeOverlay('support-overlay')">✕</button>
-    <div class="support-hero-bar">
-      <div class="support-hero-icon">🎧</div>
-      <div>
-        <div class="support-hero-title">Destek Merkezi</div>
-        <div class="support-hero-sub">Sorununu bize anlat, hızlıca çözelim.</div>
-      </div>
-      <div class="support-resp-badge">
-        <div class="resp-time">~15dk</div>
-        <div class="resp-lbl">Ort. Yanıt</div>
-      </div>
-    </div>
-    <div class="support-type-grid-new">
-      <button class="support-type-btn-new active" data-val="steam_code" onclick="selectSupportType(this,'steam_code')"><div class="stn-icon">🔑</div><div><div class="stn-label">Steam Kodu</div><div class="stn-desc">Kod çalışmıyor veya hatalı</div></div></button>
-      <button class="support-type-btn-new" data-val="extra_code" onclick="selectSupportType(this,'extra_code')"><div class="stn-icon">🔄</div><div><div class="stn-label">Ekstra Kod</div><div class="stn-desc">Ek kod talebi</div></div></button>
-      <button class="support-type-btn-new" data-val="account" onclick="selectSupportType(this,'account')"><div class="stn-icon">👤</div><div><div class="stn-label">Hesap Sorunu</div><div class="stn-desc">Giriş veya bakiye problemi</div></div></button>
-      <button class="support-type-btn-new" data-val="general" onclick="selectSupportType(this,'general')"><div class="stn-icon">💬</div><div><div class="stn-label">Genel</div><div class="stn-desc">Diğer konular</div></div></button>
-    </div>
-    <input type="hidden" id="support-type" value="steam_code">
-    <div class="support-input-row">
-      <div class="support-field"><label>Adınız / Kullanıcı Adı</label><input type="text" id="support-name" placeholder="Kullanıcı adınız"></div>
-      <div class="support-field"><label>E-posta <span style="color:#00d2ff;">*</span></label><input type="email" id="support-email" placeholder="mail@ornek.com" class="required-field"><div class="support-mail-note"><span>⚠</span> Yanıt bu adrese gönderilir</div></div>
-    </div>
-    <div class="support-field"><label>Mesajınız</label><textarea id="support-message" placeholder="Sorununuzu detaylı açıklayın..." rows="5"></textarea></div>
-    <button class="support-send-btn-new" onclick="sendSupportRequest()">Gönder →</button>
-    <div id="support-error" class="error-msg"></div>
-  </div>
-</div>
+<!-- Destek overlay kaldırıldı -->
 <!-- ===== NAV ===== -->
 <nav id="main-nav">
   <div class="nav-inner">
@@ -160,11 +130,9 @@
       <a href="index.html">Ana Sayfa</a>
       <a href="Games.html" style="color:var(--accent);">Tüm Oyunlar</a>
       <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
-      <a href="#" onclick="openSupport(); return false;">Destek</a>
     </div>
     <div class="nav-right" id="nav-auth-area">
       <button class="btn-nav-login" onclick="showOverlay('code-overlay')">🔑 Kod Gir</button>
-      <button class="btn-nav-register" onclick="openSupport()">💬 Destek</button>
     </div>
     <div class="nav-right nav-user-area" id="nav-user-area" style="display:none;">
       <div class="nav-balance">⬡ <span id="nav-balance">0</span></div>
@@ -200,6 +168,38 @@
 </main>
 
 <!-- ===== CANLI DESTEK — PANEL ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top-row">
+      <div class="footer-brand">
+        <div class="footer-logo">⬡ GameVault</div>
+        <p class="footer-desc">Dijital oyun dünyasının güvenilir adresi. Hızlı, güvenli, 7/24.</p>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <div class="footer-col-title">Sayfalar</div>
+          <div class="footer-col-links">
+            <a href="index.html">Ana Sayfa</a>
+            <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Yükle</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Yasal</div>
+          <div class="footer-col-links">
+            <a href="#" onclick="showOverlay('privacy-overlay'); return false;">Gizlilik</a>
+            <a href="#" onclick="showOverlay('terms-overlay'); return false;">Kullanım Şartları</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom-row">
+      <div class="footer-copy">© 2026 GameVault. Tüm hakları saklıdır.</div>
+      <div class="footer-made">by <strong>ott01</strong></div>
+    </div>
+  </div>
+</footer>
+
+
 <div class="lsw-panel" id="lsw-panel">
   <div class="lsw-panel-header">
     <div class="lsw-header-info">
@@ -261,8 +261,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`${API_GP}/api/games`);
     const data = await res.json();
     if (data.success) {
-      ALL_GAMES_PAGE = data.games;
-      GAMES = data.games;
+      // Exclusive oyunlar en üste
+      const sorted = data.games.sort((a, b) => {
+        if (a.exclusive && !b.exclusive) return -1;
+        if (!a.exclusive && b.exclusive) return 1;
+        return 0;
+      });
+      ALL_GAMES_PAGE = sorted;
+      GAMES = sorted;
       renderGamesPage(ALL_GAMES_PAGE);
     }
   } catch(e) {
@@ -293,7 +299,7 @@ function renderGamesPage(games) {
       ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
       : `<span class="gc-badge gc-badge-noguard">✉ Mail Onaysız</span>`;
     const deliveryBadge = hasGuard
-      ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
+      ? `<span class="gc-badge gc-badge-auto">⚡ Otomatik</span>`
       : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
     const exclusiveBadge = g.exclusive
       ? `<span class="gc-badge gc-badge-exclusive">💎 Özel</span>`
