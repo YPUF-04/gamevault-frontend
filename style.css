@@ -2180,3 +2180,92 @@ body.has-sel-banner #games,
 body.has-sel-banner .games-page-main {
   margin-top: 52px;
 }
+
+/* ===================== HERO — YENİ ELEMENTLER ===================== */
+.hero-desc {
+  color: var(--text2);
+  font-size: 16px;
+  line-height: 1.75;
+  margin-bottom: 1.75rem;
+  max-width: 520px;
+}
+
+/* Inline adım göstergesi */
+.hero-steps-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.hsi-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+}
+.hsi-num {
+  width: 22px; height: 22px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+}
+.hsi-txt {
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.hsi-arrow {
+  color: var(--text3);
+  font-size: 14px;
+}
+
+/* Trust badges */
+.hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+.trust-item {
+  font-size: 12px;
+  color: var(--text3);
+  font-weight: 600;
+}
+.trust-sep { color: var(--border2); }
+
+/* ===================== MOBİL UYUM ===================== */
+@media (max-width: 600px) {
+  .hero {
+    padding: calc(var(--nav-h) + 2.5rem) 1.25rem 3rem;
+    min-height: auto;
+  }
+  .hero-content h1 {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+  .hero-desc { font-size: 14px; }
+  .hero-steps-inline { gap: 0.5rem; }
+  .hsi-step { padding: 0.35rem 0.65rem; }
+  .hero-btns { flex-direction: column; gap: 0.75rem; }
+  .hero-btn-primary, .hero-btn-secondary {
+    width: 100%; text-align: center; padding: 13px 20px;
+  }
+  .hero-trust { justify-content: center; }
+  .nav-inner { padding: 0 1rem; gap: 1rem; }
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  }
+  .game-thumb-img, .game-thumb-emoji { height: 160px !important; }
+  .gv-sel-banner-inner { padding: 0.65rem 1rem; flex-wrap: wrap; }
+  .gv-sel-banner-sub { font-size: 0.72rem; }
+  .gv-confirm-box { padding: 1.25rem 1rem; }
+  .gv-confirm-name { font-size: 16px; }
+  .lsw-panel { width: calc(100vw - 1rem); right: 0.5rem; }
+}
+@media (max-width: 400px) {
+  .hero-steps-inline { display: none; }
+}
