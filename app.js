@@ -207,7 +207,12 @@ async function loadGames() {
     const res = await fetch(`${API}/api/games`);
     const data = await res.json();
     if (data.success) {
-      GAMES = data.games;
+      // Exclusive oyunlar en üste
+      GAMES = data.games.sort((a, b) => {
+        if (a.exclusive && !b.exclusive) return -1;
+        if (!a.exclusive && b.exclusive) return 1;
+        return 0;
+      });
       DISPLAYED_COUNT = 10;
       renderGames();
       const el = document.getElementById("stat-games");
@@ -262,7 +267,7 @@ function gameCardHTML(g) {
     ? `<span class="gc-badge gc-badge-guard">🛡 Guard Aktif</span>`
     : `<span class="gc-badge gc-badge-noguard">✉ Mail Onaysız</span>`;
   const deliveryBadge = hasGuard
-    ? `<span class="gc-badge gc-badge-instant">⚡ Otomatik</span>`
+    ? `<span class="gc-badge gc-badge-auto">⚡ Otomatik</span>`
     : `<span class="gc-badge gc-badge-instant">⚡ Anında</span>`;
 
   // Normal ekranda tüm oyunlar aynı görünür — exclusive dahil
@@ -327,8 +332,8 @@ async function handleCodeEnter() {
 
       if (data.type === "exclusive") {
         // Exclusive kod: ana ekranı göster, exclusive oyun vurgulanmış banner ile
-        const exclusiveGame = GAMES.find(g => g.id === data.exclusiveGameId);
-        showSelectionBanner("exclusive", code, data.exclusiveGameId, exclusiveGame);
+        const exclusiveGameIds = data.exclusiveGameIds || (data.exclusiveGameId ? [data.exclusiveGameId] : []);
+        showSelectionBanner("exclusive", code, exclusiveGameIds, null);
       } else {
         // Normal kod: ana ekranı göster, oyun seçim banner'ı
         activeCode = code;
@@ -416,13 +421,10 @@ async function viewPurchaseByCode(code) {
 // SEÇİM BANNER SİSTEMİ — kod girince ana ekranda görünür
 // =============================================
 let _activeExclusiveCode = null;
-let _activeExclusiveGameId = null;
+let _activeExclusiveGameIds = [];
 
-function showSelectionBanner(type, code, exclusiveGameId, exclusiveGame) {
-  // Mevcut banner varsa kaldır
+function showSelectionBanner(type, code, exclusiveGameIds, _unused) {
   removeSelectionBanner();
-
-  // Sayfanın en tepesine scroll
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   const banner = document.createElement("div");
@@ -431,22 +433,31 @@ function showSelectionBanner(type, code, exclusiveGameId, exclusiveGame) {
 
   if (type === "exclusive") {
     _activeExclusiveCode = code;
-    _activeExclusiveGameId = exclusiveGameId;
-    const gameName = exclusiveGame ? exclusiveGame.name : "Oyun";
+    _activeExclusiveGameId = exclusiveGameIds[0] || null; // compat
+    _activeExclusiveGameIds = exclusiveGameIds || [];
+
+    // Oyun isimlerini GAMES listesinden bul
+    const gameNames = exclusiveGameIds
+      .map(id => GAMES.find(g => g.id === id)?.name || id)
+      .join(", ");
+    const multi = exclusiveGameIds.length > 1;
+
     banner.innerHTML = `
       <div class="gv-sel-banner-inner">
         <div class="gv-sel-banner-left">
           <span class="gv-sel-banner-icon">💎</span>
           <div>
             <div class="gv-sel-banner-title">Özel Kod Doğrulandı</div>
-            <div class="gv-sel-banner-sub">Bu kod sana <strong>"${gameName}"</strong> oyununun hesabını almanı sağlar. Aşağıda oyunu bul ve tıkla!</div>
+            <div class="gv-sel-banner-sub">${multi
+              ? `Bu kod <strong>${gameNames}</strong> oyunlarından birini almanı sağlar. Seçmek istediğin oyuna tıkla!`
+              : `Bu kod <strong>"${gameNames}"</strong> oyununun hesabını almanı sağlar. Aşağıda oyunu bul ve tıkla!`
+            }</div>
           </div>
         </div>
         <button class="gv-sel-banner-cancel" onclick="removeSelectionBanner()">✕ İptal</button>
       </div>
     `;
-    // Exclusive oyunları parlat, diğerlerini soldur
-    highlightGamesForSelection("exclusive", exclusiveGameId);
+    highlightGamesForSelection("exclusive", exclusiveGameIds);
   } else {
     banner.innerHTML = `
       <div class="gv-sel-banner-inner">
@@ -460,11 +471,9 @@ function showSelectionBanner(type, code, exclusiveGameId, exclusiveGame) {
         <button class="gv-sel-banner-cancel" onclick="cancelSelection()">✕ İptal</button>
       </div>
     `;
-    // Normal: exclusive oyunları soldur, diğerlerini parlat
-    highlightGamesForSelection("normal", null);
+    highlightGamesForSelection("normal", []);
   }
 
-  // Nav'ın hemen altına ekle
   const nav = document.getElementById("main-nav");
   if (nav && nav.parentNode) {
     nav.parentNode.insertBefore(banner, nav.nextSibling);
@@ -472,30 +481,26 @@ function showSelectionBanner(type, code, exclusiveGameId, exclusiveGame) {
     document.body.prepend(banner);
   }
 
-  // Oyunlar bölümüne scroll
   setTimeout(() => {
     const gamesSection = document.getElementById("games") || document.querySelector(".games-page-main");
     if (gamesSection) gamesSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 400);
 }
 
-function highlightGamesForSelection(type, exclusiveGameId) {
-  // Tüm kartlara data-gv-mode ata
+function highlightGamesForSelection(type, exclusiveGameIds) {
   document.querySelectorAll(".game-card").forEach(card => {
     card.classList.remove("gv-card-dimmed", "gv-card-lit", "gv-card-target");
   });
-  // Kısa delay sonra uygula (DOM güncellenmişse)
   setTimeout(() => {
     document.querySelectorAll(".game-card").forEach(card => {
       const id = card.getAttribute("data-game-id");
       if (type === "exclusive") {
-        if (id === exclusiveGameId) {
+        if (exclusiveGameIds.includes(id)) {
           card.classList.add("gv-card-target");
         } else {
           card.classList.add("gv-card-dimmed");
         }
       } else {
-        // normal: exclusive kartlar soluk
         const isExclusive = card.classList.contains("exclusive-card");
         if (isExclusive) {
           card.classList.add("gv-card-dimmed");
@@ -516,6 +521,7 @@ function removeSelectionBanner() {
   });
   _activeExclusiveCode = null;
   _activeExclusiveGameId = null;
+  _activeExclusiveGameIds = [];
 }
 
 function cancelSelection() {
@@ -599,6 +605,7 @@ async function executePurchase(gameId, code, codeType) {
       activeCodeType = null;
       _activeExclusiveCode = null;
       _activeExclusiveGameId = null;
+      _activeExclusiveGameIds = [];
       removeSelectionBanner();
       const modal = document.getElementById("gv-confirm-modal");
       if (modal) modal.remove();
@@ -628,28 +635,29 @@ function handleGameClick(gameId) {
   // Exclusive oyun: sadece özel kodla alınabilir
   if (game.exclusive) {
     // Eğer bu oyun için özel kod girilmişse → onay modal'ı
-    if (_activeExclusiveGameId === gameId && _activeExclusiveCode) {
+    if (_activeExclusiveCode && (_activeExclusiveGameIds.includes(gameId) || _activeExclusiveGameId === gameId)) {
       showPurchaseConfirm(gameId, _activeExclusiveCode, "exclusive");
       return;
     }
-    // Değilse: bilgi toast
-    showToast(`"${game.name}" özel bir oyundur. Özel kodunla erişebilirsin.`, "info");
+    // Değilse: kod sor
+    showOverlay("code-overlay");
+    const errEl = document.getElementById("redeem-error");
+    errEl.style.color = "var(--text2)";
+    errEl.textContent = `"${game.name}" için özel kodunuzu girin.`;
     return;
   }
 
   // Normal oyun
   if (activeCode) {
-    // Kod girilmiş, seçim modundayız → onay modal'ı
     showPurchaseConfirm(gameId, activeCode, "normal");
   } else if (_activeExclusiveCode) {
-    // Özel kod var ama bu oyun exclusive değil — bilgi ver
     showToast("Bu kodla sadece özel oyununuzu alabilirsiniz.", "info");
   } else {
-    // Kod yok: kod giriş ekranını aç, bu oyunu beklet
+    // Kod yok: kod giriş ekranını aç
     showOverlay("code-overlay");
     const errEl = document.getElementById("redeem-error");
     errEl.style.color = "var(--text2)";
-    errEl.textContent = `"${game.name}" için kodunu gir.`;
+    errEl.textContent = `"${game.name}" için kodunuzu girin.`;
     window._pendingGameId = gameId;
   }
 }
@@ -671,11 +679,9 @@ function openPurchaseOverlay(data) {
   const instructions = document.getElementById("steam-instructions");
 
   if (data.requiresCode === false) {
-    // Kullanıcı adı + şifre göster, kod butonu yok
     codeBtn.style.display = "none";
     reqInfo.textContent   = "✅ Bu oyun için Steam Guard kodu gerekmez.";
     reqInfo.style.color   = "var(--green)";
-    // Talimatları kod adımı olmadan göster
     instructions.style.display = "block";
     instructions.innerHTML = `
       <p class="instr-title">Nasıl giriş yapılır?</p>
@@ -700,6 +706,16 @@ function openPurchaseOverlay(data) {
       </ol>
     `;
   }
+
+  // "Tekrar erişmek için" notu
+  const existingNote = document.getElementById("po-reaccess-note");
+  if (existingNote) existingNote.remove();
+  const note = document.createElement("div");
+  note.id = "po-reaccess-note";
+  note.style.cssText = "margin-top:1rem;padding:0.65rem 0.9rem;background:rgba(255,200,0,0.07);border:1px solid rgba(255,200,0,0.18);border-radius:10px;font-size:0.78rem;color:var(--text2);line-height:1.5;";
+  note.innerHTML = `<span style="color:#ffd700;font-weight:700;">💡 Not:</span> Bu oyuna tekrar erişmek istediğinde <strong>aynı kodu</strong> "Kodu Gir" ekranına tekrar girmen yeterli.`;
+  const poBox = document.querySelector("#purchase-overlay .overlay-box");
+  if (poBox) poBox.appendChild(note);
 
   showOverlay("purchase-overlay");
 }
