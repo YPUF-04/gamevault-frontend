@@ -2269,3 +2269,196 @@ body.has-sel-banner .games-page-main {
 @media (max-width: 400px) {
   .hero-steps-inline { display: none; }
 }
+
+/* ===================== HERO V2 ===================== */
+.hero-v2 {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  min-height: 92vh;
+  padding: calc(var(--nav-h) + 5rem) 4rem 5rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Pill badges */
+.hero-pill-row {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+.hero-pill {
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 20px;
+}
+.hero-pill-green { background: rgba(0,232,122,0.12); color: #00e87a; border: 1px solid rgba(0,232,122,0.28); }
+.hero-pill-blue  { background: rgba(0,212,255,0.10); color: #00d4ff; border: 1px solid rgba(0,212,255,0.25); }
+.hero-pill-purple { background: rgba(123,94,248,0.12); color: #a07ef8; border: 1px solid rgba(123,94,248,0.28); }
+
+/* Title */
+.hero-title-v2 {
+  font-family: 'Orbitron', monospace;
+  display: flex; flex-direction: column;
+  gap: 0.1em;
+  margin-bottom: 1.5rem;
+  line-height: 1.05;
+  letter-spacing: -1px;
+}
+.ht-line1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  color: var(--text);
+}
+.ht-line2 {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 900;
+  color: var(--text);
+}
+.ht-line2 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Desc */
+.hero-desc-v2 {
+  font-size: 15px; color: var(--text2); line-height: 1.8;
+  margin-bottom: 2rem; max-width: 480px;
+}
+.hero-desc-v2 strong { color: var(--text); }
+
+/* Flow steps */
+.hero-flow {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 2.25rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  max-width: 420px;
+}
+.hf-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0.35rem;
+  flex: 1;
+}
+.hf-icon { font-size: 1.6rem; }
+.hf-label { font-size: 11px; font-weight: 700; color: var(--text2); text-align: center; }
+.hf-divider {
+  width: 1px; height: 36px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0; margin: 0 0.5rem;
+}
+
+/* CTA */
+.hero-cta-row {
+  display: flex; gap: 0.85rem; flex-wrap: wrap;
+}
+.hero-cta-main {
+  padding: 15px 32px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 15px; font-weight: 800;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: transform 0.2s, box-shadow 0.2s;
+  letter-spacing: 0.2px;
+}
+.hero-cta-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 35px rgba(0,212,255,0.28);
+}
+.hero-cta-code {
+  padding: 15px 28px; border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text); font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.hero-cta-code:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Sağ taraf — yorumlar */
+.hero-right {
+  flex: 1; min-width: 280px; max-width: 380px;
+}
+.hero-reviews-card {
+  background: rgba(14,17,32,0.7);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 1.25rem;
+  backdrop-filter: blur(16px);
+}
+.hrc-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hrc-star { color: #ffd700; font-size: 1rem; }
+.hrc-title {
+  font-size: 11px; font-weight: 800;
+  color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.hrc-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* hero-review-card artık kart içinde */
+.hero-reviews-card .hero-review-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 0.75rem 0.875rem;
+  display: flex; gap: 0.65rem; align-items: flex-start;
+  animation: none;
+}
+.hero-reviews-card .hero-review-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.hero-reviews-card .hero-review-name {
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.hero-reviews-card .hero-review-stars {
+  font-size: 11px; color: #ffd700;
+}
+.hero-reviews-card .hero-review-text {
+  font-size: 12px; color: var(--text2); line-height: 1.5; margin-top: 2px;
+}
+
+/* Gearly logo özel stili */
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 20px; font-weight: 900;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 3px;
+}
+
+/* ===================== MOBİL — HERO V2 ===================== */
+@media (max-width: 900px) {
+  .hero-v2 {
+    flex-direction: column;
+    gap: 2.5rem;
+    padding: calc(var(--nav-h) + 3rem) 1.5rem 3rem;
+    min-height: auto;
+  }
+  .hero-right { max-width: 100%; min-width: 0; width: 100%; }
+  .hero-flow { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .ht-line1 { font-size: 1.7rem; }
+  .ht-line2 { font-size: 2.1rem; }
+  .hero-desc-v2 { font-size: 14px; }
+  .hero-cta-row { flex-direction: column; }
+  .hero-cta-main, .hero-cta-code { width: 100%; text-align: center; }
+  .hero-flow { padding: 0.75rem 1rem; }
+  .hf-icon { font-size: 1.3rem; }
+  .hf-label { font-size: 10px; }
+}
