@@ -206,7 +206,7 @@
       <div class="lsw-header-avatar">GR</div>
       <div>
         <div class="lsw-header-name">Gearly Destek</div>
-        <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
+        <div class="lsw-header-status" id="lsw-status-line"><span class="lsw-online-dot" id="lsw-status-dot"></span> <span id="lsw-status-text">Çevrimiçi</span></div>
       </div>
     </div>
     <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
@@ -248,6 +248,37 @@
     <span class="lsw-notif-dot" id="lsw-notif-dot" style="display:none;"></span>
   </button>
 </div>
+
+<style>
+.lsw-header-status.offline { color: #f59e0b !important; }
+.lsw-header-status.offline .lsw-online-dot { background: #f59e0b !important; }
+</style>
+
+<script>
+// ===== CANLI DESTEK DURUMU =====
+// "online"  → Çevrimiçi (yeşil)
+// "30"      → ~30 dk içinde yanıtlıyoruz (sarı)
+// "60"      → ~60 dk içinde yanıtlıyoruz
+const LSW_STATUS = "online"; // <-- buraya "online", "30", "60" yaz
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dot  = document.getElementById("lsw-status-dot");
+  const txt  = document.getElementById("lsw-status-text");
+  const line = document.getElementById("lsw-status-line");
+  if (!dot || !txt) return;
+  if (LSW_STATUS === "online") {
+    txt.textContent = "Çevrimiçi";
+    dot.style.background = "#00e87a";
+    dot.style.boxShadow = "0 0 6px #00e87a88";
+  } else {
+    const mins = parseInt(LSW_STATUS) || 30;
+    txt.textContent = `~${mins} dk içinde yanıtlıyoruz`;
+    dot.style.background = "#f59e0b";
+    dot.style.boxShadow = "0 0 6px #f59e0b88";
+    if (line) line.style.color = "#f59e0b";
+  }
+});
+</script>
 
 <script src="app.js"></script>
 <script>
