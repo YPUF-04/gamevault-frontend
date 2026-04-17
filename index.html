@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gearly | Dijital Oyun Doğrulama Sitesi</title>
+<title>Gearly.com.tr | Dijital Oyun Doğrulama Sitesi</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +16,7 @@
 <div id="code-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly</div>
+    <div class="overlay-logo">◈ Gearly.com.tr</div>
     <h2>🔑 Kodunu Gir</h2>
     <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
     <div class="field-group">
@@ -36,7 +36,7 @@
 <div id="purchase-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('purchase-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly</div>
+    <div class="overlay-logo">◈ Gearly.com.tr</div>
     <div class="steam-icon">♨</div>
     <h2 id="po-game-name">Oyun Adı</h2>
     <div class="account-info-box">
@@ -71,10 +71,10 @@
 <div id="privacy-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('privacy-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly</div>
+    <div class="overlay-logo">◈ Gearly.com.tr</div>
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
-      <p>Gearly olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
+      <p>Gearly.com.tr olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
       <h4>Toplanan Veriler</h4><p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
       <h4>Veri Güvenliği</h4><p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
       <h4>Çerezler</h4><p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
@@ -86,10 +86,10 @@
 <div id="terms-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('terms-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly</div>
+    <div class="overlay-logo">◈ Gearly.com.tr</div>
     <h2>Kullanım Şartları</h2>
     <div class="legal-content">
-      <p>Gearly platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
+      <p>Gearly.com.tr platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
       <h4>Hizmet Kapsamı</h4><p>Gearly, dijital oyun erişimi sağlayan bir platformdur.</p>
       <h4>Kullanıcı Sorumluluğu</h4><p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
       <h4>İade Politikası</h4><p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
@@ -100,7 +100,7 @@
 <!-- ===== NAV ===== -->
 <nav id="main-nav">
   <div class="nav-inner">
-    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">◈ Gearly</div>
+    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">◈ Gearly.com.tr</div>
     <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
@@ -132,7 +132,7 @@
     </div>
 
     <h1 class="hero-title-v2">
-      <span class="ht-line1">Gearly — Dijital Oyun</span>
+      <span class="ht-line1">Gearly.com.tr — Dijital Oyun</span>
       <span class="ht-line2">Doğrulama <em>Platformu.</em></span>
     </h1>
 
@@ -246,7 +246,7 @@
   <div class="footer-inner">
     <div class="footer-top-row">
       <div class="footer-brand">
-        <div class="footer-logo">◈ Gearly</div>
+        <div class="footer-logo">◈ Gearly.com.tr</div>
         <p class="footer-desc">Steam hesabı almanın en hızlı ve güvenilir yolu.</p>
       </div>
       <div class="footer-cols">
@@ -411,19 +411,26 @@ let _sIdx = 0, _sItems = [], _sTimer = null;
 
 function buildSlider(reviews) {
   if (!reviews || !reviews.length) return;
-  _sItems = reviews;
   const track = document.getElementById("hrc-slider-track");
   const dotsEl = document.getElementById("hrc-dots");
   if (!track) return;
 
-  track.innerHTML = reviews.map(r => {
-    const nm   = r.username || r.name || "Kullanıcı";
-    const av   = r.avatar || nm.slice(0,2).toUpperCase();
-    const stars = "★".repeat(Math.min(5, r.rating || 5));
-    const msg  = r.message || r.text || r.comment || "";
-    return `<div class="hrc-slide">
-      <div class="hero-review-card" style="margin:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+  // Group reviews into pages of 3
+  const pageSize = 3;
+  const pages = [];
+  for (let i = 0; i < reviews.length; i += pageSize) {
+    pages.push(reviews.slice(i, i + pageSize));
+  }
+  _sItems = pages; // track pages not individual reviews
+
+  track.innerHTML = pages.map(page => {
+    const cardsHTML = page.map(r => {
+      const nm   = r.username || r.name || "Kullanıcı";
+      const av   = r.avatar || nm.slice(0,2).toUpperCase();
+      const stars = "★".repeat(Math.min(5, r.rating || 5));
+      const msg  = r.message || r.text || r.comment || "";
+      return `<div class="hero-review-card" style="margin:0 0 0.45rem 0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
           <div style="display:flex;align-items:center;gap:0.5rem;">
             <div class="hero-review-avatar">${av}</div>
             <span class="hero-review-name">${nm}</span>
@@ -431,18 +438,19 @@ function buildSlider(reviews) {
           <span class="hero-review-stars">${stars}</span>
         </div>
         <p class="hero-review-text">${msg}</p>
-      </div>
-    </div>`;
+      </div>`;
+    }).join("");
+    return `<div class="hrc-slide"><div style="display:flex;flex-direction:column;">${cardsHTML}</div></div>`;
   }).join("");
 
   if (dotsEl) {
-    dotsEl.innerHTML = reviews.map((_, i) =>
+    dotsEl.innerHTML = pages.map((_, i) =>
       `<button class="hrc-dot${i===0?' active':''}" onclick="gSlide(${i})"></button>`
     ).join("");
   }
   gSlide(0);
   clearInterval(_sTimer);
-  _sTimer = setInterval(() => gSlide((_sIdx + 1) % _sItems.length), 3800);
+  _sTimer = setInterval(() => gSlide((_sIdx + 1) % _sItems.length), 4500);
 }
 
 window.gSlide = function(idx) {
