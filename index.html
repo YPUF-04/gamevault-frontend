@@ -129,138 +129,92 @@
     <svg class="hero-globe-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="globeGrad" cx="38%" cy="35%" r="60%">
-          <stop offset="0%"   stop-color="#1a2a4a" stop-opacity="0.92"/>
-          <stop offset="100%" stop-color="#040810" stop-opacity="0.97"/>
+          <stop offset="0%" stop-color="#1a2a4a" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#060a15" stop-opacity="0.95"/>
         </radialGradient>
         <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stop-color="#00d2ff" stop-opacity="0.18"/>
-          <stop offset="55%"  stop-color="#7b2ff7" stop-opacity="0.10"/>
-          <stop offset="100%" stop-color="#000"    stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="globeGlow2" cx="38%" cy="32%" r="45%">
-          <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.06"/>
-          <stop offset="100%" stop-color="#000"    stop-opacity="0"/>
+          <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.12"/>
+          <stop offset="70%" stop-color="#7b2ff7" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#000" stop-opacity="0"/>
         </radialGradient>
         <clipPath id="globeClip">
           <circle cx="260" cy="260" r="220"/>
         </clipPath>
         <filter id="globeBlur">
-          <feGaussianBlur stdDeviation="1"/>
-        </filter>
-        <filter id="softBlur">
-          <feGaussianBlur stdDeviation="2.5"/>
+          <feGaussianBlur stdDeviation="1.2"/>
         </filter>
       </defs>
-
-      <!-- Dış glow halkası -->
-      <circle cx="260" cy="260" r="256" fill="url(#globeGlow)"/>
-      <!-- İkincil highlight -->
-      <circle cx="260" cy="260" r="220" fill="url(#globeGlow2)"/>
+      <!-- Glow -->
+      <circle cx="260" cy="260" r="240" fill="url(#globeGlow)"/>
       <!-- Ana küre -->
-      <circle cx="260" cy="260" r="220" fill="url(#globeGrad)" stroke="#00d2ff" stroke-width="0.9" stroke-opacity="0.35"/>
-
-      <!-- Enlem çizgileri (daha fazla) -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.2" fill="none" filter="url(#globeBlur)">
-        <ellipse cx="260" cy="260" rx="220" ry="46"/>
-        <ellipse cx="260" cy="215" rx="200" ry="40"/>
-        <ellipse cx="260" cy="168" rx="168" ry="30"/>
-        <ellipse cx="260" cy="125" rx="118" ry="19"/>
-        <ellipse cx="260" cy="88"  rx="65"  ry="10"/>
-        <ellipse cx="260" cy="305" rx="200" ry="40"/>
-        <ellipse cx="260" cy="352" rx="168" ry="30"/>
-        <ellipse cx="260" cy="395" rx="118" ry="19"/>
-        <ellipse cx="260" cy="432" rx="65"  ry="10"/>
+      <circle cx="260" cy="260" r="220" fill="url(#globeGrad)" stroke="#00d2ff" stroke-width="0.8" stroke-opacity="0.3"/>
+      <!-- Enlem çizgileri -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="220" ry="44"/>
+        <ellipse cx="260" cy="210" rx="195" ry="38"/>
+        <ellipse cx="260" cy="160" rx="155" ry="28"/>
+        <ellipse cx="260" cy="115" rx="100" ry="16"/>
+        <ellipse cx="260" cy="310" rx="195" ry="38"/>
+        <ellipse cx="260" cy="360" rx="155" ry="28"/>
+        <ellipse cx="260" cy="405" rx="100" ry="16"/>
       </g>
-
-      <!-- Boylam çizgileri (daha fazla) -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.2" fill="none" filter="url(#globeBlur)">
-        <ellipse cx="260" cy="260" rx="40"  ry="220"/>
-        <ellipse cx="260" cy="260" rx="88"  ry="220"/>
-        <ellipse cx="260" cy="260" rx="136" ry="220"/>
-        <ellipse cx="260" cy="260" rx="184" ry="220"/>
+      <!-- Boylam çizgileri -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="55" ry="220"/>
+        <ellipse cx="260" cy="260" rx="110" ry="220"/>
+        <ellipse cx="260" cy="260" rx="165" ry="220"/>
         <ellipse cx="260" cy="260" rx="220" ry="220"/>
       </g>
-
-      <!-- Kıta lekeleri (soyut) -->
-      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.06">
-        <ellipse cx="195" cy="218" rx="60" ry="38" transform="rotate(-15 195 218)"/>
-        <ellipse cx="318" cy="192" rx="45" ry="28" transform="rotate(10 318 192)"/>
-        <ellipse cx="258" cy="308" rx="70" ry="30" transform="rotate(5 258 308)"/>
-        <ellipse cx="155" cy="305" rx="32" ry="22" transform="rotate(-10 155 305)"/>
-        <ellipse cx="348" cy="318" rx="38" ry="20" transform="rotate(20 348 318)"/>
-        <ellipse cx="228" cy="158" rx="28" ry="16"/>
-        <ellipse cx="370" cy="250" rx="22" ry="14" transform="rotate(30 370 250)"/>
-        <ellipse cx="145" cy="180" rx="18" ry="12" transform="rotate(-20 145 180)"/>
+      <!-- Kıta leke şekilleri (soyut) -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.07">
+        <ellipse cx="200" cy="220" rx="55" ry="35" transform="rotate(-15 200 220)"/>
+        <ellipse cx="310" cy="195" rx="40" ry="25" transform="rotate(10 310 195)"/>
+        <ellipse cx="260" cy="300" rx="65" ry="28" transform="rotate(5 260 300)"/>
+        <ellipse cx="160" cy="300" rx="30" ry="20" transform="rotate(-10 160 300)"/>
+        <ellipse cx="340" cy="310" rx="35" ry="18" transform="rotate(20 340 310)"/>
+        <ellipse cx="230" cy="160" rx="25" ry="14"/>
       </g>
-
-      <!-- Nokta ağı -->
-      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.7">
+      <!-- Nokta ağı (bağlantı noktaları) -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.55">
         <circle cx="190" cy="215" r="3.5"/>
         <circle cx="315" cy="190" r="2.8"/>
-        <circle cx="265" cy="298" r="3.2"/>
+        <circle cx="265" cy="295" r="3"/>
         <circle cx="155" cy="295" r="2.5"/>
-        <circle cx="350" cy="308" r="2.8"/>
+        <circle cx="350" cy="305" r="2.8"/>
         <circle cx="235" cy="155" r="2.2"/>
-        <circle cx="292" cy="242" r="2"/>
-        <circle cx="220" cy="262" r="2"/>
-        <circle cx="372" cy="232" r="2.4"/>
-        <circle cx="145" cy="242" r="2"/>
-        <circle cx="175" cy="340" r="2.2"/>
-        <circle cx="330" cy="355" r="2.5"/>
-        <circle cx="260" cy="170" r="2"/>
-        <circle cx="390" cy="280" r="2"/>
-        <circle cx="128" cy="290" r="1.8"/>
+        <circle cx="290" cy="240" r="2"/>
+        <circle cx="220" cy="260" r="2"/>
+        <circle cx="370" cy="230" r="2.2"/>
+        <circle cx="145" cy="240" r="2"/>
       </g>
-      <!-- Mor nokta aksanı -->
-      <g clip-path="url(#globeClip)" fill="#a259ff" fill-opacity="0.65">
-        <circle cx="310" cy="330" r="2.5"/>
-        <circle cx="200" cy="175" r="2"/>
-        <circle cx="355" cy="195" r="1.8"/>
-        <circle cx="170" cy="255" r="2"/>
-      </g>
-
       <!-- Bağlantı çizgileri -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.7" stroke-opacity="0.28" fill="none">
-        <line x1="190" y1="215" x2="265" y2="298"/>
-        <line x1="315" y1="190" x2="265" y2="298"/>
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.7" stroke-opacity="0.3" fill="none">
+        <line x1="190" y1="215" x2="265" y2="295"/>
+        <line x1="315" y1="190" x2="265" y2="295"/>
         <line x1="190" y1="215" x2="315" y2="190"/>
-        <line x1="265" y1="298" x2="350" y2="308"/>
+        <line x1="265" y1="295" x2="350" y2="305"/>
         <line x1="190" y1="215" x2="155" y2="295"/>
         <line x1="235" y1="155" x2="315" y2="190"/>
-        <line x1="292" y1="242" x2="372" y2="232"/>
-        <line x1="220" y1="262" x2="145" y2="242"/>
+        <line x1="290" y1="240" x2="370" y2="230"/>
+        <line x1="220" y1="260" x2="145" y2="240"/>
         <line x1="235" y1="155" x2="190" y2="215"/>
-        <line x1="175" y1="340" x2="155" y2="295"/>
-        <line x1="330" y1="355" x2="350" y2="308"/>
-        <line x1="265" y1="298" x2="175" y2="340"/>
-        <line x1="265" y1="298" x2="330" y2="355"/>
-        <line x1="315" y1="190" x2="372" y2="232"/>
-        <line x1="260" y1="170" x2="235" y2="155"/>
-        <line x1="390" y1="280" x2="372" y2="232"/>
       </g>
-
       <!-- Animasyonlu pulse noktaları -->
-      <circle cx="190" cy="215" r="6" fill="none" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.6">
-        <animate attributeName="r" values="5;16;5" dur="3.2s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="3.2s" repeatCount="indefinite"/>
+      <circle cx="190" cy="215" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="265" cy="298" r="6" fill="none" stroke="#7b2ff7" stroke-width="1.2" stroke-opacity="0.6">
-        <animate attributeName="r" values="5;14;5" dur="2.6s" begin="0.8s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="2.6s" begin="0.8s" repeatCount="indefinite"/>
+      <circle cx="265" cy="295" r="7" fill="none" stroke="#7b2ff7" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="5;12;5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="315" cy="190" r="6" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.5">
-        <animate attributeName="r" values="5;12;5" dur="3s" begin="1.5s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+      <circle cx="315" cy="190" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.4">
+        <animate attributeName="r" values="5;10;5" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.4;0;0.4" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="350" cy="308" r="5" fill="none" stroke="#a259ff" stroke-width="1" stroke-opacity="0.5">
-        <animate attributeName="r" values="4;11;4" dur="2.8s" begin="2.2s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.8s" begin="2.2s" repeatCount="indefinite"/>
-      </circle>
-
-      <!-- Dış kenar çizgileri -->
-      <circle cx="260" cy="260" r="220" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-opacity="0.22"/>
-      <circle cx="260" cy="260" r="235" fill="none" stroke="#00d2ff" stroke-width="0.6" stroke-opacity="0.1" stroke-dasharray="5 10"/>
-      <circle cx="260" cy="260" r="248" fill="none" stroke="#7b2ff7" stroke-width="0.4" stroke-opacity="0.06" stroke-dasharray="2 14"/>
+      <!-- Dış parlaklık halkası -->
+      <circle cx="260" cy="260" r="220" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-opacity="0.2"/>
+      <circle cx="260" cy="260" r="235" fill="none" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.08" stroke-dasharray="4 8"/>
     </svg>
   </div>
 
@@ -412,15 +366,6 @@
             <a href="#" onclick="showOverlay('terms-overlay'); return false;">Kullanım Şartları</a>
           </div>
         </div>
-        <div>
-          <div class="footer-col-title">Sosyal</div>
-          <div class="footer-social-mini">
-            <a href="#" class="social-btn-mini" title="Discord"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg></a>
-            <a href="#" class="social-btn-mini" title="Twitter/X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-            <a href="#" class="social-btn-mini" title="Instagram"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
-            <a href="#" class="social-btn-mini" title="Telegram"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg></a>
-          </div>
-        </div>
       </div>
     </div>
     <div class="footer-bottom-row">
@@ -431,7 +376,7 @@
 </footer>
 
 <!-- ===== CANLI DESTEK — PANEL (fixed, FAB üstünde) ===== -->
-<div class="lsw-panel" id="lsw-panel">
+<div class="lsw-panel" id="lsw-panel" style="display:none !important;">
   <div class="lsw-panel-header">
     <div class="lsw-header-info">
       <div class="lsw-header-avatar">◈</div>
@@ -468,7 +413,7 @@
 </div>
 
 <!-- ===== CANLI DESTEK — FAB + TOOLTIP (fixed, sağ-alt) ===== -->
-<div id="live-support-widget">
+<div id="live-support-widget" style="display:none !important;">
   <div class="lsw-tooltip" id="lsw-tooltip">
     <span>★ 7/24 Canlı Destek</span>
     <button class="lsw-tooltip-close" onclick="document.getElementById('lsw-tooltip').style.display='none'">✕</button>
@@ -484,14 +429,14 @@
 /* ===== HERO GLOBE ===== */
 .hero-globe-wrap {
   position: absolute;
-  right: -60px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
-  width: 580px;
-  height: 580px;
+  width: 520px;
+  height: 520px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.7;
+  opacity: 0.65;
   animation: globeSpin 90s linear infinite, globePulse 8s ease-in-out infinite;
 }
 .hero-globe-svg {
@@ -504,11 +449,11 @@
   to   { transform: translateY(-50%) rotate(360deg); }
 }
 @keyframes globePulse {
-  0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 60px rgba(0,210,255,0.22)) drop-shadow(0 0 120px rgba(123,47,247,0.15)); }
-  50%       { opacity: 0.85; filter: drop-shadow(0 0 90px rgba(0,210,255,0.38)) drop-shadow(0 0 160px rgba(123,47,247,0.28)) drop-shadow(0 0 30px rgba(0,210,255,0.5)); }
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 0.85; }
 }
 @media (max-width: 900px) {
-  .hero-globe-wrap { width: 340px; height: 340px; right: -80px; opacity: 0.35; }
+  .hero-globe-wrap { width: 320px; height: 320px; right: 10px; opacity: 0.3; }
 }
 @media (max-width: 600px) {
   .hero-globe-wrap { display: none; }
