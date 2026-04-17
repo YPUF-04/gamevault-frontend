@@ -387,7 +387,7 @@
 <div class="lsw-panel" id="lsw-panel">
   <div class="lsw-panel-header">
     <div class="lsw-header-info">
-      <div class="lsw-header-avatar">GR</div>
+      <div class="lsw-header-avatar">◈</div>
       <div>
         <div class="lsw-header-name">Gearly Destek</div>
         <div class="lsw-header-status" id="lsw-status-line"><span class="lsw-online-dot" id="lsw-status-dot"></span> <span id="lsw-status-text">Çevrimiçi</span></div>
@@ -490,27 +490,37 @@
 
 <script>
 // ============================================================
-// CANLI DESTEK DURUMU
-// "online" → yeşil, "30" / "60" vb → sarı + dk mesajı
+// CANLI DESTEK DURUMU — API'den dinamik olarak çekilir
+// Firestore settings.supportStatus: "online" | "30" | "60" vb.
 // ============================================================
-const LSW_STATUS = "online";
-
-function applyLswStatus() {
+function applyLswStatus(status) {
   const dot  = document.getElementById("lsw-status-dot");
   const txt  = document.getElementById("lsw-status-text");
   const line = document.getElementById("lsw-status-line");
   if (!dot || !txt) return;
-  if (LSW_STATUS === "online") {
+  if (status === "online") {
     txt.textContent = "Çevrimiçi";
     dot.style.cssText = "background:#00e87a;box-shadow:0 0 6px #00e87a88;";
+    if (line) { line.style.color = ""; }
   } else {
-    const mins = parseInt(LSW_STATUS) || 30;
-    txt.textContent = `~${mins} dk içinde yanıtlıyoruz`;
+    const mins = parseInt(status) || 30;
+    txt.textContent = `~${mins} dk içinde dönüyoruz`;
     dot.style.cssText = "background:#f59e0b;box-shadow:0 0 6px #f59e0b88;";
     if (line) line.style.color = "#f59e0b";
   }
 }
-document.addEventListener("DOMContentLoaded", applyLswStatus);
+async function loadLswStatus() {
+  try {
+    const BACKEND = (typeof window.BACKEND_URL !== "undefined") ? window.BACKEND_URL
+      : (window.location.hostname === "localhost" ? "http://localhost:3000" : "");
+    const res = await fetch(`${BACKEND}/api/settings`);
+    const data = await res.json();
+    applyLswStatus(data.supportStatus || "online");
+  } catch(e) {
+    applyLswStatus("online");
+  }
+}
+document.addEventListener("DOMContentLoaded", loadLswStatus);
 
 // ============================================================
 // GİRİŞ EKRANI — "Dijital Oyun Doğrulama Sitesi" alt yazısı
