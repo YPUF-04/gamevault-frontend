@@ -19,7 +19,7 @@
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
     <div class="overlay-logo">◈ Gearly</div>
     <h2>🔑 Kodunu Gir</h2>
-    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
+    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun doğrulama kodunu al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
     <div class="field-group">
       <label>Erişim Kodu</label>
       <input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="35" style="text-transform:uppercase;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
@@ -75,10 +75,10 @@
     <div class="overlay-logo">◈ Gearly</div>
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
-      <p>Gearly.com.tr olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
-      <h4>Toplanan Veriler</h4><p>Kayıt sırasında kullanıcı adı, e-posta adresi ve şifre bilgileriniz şifrelenmiş şekilde saklanır.</p>
-      <h4>Veri Güvenliği</h4><p>Tüm veriler güvenli sunucularda saklanır. Üçüncü taraflarla paylaşılmaz.</p>
-      <h4>Çerezler</h4><p>Oturum bilgilerinizi hatırlamak için tarayıcı yerel depolama alanı kullanılır.</p>
+      <p>Gearly, kullanıcı gizliliğini en üst seviyede tutar. Platformumuz bir veri toplama aracı değil, sadece veri doğrulama servisidir.</p>
+      <h4>Veri Kullanımı ve Kayıtlar</h4><p>Kişisel Veri: Sitemizde üyelik yoktur; isminiz, e-postanız veya şifreniz gibi kişisel bilgileriniz asla istenmez ve sistemimize kaydedilmez.</p>
+      <p>İşlem Kayıtları: Yapılan doğrulamaların güvenliği ve takibi amacıyla; işlemin gerçekleştiği zaman ve sorgulanan içerik bilgisi sistemimizde kayıt altında tutulabilir. Bu kayıtlar sadece sistem yönetimi için kullanılır ve üçüncü şahıslarla paylaşılmaz.</p>
+      <h4>Çerezler ve İzleme</h4><p>Sitemiz reklam hedeflemesi yapmaz ve kullanıcıları takip eden çerezler (cookie) kullanmaz. Sadece teknik devamlılık için tarayıcınızın yerel depolama alanı kullanılabilir.</p>
     </div>
   </div>
 </div>
@@ -92,7 +92,7 @@
     <div class="legal-content">
       <p>Gearly.com.tr platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
       <h4>Hizmet Kapsamı</h4><p>Gearly, dijital oyun erişimi sağlayan bir platformdur.</p>
-      <h4>Kullanıcı Sorumluluğu</h4><p>Hesap bilgilerinizin güvenliğinden siz sorumlusunuz.</p>
+      <h4>Kullanıcı Sorumluluğu</h4><p>Doğrulama kodlarınızın güvenliğinden siz sorumlusunuz.</p>
       <h4>İade Politikası</h4><p>Dijital ürünlerin doğası gereği, oyun erişimi sağlandıktan sonra iade yapılmamaktadır.</p>
     </div>
   </div>
@@ -242,27 +242,71 @@
     </div>
   </div>
 
-  <!-- Sağ: yorumlar slider -->
+  <!-- Sağ: nasıl çalışır adımları -->
   <div class="hero-right">
-    <div class="hero-reviews-card" id="hero-reviews">
-      <div class="hrc-header">
-        <span class="hrc-star">★</span>
-        <span class="hrc-title">Kullanıcı Yorumları</span>
+    <div class="hero-reviews-card" id="hero-reviews" style="padding:1.6rem 1.8rem; position:relative; overflow:hidden;">
+
+      <!-- Dekoratif arka plan ışığı -->
+      <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 70%);pointer-events:none;"></div>
+
+      <div class="hrc-header" style="margin-bottom:1.4rem;">
+        <span class="hrc-star" style="font-size:1rem;">◈</span>
+        <span class="hrc-title" style="font-size:0.95rem;letter-spacing:0.08em;text-transform:uppercase;">Nasıl Çalışır?</span>
       </div>
-      <!-- app.js buraya yazar, slider buradan okur -->
-      <div id="hero-reviews-list" style="display:none;"></div>
-      <!-- Slider -->
-      <div class="hrc-slider-outer">
-        <div class="hrc-slider-track" id="hrc-slider-track">
-          <div class="hrc-slide"><div class="hrc-empty">Yükleniyor...</div></div>
+
+      <!-- Adım 1 -->
+      <div style="display:flex;gap:1rem;margin-bottom:1.1rem;position:relative;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,rgba(99,102,241,0.4),transparent);margin-top:4px;min-height:28px;"></div>
         </div>
-        <div class="hrc-dots" id="hrc-dots"></div>
+        <div style="padding-top:4px;">
+          <div style="font-weight:600;font-size:0.88rem;color:#e2e8f0;margin-bottom:2px;">Oyunu Seç</div>
+          <div style="font-size:0.76rem;color:#94a3b8;line-height:1.5;">Mağazadan istediğin oyunu bul ve sepete ekle.</div>
+        </div>
       </div>
+
+      <!-- Adım 2 -->
+      <div style="display:flex;gap:1rem;margin-bottom:1.1rem;position:relative;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;">2</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,rgba(99,102,241,0.4),transparent);margin-top:4px;min-height:28px;"></div>
+        </div>
+        <div style="padding-top:4px;">
+          <div style="font-weight:600;font-size:0.88rem;color:#e2e8f0;margin-bottom:2px;">Ödeme Yap</div>
+          <div style="font-size:0.76rem;color:#94a3b8;line-height:1.5;">Güvenli ödeme ile işlemini tamamla.</div>
+        </div>
+      </div>
+
+      <!-- Adım 3 -->
+      <div style="display:flex;gap:1rem;margin-bottom:1.1rem;position:relative;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;">3</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,rgba(99,102,241,0.4),transparent);margin-top:4px;min-height:28px;"></div>
+        </div>
+        <div style="padding-top:4px;">
+          <div style="font-weight:600;font-size:0.88rem;color:#e2e8f0;margin-bottom:2px;">Kodu Al</div>
+          <div style="font-size:0.76rem;color:#94a3b8;line-height:1.5;">Steam erişim bilgilerin anında sana iletilir.</div>
+        </div>
+      </div>
+
+      <!-- Adım 4 -->
+      <div style="display:flex;gap:1rem;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:#fff;flex-shrink:0;">✓</div>
+        </div>
+        <div style="padding-top:4px;">
+          <div style="font-weight:600;font-size:0.88rem;color:#10b981;margin-bottom:2px;">Oyna!</div>
+          <div style="font-size:0.76rem;color:#94a3b8;line-height:1.5;">Steam'e giriş yap, oyunun hazır.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
 <!-- ===== İSTATİSTİKLER ===== -->
+ <!--
 <section class="stats-bar">
   <div class="stat-item"><div class="stat-icon">👥</div><div class="stat-info"><div class="stat-value" id="stat-users">137</div><div class="stat-label">Mutlu Kullanıcı</div></div></div>
   <div class="stat-divider"></div>
@@ -272,12 +316,12 @@
   <div class="stat-divider"></div>
   <div class="stat-item"><div class="stat-icon">💬</div><div class="stat-info"><div class="stat-value stat-live">7/24</div><div class="stat-label">Canlı Destek</div></div></div>
 </section>
-
+-->
 <!-- ===== ÖZELLİKLER ===== -->
 <section class="features-section">
   <div class="container-wide">
     <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Anında Teslimat</h3><p>Satın alma tamamlandıktan sonra oyununuz saniyeler içinde hesabınıza tanımlanır.</p></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Anında Teslimat</h3><p>Satın alma tamamlandıktan sonra siteye gelip oyununuz saniyeler içinde doğrulayıp oyunun tadını çıkarabilirsiniz.</p></div>
       <div class="feature-card"><div class="feature-icon">🖥️</div><h3>Kesintisiz Hizmet</h3><p>Sunucularımız her zaman aktif. Oyunlarınıza istediğiniz zaman erişin.</p><div class="feature-status"><span class="status-dot" id="server-status-dot"></span><span id="server-status-text">Sunucu durumu kontrol ediliyor...</span></div></div>
       <div class="feature-card"><div class="feature-icon">🎧</div><h3>Hızlı Destek</h3><p>Sorun yaşadığınızda çözüm odaklı destek ekibimiz yanınızda.</p><div class="feature-meta">Ort. yanıt süresi: ~15 dk</div></div>
     </div>
@@ -305,13 +349,13 @@
     <div class="how-steps" id="how-steps">
       <div class="how-step" id="how-step-1">
         <div class="how-num">01</div><div class="how-icon-wrap">🔑</div>
-        <h4>Kod Satın Al</h4><p>Gearly erişim kodu satın al ve platforma yükle. Bakiyen anında güncellenir.</p>
+        <h4>Kod Satın Al</h4><p>Kodunuzu satın aldıktan sonra .Gearly üzerinden kodunu yükle. Ardından oyununu hemen seç.</p>
         <div class="how-step-glow"></div>
       </div>
       <div class="how-connector"><div class="how-connector-line"><div class="how-connector-arrow"></div></div></div>
       <div class="how-step" id="how-step-2">
         <div class="how-num">02</div><div class="how-icon-wrap">🎮</div>
-        <h4>Oyun Seç</h4><p>Kütüphanemizdeki oyunlardan birini seç ve tek tıkla satın al.</p>
+        <h4>Oyun Seç</h4><p>Kütüphanemizdeki oyunlardan birini seç ve tek tıkla Kodunu al.</p>
         <div class="how-step-glow"></div>
       </div>
       <div class="how-connector"><div class="how-connector-line"><div class="how-connector-arrow"></div></div></div>
