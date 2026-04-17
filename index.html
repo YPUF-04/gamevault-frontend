@@ -129,92 +129,138 @@
     <svg class="hero-globe-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="globeGrad" cx="38%" cy="35%" r="60%">
-          <stop offset="0%" stop-color="#1a2a4a" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#060a15" stop-opacity="0.95"/>
+          <stop offset="0%"   stop-color="#1a2a4a" stop-opacity="0.92"/>
+          <stop offset="100%" stop-color="#040810" stop-opacity="0.97"/>
         </radialGradient>
         <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.12"/>
-          <stop offset="70%" stop-color="#7b2ff7" stop-opacity="0.06"/>
-          <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          <stop offset="0%"   stop-color="#00d2ff" stop-opacity="0.18"/>
+          <stop offset="55%"  stop-color="#7b2ff7" stop-opacity="0.10"/>
+          <stop offset="100%" stop-color="#000"    stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="globeGlow2" cx="38%" cy="32%" r="45%">
+          <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#000"    stop-opacity="0"/>
         </radialGradient>
         <clipPath id="globeClip">
           <circle cx="260" cy="260" r="220"/>
         </clipPath>
         <filter id="globeBlur">
-          <feGaussianBlur stdDeviation="1.2"/>
+          <feGaussianBlur stdDeviation="1"/>
+        </filter>
+        <filter id="softBlur">
+          <feGaussianBlur stdDeviation="2.5"/>
         </filter>
       </defs>
-      <!-- Glow -->
-      <circle cx="260" cy="260" r="240" fill="url(#globeGlow)"/>
+
+      <!-- Dış glow halkası -->
+      <circle cx="260" cy="260" r="256" fill="url(#globeGlow)"/>
+      <!-- İkincil highlight -->
+      <circle cx="260" cy="260" r="220" fill="url(#globeGlow2)"/>
       <!-- Ana küre -->
-      <circle cx="260" cy="260" r="220" fill="url(#globeGrad)" stroke="#00d2ff" stroke-width="0.8" stroke-opacity="0.3"/>
-      <!-- Enlem çizgileri -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
-        <ellipse cx="260" cy="260" rx="220" ry="44"/>
-        <ellipse cx="260" cy="210" rx="195" ry="38"/>
-        <ellipse cx="260" cy="160" rx="155" ry="28"/>
-        <ellipse cx="260" cy="115" rx="100" ry="16"/>
-        <ellipse cx="260" cy="310" rx="195" ry="38"/>
-        <ellipse cx="260" cy="360" rx="155" ry="28"/>
-        <ellipse cx="260" cy="405" rx="100" ry="16"/>
+      <circle cx="260" cy="260" r="220" fill="url(#globeGrad)" stroke="#00d2ff" stroke-width="0.9" stroke-opacity="0.35"/>
+
+      <!-- Enlem çizgileri (daha fazla) -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.2" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="220" ry="46"/>
+        <ellipse cx="260" cy="215" rx="200" ry="40"/>
+        <ellipse cx="260" cy="168" rx="168" ry="30"/>
+        <ellipse cx="260" cy="125" rx="118" ry="19"/>
+        <ellipse cx="260" cy="88"  rx="65"  ry="10"/>
+        <ellipse cx="260" cy="305" rx="200" ry="40"/>
+        <ellipse cx="260" cy="352" rx="168" ry="30"/>
+        <ellipse cx="260" cy="395" rx="118" ry="19"/>
+        <ellipse cx="260" cy="432" rx="65"  ry="10"/>
       </g>
-      <!-- Boylam çizgileri -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
-        <ellipse cx="260" cy="260" rx="55" ry="220"/>
-        <ellipse cx="260" cy="260" rx="110" ry="220"/>
-        <ellipse cx="260" cy="260" rx="165" ry="220"/>
+
+      <!-- Boylam çizgileri (daha fazla) -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.2" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="40"  ry="220"/>
+        <ellipse cx="260" cy="260" rx="88"  ry="220"/>
+        <ellipse cx="260" cy="260" rx="136" ry="220"/>
+        <ellipse cx="260" cy="260" rx="184" ry="220"/>
         <ellipse cx="260" cy="260" rx="220" ry="220"/>
       </g>
-      <!-- Kıta leke şekilleri (soyut) -->
-      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.07">
-        <ellipse cx="200" cy="220" rx="55" ry="35" transform="rotate(-15 200 220)"/>
-        <ellipse cx="310" cy="195" rx="40" ry="25" transform="rotate(10 310 195)"/>
-        <ellipse cx="260" cy="300" rx="65" ry="28" transform="rotate(5 260 300)"/>
-        <ellipse cx="160" cy="300" rx="30" ry="20" transform="rotate(-10 160 300)"/>
-        <ellipse cx="340" cy="310" rx="35" ry="18" transform="rotate(20 340 310)"/>
-        <ellipse cx="230" cy="160" rx="25" ry="14"/>
+
+      <!-- Kıta lekeleri (soyut) -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.06">
+        <ellipse cx="195" cy="218" rx="60" ry="38" transform="rotate(-15 195 218)"/>
+        <ellipse cx="318" cy="192" rx="45" ry="28" transform="rotate(10 318 192)"/>
+        <ellipse cx="258" cy="308" rx="70" ry="30" transform="rotate(5 258 308)"/>
+        <ellipse cx="155" cy="305" rx="32" ry="22" transform="rotate(-10 155 305)"/>
+        <ellipse cx="348" cy="318" rx="38" ry="20" transform="rotate(20 348 318)"/>
+        <ellipse cx="228" cy="158" rx="28" ry="16"/>
+        <ellipse cx="370" cy="250" rx="22" ry="14" transform="rotate(30 370 250)"/>
+        <ellipse cx="145" cy="180" rx="18" ry="12" transform="rotate(-20 145 180)"/>
       </g>
-      <!-- Nokta ağı (bağlantı noktaları) -->
-      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.55">
+
+      <!-- Nokta ağı -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.7">
         <circle cx="190" cy="215" r="3.5"/>
         <circle cx="315" cy="190" r="2.8"/>
-        <circle cx="265" cy="295" r="3"/>
+        <circle cx="265" cy="298" r="3.2"/>
         <circle cx="155" cy="295" r="2.5"/>
-        <circle cx="350" cy="305" r="2.8"/>
+        <circle cx="350" cy="308" r="2.8"/>
         <circle cx="235" cy="155" r="2.2"/>
-        <circle cx="290" cy="240" r="2"/>
-        <circle cx="220" cy="260" r="2"/>
-        <circle cx="370" cy="230" r="2.2"/>
-        <circle cx="145" cy="240" r="2"/>
+        <circle cx="292" cy="242" r="2"/>
+        <circle cx="220" cy="262" r="2"/>
+        <circle cx="372" cy="232" r="2.4"/>
+        <circle cx="145" cy="242" r="2"/>
+        <circle cx="175" cy="340" r="2.2"/>
+        <circle cx="330" cy="355" r="2.5"/>
+        <circle cx="260" cy="170" r="2"/>
+        <circle cx="390" cy="280" r="2"/>
+        <circle cx="128" cy="290" r="1.8"/>
       </g>
+      <!-- Mor nokta aksanı -->
+      <g clip-path="url(#globeClip)" fill="#a259ff" fill-opacity="0.65">
+        <circle cx="310" cy="330" r="2.5"/>
+        <circle cx="200" cy="175" r="2"/>
+        <circle cx="355" cy="195" r="1.8"/>
+        <circle cx="170" cy="255" r="2"/>
+      </g>
+
       <!-- Bağlantı çizgileri -->
-      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.7" stroke-opacity="0.3" fill="none">
-        <line x1="190" y1="215" x2="265" y2="295"/>
-        <line x1="315" y1="190" x2="265" y2="295"/>
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.7" stroke-opacity="0.28" fill="none">
+        <line x1="190" y1="215" x2="265" y2="298"/>
+        <line x1="315" y1="190" x2="265" y2="298"/>
         <line x1="190" y1="215" x2="315" y2="190"/>
-        <line x1="265" y1="295" x2="350" y2="305"/>
+        <line x1="265" y1="298" x2="350" y2="308"/>
         <line x1="190" y1="215" x2="155" y2="295"/>
         <line x1="235" y1="155" x2="315" y2="190"/>
-        <line x1="290" y1="240" x2="370" y2="230"/>
-        <line x1="220" y1="260" x2="145" y2="240"/>
+        <line x1="292" y1="242" x2="372" y2="232"/>
+        <line x1="220" y1="262" x2="145" y2="242"/>
         <line x1="235" y1="155" x2="190" y2="215"/>
+        <line x1="175" y1="340" x2="155" y2="295"/>
+        <line x1="330" y1="355" x2="350" y2="308"/>
+        <line x1="265" y1="298" x2="175" y2="340"/>
+        <line x1="265" y1="298" x2="330" y2="355"/>
+        <line x1="315" y1="190" x2="372" y2="232"/>
+        <line x1="260" y1="170" x2="235" y2="155"/>
+        <line x1="390" y1="280" x2="372" y2="232"/>
       </g>
+
       <!-- Animasyonlu pulse noktaları -->
-      <circle cx="190" cy="215" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.5">
-        <animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
+      <circle cx="190" cy="215" r="6" fill="none" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.6">
+        <animate attributeName="r" values="5;16;5" dur="3.2s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="3.2s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="265" cy="295" r="7" fill="none" stroke="#7b2ff7" stroke-width="1" stroke-opacity="0.5">
-        <animate attributeName="r" values="5;12;5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+      <circle cx="265" cy="298" r="6" fill="none" stroke="#7b2ff7" stroke-width="1.2" stroke-opacity="0.6">
+        <animate attributeName="r" values="5;14;5" dur="2.6s" begin="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="2.6s" begin="0.8s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="315" cy="190" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.4">
-        <animate attributeName="r" values="5;10;5" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
-        <animate attributeName="stroke-opacity" values="0.4;0;0.4" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+      <circle cx="315" cy="190" r="6" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="5;12;5" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3s" begin="1.5s" repeatCount="indefinite"/>
       </circle>
-      <!-- Dış parlaklık halkası -->
-      <circle cx="260" cy="260" r="220" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-opacity="0.2"/>
-      <circle cx="260" cy="260" r="235" fill="none" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.08" stroke-dasharray="4 8"/>
+      <circle cx="350" cy="308" r="5" fill="none" stroke="#a259ff" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="4;11;4" dur="2.8s" begin="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.8s" begin="2.2s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Dış kenar çizgileri -->
+      <circle cx="260" cy="260" r="220" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-opacity="0.22"/>
+      <circle cx="260" cy="260" r="235" fill="none" stroke="#00d2ff" stroke-width="0.6" stroke-opacity="0.1" stroke-dasharray="5 10"/>
+      <circle cx="260" cy="260" r="248" fill="none" stroke="#7b2ff7" stroke-width="0.4" stroke-opacity="0.06" stroke-dasharray="2 14"/>
     </svg>
   </div>
 
@@ -441,24 +487,28 @@
   right: -60px;
   top: 50%;
   transform: translateY(-50%);
-  width: 520px;
-  height: 520px;
+  width: 580px;
+  height: 580px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.55;
-  animation: globeSpin 60s linear infinite;
+  opacity: 0.7;
+  animation: globeSpin 90s linear infinite, globePulse 8s ease-in-out infinite;
 }
 .hero-globe-svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 40px rgba(0,210,255,0.15)) drop-shadow(0 0 80px rgba(123,47,247,0.1));
+  filter: drop-shadow(0 0 60px rgba(0,210,255,0.25)) drop-shadow(0 0 120px rgba(123,47,247,0.18)) drop-shadow(0 0 20px rgba(0,210,255,0.3));
 }
 @keyframes globeSpin {
   from { transform: translateY(-50%) rotate(0deg); }
   to   { transform: translateY(-50%) rotate(360deg); }
 }
+@keyframes globePulse {
+  0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 60px rgba(0,210,255,0.22)) drop-shadow(0 0 120px rgba(123,47,247,0.15)); }
+  50%       { opacity: 0.85; filter: drop-shadow(0 0 90px rgba(0,210,255,0.38)) drop-shadow(0 0 160px rgba(123,47,247,0.28)) drop-shadow(0 0 30px rgba(0,210,255,0.5)); }
+}
 @media (max-width: 900px) {
-  .hero-globe-wrap { width: 320px; height: 320px; right: -80px; opacity: 0.3; }
+  .hero-globe-wrap { width: 340px; height: 340px; right: -80px; opacity: 0.35; }
 }
 @media (max-width: 600px) {
   .hero-globe-wrap { display: none; }
