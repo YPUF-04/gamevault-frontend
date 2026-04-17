@@ -284,7 +284,7 @@ function gameCardHTML(g) {
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
         <div class="game-price">${g.price || 'Hesap'}</div>
-        <div class="game-buy-btn">Satın Al →</div>
+        <div class="game-buy-btn">Kodu Doğrula →</div>
       </div>
     </div>
   `;
