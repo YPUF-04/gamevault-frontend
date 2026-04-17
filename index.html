@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gearly | Steam Hesap Mağazası</title>
+<title>Gearly | Dijital Oyun Doğrulama Sitesi</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -104,10 +104,14 @@
     <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
-      <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Gir</a>
+      <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
     </div>
-    <div class="nav-right">
-      <button class="btn-nav-login" onclick="showOverlay('code-overlay')" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;">🔑 Kodu Gir</button>
+    <div class="nav-right" id="nav-auth-area">
+      <button class="btn-nav-login" onclick="showOverlay('code-overlay')">🔑 Kod Gir</button>
+    </div>
+    <div class="nav-right nav-user-area" id="nav-user-area" style="display:none;">
+      <div class="nav-balance">◈ <span id="nav-balance">0</span></div>
+      <button class="btn-nav-account" onclick="showOverlay('code-overlay')">👤 <span id="nav-username">—</span></button>
     </div>
     <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
       <span></span><span></span><span></span>
@@ -128,8 +132,8 @@
     </div>
 
     <h1 class="hero-title-v2">
-      <span class="ht-line1">Steam Hesabı Al,</span>
-      <span class="ht-line2">Dakikalar İçinde <em>Oyna.</em></span>
+      <span class="ht-line1">Gearly — Dijital Oyun</span>
+      <span class="ht-line2">Doğrulama <em>Platformu.</em></span>
     </h1>
 
     <p class="hero-desc-v2">
@@ -161,15 +165,19 @@
     </div>
   </div>
 
-  <!-- Sağ: yorumlar -->
+  <!-- Sağ: yorumlar slider -->
   <div class="hero-right">
     <div class="hero-reviews-card" id="hero-reviews">
       <div class="hrc-header">
         <span class="hrc-star">★</span>
         <span class="hrc-title">Kullanıcı Yorumları</span>
       </div>
-      <div class="hrc-list" id="hero-reviews-list">
-        <div class="hero-review-loading">Yükleniyor...</div>
+      <!-- Horizontal slider wrapper -->
+      <div class="hrc-slider-outer">
+        <div class="hrc-slider-track" id="hrc-slider-track">
+          <div class="hero-review-loading">Yükleniyor...</div>
+        </div>
+        <div class="hrc-dots" id="hrc-dots"></div>
       </div>
     </div>
   </div>
@@ -298,7 +306,7 @@
       <div class="lsw-header-avatar">GR</div>
       <div>
         <div class="lsw-header-name">Gearly Destek</div>
-        <div class="lsw-header-status"><span class="lsw-online-dot"></span> Çevrimiçi</div>
+        <div class="lsw-header-status" id="lsw-status-line"><span class="lsw-online-dot" id="lsw-status-dot"></span> <span id="lsw-status-text">Çevrimiçi</span></div>
       </div>
     </div>
     <button class="lsw-panel-close" onclick="toggleLiveSupport()">✕</button>
@@ -340,6 +348,150 @@
     <span class="lsw-notif-dot" id="lsw-notif-dot" style="display:none;"></span>
   </button>
 </div>
+
+<style>
+/* ===== REVIEWS HORIZONTAL SLIDER ===== */
+.hrc-slider-outer {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.hrc-slider-track {
+  display: flex;
+  gap: 0.75rem;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+.hrc-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+.hrc-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 0.75rem;
+}
+.hrc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.hrc-dot.active {
+  background: var(--accent, #00d2ff);
+  width: 18px;
+  border-radius: 3px;
+}
+/* Status offline color */
+.lsw-header-status.offline { color: #f59e0b !important; }
+.lsw-header-status.offline .lsw-online-dot { background: #f59e0b !important; }
+</style>
+
+<script>
+// ===== CANLI DESTEK DURUMU =====
+// Burayı değiştirerek durumu ayarlayabilirsin:
+// "online"  → Çevrimiçi (yeşil nokta)
+// "30"      → "~30 dk içinde yanıtlıyoruz" (sarı nokta)
+// "60"      → "~60 dk içinde yanıtlıyoruz"
+const LSW_STATUS = "online"; // <-- buraya "online", "30", "60" yaz
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dot  = document.getElementById("lsw-status-dot");
+  const txt  = document.getElementById("lsw-status-text");
+  const line = document.getElementById("lsw-status-line");
+  if (!dot || !txt) return;
+  if (LSW_STATUS === "online") {
+    txt.textContent = "Çevrimiçi";
+    dot.style.background = "#00e87a";
+    dot.style.boxShadow = "0 0 6px #00e87a88";
+  } else {
+    const mins = parseInt(LSW_STATUS) || 30;
+    txt.textContent = `~${mins} dk içinde yanıtlıyoruz`;
+    dot.style.background = "#f59e0b";
+    dot.style.boxShadow = "0 0 6px #f59e0b88";
+    if (line) line.style.color = "#f59e0b";
+  }
+});
+
+// ===== REVIEWS SLIDER =====
+let _sliderIdx = 0;
+let _sliderItems = [];
+let _sliderTimer = null;
+
+function initReviewsSlider(reviews) {
+  const track = document.getElementById("hrc-slider-track");
+  const dotsEl = document.getElementById("hrc-dots");
+  if (!track || !reviews.length) return;
+
+  _sliderItems = reviews;
+  track.innerHTML = reviews.map(r => {
+    const stars = "★".repeat(Math.min(5, r.rating || 5));
+    const name = r.name || "Kullanıcı";
+    const initials = name.slice(0,2).toUpperCase();
+    return `<div class="hrc-slide">
+      <div class="hero-review-card" style="margin:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div class="hero-review-avatar">${initials}</div>
+            <span class="hero-review-name">${name}</span>
+          </div>
+          <span class="hero-review-stars">${stars}</span>
+        </div>
+        <p class="hero-review-text">${r.text || r.comment || ""}</p>
+      </div>
+    </div>`;
+  }).join("");
+
+  dotsEl.innerHTML = reviews.map((_, i) =>
+    `<div class="hrc-dot${i===0?' active':''}" onclick="goSlide(${i})"></div>`
+  ).join("");
+
+  goSlide(0);
+  _sliderTimer = setInterval(() => goSlide((_sliderIdx + 1) % _sliderItems.length), 3500);
+}
+
+function goSlide(idx) {
+  const track = document.getElementById("hrc-slider-track");
+  const dots = document.querySelectorAll(".hrc-dot");
+  if (!track) return;
+  _sliderIdx = idx;
+  track.style.transform = `translateX(-${idx * 100}%)`;
+  dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+}
+
+// Patch global renderHeroReviews from app.js
+window._sliderReady = false;
+const _origRender = window.renderHeroReviews;
+// Override after app.js loads
+window.addEventListener("load", () => {
+  // app.js'deki review render'ı yakala
+  const origFetch = window.fetch;
+  // Fallback: observe hrc-slider-track for data injected by app.js
+  const obs = new MutationObserver(() => {
+    const track = document.getElementById("hrc-slider-track");
+    // if app.js wrote review cards into hrc-list (old id), migrate them
+    const oldList = document.getElementById("hero-reviews-list");
+    if (oldList && oldList.children.length) {
+      const cards = Array.from(oldList.querySelectorAll(".hero-review-card"));
+      if (cards.length > 0 && !window._sliderReady) {
+        window._sliderReady = true;
+        // Extract data and build slides
+        const fakeReviews = cards.map(c => ({
+          name: c.querySelector(".hero-review-name")?.textContent || "Kullanıcı",
+          rating: (c.querySelector(".hero-review-stars")?.textContent || "★★★★★").length,
+          text: c.querySelector(".hero-review-text")?.textContent || ""
+        }));
+        oldList.style.display = "none";
+        initReviewsSlider(fakeReviews);
+      }
+    }
+  });
+  const reviewsCard = document.getElementById("hero-reviews");
+  if (reviewsCard) obs.observe(reviewsCard, { childList: true, subtree: true });
+});
+</script>
 
 <script src="app.js"></script>
 </body>
