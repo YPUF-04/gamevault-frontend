@@ -16,7 +16,7 @@
 <div id="code-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly.com.tr</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>🔑 Kodunu Gir</h2>
     <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
     <div class="field-group">
@@ -36,7 +36,7 @@
 <div id="purchase-overlay" class="overlay">
   <div class="overlay-box">
     <button class="overlay-close" onclick="closeOverlay('purchase-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly.com.tr</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <div class="steam-icon">♨</div>
     <h2 id="po-game-name">Oyun Adı</h2>
     <div class="account-info-box">
@@ -71,7 +71,7 @@
 <div id="privacy-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('privacy-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly.com.tr</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>Gizlilik Politikası</h2>
     <div class="legal-content">
       <p>Gearly.com.tr olarak kullanıcı gizliliğine büyük önem veriyoruz.</p>
@@ -86,7 +86,7 @@
 <div id="terms-overlay" class="overlay">
   <div class="overlay-box wide">
     <button class="overlay-close" onclick="closeOverlay('terms-overlay')">✕</button>
-    <div class="overlay-logo">◈ Gearly.com.tr</div>
+    <div class="overlay-logo">◈ Gearly</div>
     <h2>Kullanım Şartları</h2>
     <div class="legal-content">
       <p>Gearly.com.tr platformunu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
@@ -100,11 +100,11 @@
 <!-- ===== NAV ===== -->
 <nav id="main-nav">
   <div class="nav-inner">
-    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">◈ Gearly.com.tr</div>
+    <div class="logo" onclick="scrollToTop()" style="cursor:pointer;">◈ Gearly</div>
     <div class="nav-links" id="nav-links">
       <a href="index.html" style="color:var(--accent);">Ana Sayfa</a>
       <a href="Games.html">Tüm Oyunlar</a>
-      <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
+      <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Yükle</a>
     </div>
     <div class="nav-right" id="nav-auth-area">
       <button class="btn-nav-login" onclick="showOverlay('code-overlay')">🔑 Kod Gir</button>
@@ -122,6 +122,100 @@
 <!-- ===== HERO ===== -->
 <section class="hero hero-v2">
   <div class="hero-bg"></div>
+
+  <!-- Dünya görseli arka plan -->
+  <div class="hero-globe-wrap" aria-hidden="true">
+    <svg class="hero-globe-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="globeGrad" cx="38%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#1a2a4a" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#060a15" stop-opacity="0.95"/>
+        </radialGradient>
+        <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.12"/>
+          <stop offset="70%" stop-color="#7b2ff7" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+        </radialGradient>
+        <clipPath id="globeClip">
+          <circle cx="260" cy="260" r="220"/>
+        </clipPath>
+        <filter id="globeBlur">
+          <feGaussianBlur stdDeviation="1.2"/>
+        </filter>
+      </defs>
+      <!-- Glow -->
+      <circle cx="260" cy="260" r="240" fill="url(#globeGlow)"/>
+      <!-- Ana küre -->
+      <circle cx="260" cy="260" r="220" fill="url(#globeGrad)" stroke="#00d2ff" stroke-width="0.8" stroke-opacity="0.3"/>
+      <!-- Enlem çizgileri -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="220" ry="44"/>
+        <ellipse cx="260" cy="210" rx="195" ry="38"/>
+        <ellipse cx="260" cy="160" rx="155" ry="28"/>
+        <ellipse cx="260" cy="115" rx="100" ry="16"/>
+        <ellipse cx="260" cy="310" rx="195" ry="38"/>
+        <ellipse cx="260" cy="360" rx="155" ry="28"/>
+        <ellipse cx="260" cy="405" rx="100" ry="16"/>
+      </g>
+      <!-- Boylam çizgileri -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.18" fill="none" filter="url(#globeBlur)">
+        <ellipse cx="260" cy="260" rx="55" ry="220"/>
+        <ellipse cx="260" cy="260" rx="110" ry="220"/>
+        <ellipse cx="260" cy="260" rx="165" ry="220"/>
+        <ellipse cx="260" cy="260" rx="220" ry="220"/>
+      </g>
+      <!-- Kıta leke şekilleri (soyut) -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.07">
+        <ellipse cx="200" cy="220" rx="55" ry="35" transform="rotate(-15 200 220)"/>
+        <ellipse cx="310" cy="195" rx="40" ry="25" transform="rotate(10 310 195)"/>
+        <ellipse cx="260" cy="300" rx="65" ry="28" transform="rotate(5 260 300)"/>
+        <ellipse cx="160" cy="300" rx="30" ry="20" transform="rotate(-10 160 300)"/>
+        <ellipse cx="340" cy="310" rx="35" ry="18" transform="rotate(20 340 310)"/>
+        <ellipse cx="230" cy="160" rx="25" ry="14"/>
+      </g>
+      <!-- Nokta ağı (bağlantı noktaları) -->
+      <g clip-path="url(#globeClip)" fill="#00d2ff" fill-opacity="0.55">
+        <circle cx="190" cy="215" r="3.5"/>
+        <circle cx="315" cy="190" r="2.8"/>
+        <circle cx="265" cy="295" r="3"/>
+        <circle cx="155" cy="295" r="2.5"/>
+        <circle cx="350" cy="305" r="2.8"/>
+        <circle cx="235" cy="155" r="2.2"/>
+        <circle cx="290" cy="240" r="2"/>
+        <circle cx="220" cy="260" r="2"/>
+        <circle cx="370" cy="230" r="2.2"/>
+        <circle cx="145" cy="240" r="2"/>
+      </g>
+      <!-- Bağlantı çizgileri -->
+      <g clip-path="url(#globeClip)" stroke="#00d2ff" stroke-width="0.7" stroke-opacity="0.3" fill="none">
+        <line x1="190" y1="215" x2="265" y2="295"/>
+        <line x1="315" y1="190" x2="265" y2="295"/>
+        <line x1="190" y1="215" x2="315" y2="190"/>
+        <line x1="265" y1="295" x2="350" y2="305"/>
+        <line x1="190" y1="215" x2="155" y2="295"/>
+        <line x1="235" y1="155" x2="315" y2="190"/>
+        <line x1="290" y1="240" x2="370" y2="230"/>
+        <line x1="220" y1="260" x2="145" y2="240"/>
+        <line x1="235" y1="155" x2="190" y2="215"/>
+      </g>
+      <!-- Animasyonlu pulse noktaları -->
+      <circle cx="190" cy="215" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="265" cy="295" r="7" fill="none" stroke="#7b2ff7" stroke-width="1" stroke-opacity="0.5">
+        <animate attributeName="r" values="5;12;5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="315" cy="190" r="7" fill="none" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.4">
+        <animate attributeName="r" values="5;10;5" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.4;0;0.4" dur="2.8s" begin="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Dış parlaklık halkası -->
+      <circle cx="260" cy="260" r="220" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-opacity="0.2"/>
+      <circle cx="260" cy="260" r="235" fill="none" stroke="#00d2ff" stroke-width="0.5" stroke-opacity="0.08" stroke-dasharray="4 8"/>
+    </svg>
+  </div>
 
   <!-- Sol: metin -->
   <div class="hero-content">
@@ -246,7 +340,7 @@
   <div class="footer-inner">
     <div class="footer-top-row">
       <div class="footer-brand">
-        <div class="footer-logo">◈ Gearly.com.tr</div>
+        <div class="footer-logo">◈ Gearly</div>
         <p class="footer-desc">Steam hesabı almanın en hızlı ve güvenilir yolu.</p>
       </div>
       <div class="footer-cols">
@@ -254,7 +348,7 @@
           <div class="footer-col-title">Sayfalar</div>
           <div class="footer-col-links">
             <a href="#games" onclick="smoothScrollToGames(event)">Oyunlar</a>
-            <a href="#" onclick="handleCodeBtn(); return false;">Kodu Yükle</a>
+            <a href="#" onclick="showOverlay('code-overlay'); return false;">Kodu Yükle</a>
 
           </div>
         </div>
@@ -334,6 +428,35 @@
 </div>
 
 <style>
+/* ===== HERO GLOBE ===== */
+.hero-globe-wrap {
+  position: absolute;
+  right: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 520px;
+  height: 520px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  animation: globeSpin 60s linear infinite;
+}
+.hero-globe-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 40px rgba(0,210,255,0.15)) drop-shadow(0 0 80px rgba(123,47,247,0.1));
+}
+@keyframes globeSpin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to   { transform: translateY(-50%) rotate(360deg); }
+}
+@media (max-width: 900px) {
+  .hero-globe-wrap { width: 320px; height: 320px; right: -80px; opacity: 0.3; }
+}
+@media (max-width: 600px) {
+  .hero-globe-wrap { display: none; }
+}
+
 /* ===== REVIEWS HORIZONTAL SLIDER ===== */
 .hrc-slider-outer { overflow: hidden; width: 100%; }
 .hrc-slider-track {
