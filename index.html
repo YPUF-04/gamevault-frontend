@@ -137,27 +137,9 @@
     </h1>
 
     <p class="hero-desc-v2">
-      Gearly üzerinden erişim kodunu gir, istediğin oyunu seç.<br>
-      Steam kullanıcı adı ve şifresi <strong>anında</strong> sana iletilir —<br>
-      indirme yok, kurulum yok, bekleme yok.
+      Erişim kodunu gir, istediğin oyunu seç.<br>
+      Steam bilgilerin <strong>anında</strong> sana iletilir.
     </p>
-
-    <div class="hero-flow">
-      <div class="hf-item">
-        <div class="hf-icon">🔑</div>
-        <div class="hf-label">Kodunu Gir</div>
-      </div>
-      <div class="hf-divider"></div>
-      <div class="hf-item">
-        <div class="hf-icon">🎮</div>
-        <div class="hf-label">Oyununu Seç</div>
-      </div>
-      <div class="hf-divider"></div>
-      <div class="hf-item">
-        <div class="hf-icon">🚀</div>
-        <div class="hf-label">Hemen Oyna</div>
-      </div>
-    </div>
 
     <div class="hero-cta-row">
       <button class="hero-cta-main" onclick="smoothScrollToGames()">Oyunlara Göz At →</button>
@@ -172,10 +154,12 @@
         <span class="hrc-star">★</span>
         <span class="hrc-title">Kullanıcı Yorumları</span>
       </div>
-      <!-- Horizontal slider wrapper -->
+      <!-- app.js buraya yazar, slider buradan okur -->
+      <div id="hero-reviews-list" style="display:none;"></div>
+      <!-- Slider -->
       <div class="hrc-slider-outer">
         <div class="hrc-slider-track" id="hrc-slider-track">
-          <div class="hero-review-loading">Yükleniyor...</div>
+          <div class="hrc-slide"><div class="hrc-empty">Yükleniyor...</div></div>
         </div>
         <div class="hrc-dots" id="hrc-dots"></div>
       </div>
@@ -351,145 +335,152 @@
 
 <style>
 /* ===== REVIEWS HORIZONTAL SLIDER ===== */
-.hrc-slider-outer {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
+.hrc-slider-outer { overflow: hidden; width: 100%; }
 .hrc-slider-track {
   display: flex;
-  gap: 0.75rem;
-  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
   will-change: transform;
 }
-.hrc-slide {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-.hrc-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 0.75rem;
-}
+.hrc-slide { flex: 0 0 100%; min-width: 0; }
+.hrc-empty { color: var(--text3,#4a566a); font-size:0.82rem; text-align:center; padding:1rem 0; }
+.hrc-dots { display:flex; justify-content:center; gap:6px; margin-top:0.65rem; }
 .hrc-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  transition: all 0.3s;
-  cursor: pointer;
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(255,255,255,0.18);
+  transition: all 0.3s; cursor:pointer; border:none;
 }
-.hrc-dot.active {
-  background: var(--accent, #00d2ff);
-  width: 18px;
-  border-radius: 3px;
-}
-/* Status offline color */
-.lsw-header-status.offline { color: #f59e0b !important; }
-.lsw-header-status.offline .lsw-online-dot { background: #f59e0b !important; }
+.hrc-dot.active { background:var(--accent,#00d2ff); width:18px; border-radius:3px; }
+
+/* Status offline */
+#lsw-status-line.offline { color:#f59e0b !important; }
+#lsw-status-line.offline #lsw-status-dot { background:#f59e0b !important; }
+
+/* Hero desc sade */
+.hero-desc-v2 { max-width: 480px; }
 </style>
 
 <script>
-// ===== CANLI DESTEK DURUMU =====
-// Burayı değiştirerek durumu ayarlayabilirsin:
-// "online"  → Çevrimiçi (yeşil nokta)
-// "30"      → "~30 dk içinde yanıtlıyoruz" (sarı nokta)
-// "60"      → "~60 dk içinde yanıtlıyoruz"
-const LSW_STATUS = "online"; // <-- buraya "online", "30", "60" yaz
+// ============================================================
+// CANLI DESTEK DURUMU
+// "online" → yeşil, "30" / "60" vb → sarı + dk mesajı
+// ============================================================
+const LSW_STATUS = "online";
 
-document.addEventListener("DOMContentLoaded", () => {
+function applyLswStatus() {
   const dot  = document.getElementById("lsw-status-dot");
   const txt  = document.getElementById("lsw-status-text");
   const line = document.getElementById("lsw-status-line");
   if (!dot || !txt) return;
   if (LSW_STATUS === "online") {
     txt.textContent = "Çevrimiçi";
-    dot.style.background = "#00e87a";
-    dot.style.boxShadow = "0 0 6px #00e87a88";
+    dot.style.cssText = "background:#00e87a;box-shadow:0 0 6px #00e87a88;";
   } else {
     const mins = parseInt(LSW_STATUS) || 30;
     txt.textContent = `~${mins} dk içinde yanıtlıyoruz`;
-    dot.style.background = "#f59e0b";
-    dot.style.boxShadow = "0 0 6px #f59e0b88";
+    dot.style.cssText = "background:#f59e0b;box-shadow:0 0 6px #f59e0b88;";
     if (line) line.style.color = "#f59e0b";
   }
-});
+}
+document.addEventListener("DOMContentLoaded", applyLswStatus);
 
-// ===== REVIEWS SLIDER =====
-let _sliderIdx = 0;
-let _sliderItems = [];
-let _sliderTimer = null;
+// ============================================================
+// GİRİŞ EKRANI — "Dijital Oyun Doğrulama Sitesi" alt yazısı
+// app.js, DOMContentLoaded'da showIntroAnimation() çağırır.
+// Biz app.js yüklenmeden önce fetch'i wrap ediyoruz.
+// ============================================================
+(function patchIntro() {
+  const _origBodyAppend = document.body.appendChild.bind(document.body);
+  document.body.appendChild = function(el) {
+    const result = _origBodyAppend(el);
+    if (el && el.id === "intro-overlay") {
+      const divs = el.querySelectorAll("div");
+      divs.forEach(d => {
+        if (d.textContent && d.textContent.includes("Mağazası")) {
+          d.textContent = "Dijital Oyun Doğrulama Sitesi";
+        }
+      });
+    }
+    return result;
+  };
+})();
 
-function initReviewsSlider(reviews) {
+// ============================================================
+// REVIEWS SLIDER
+// ============================================================
+let _sIdx = 0, _sItems = [], _sTimer = null;
+
+function buildSlider(reviews) {
+  if (!reviews || !reviews.length) return;
+  _sItems = reviews;
   const track = document.getElementById("hrc-slider-track");
   const dotsEl = document.getElementById("hrc-dots");
-  if (!track || !reviews.length) return;
+  if (!track) return;
 
-  _sliderItems = reviews;
   track.innerHTML = reviews.map(r => {
+    const nm   = r.username || r.name || "Kullanıcı";
+    const av   = r.avatar || nm.slice(0,2).toUpperCase();
     const stars = "★".repeat(Math.min(5, r.rating || 5));
-    const name = r.name || "Kullanıcı";
-    const initials = name.slice(0,2).toUpperCase();
+    const msg  = r.message || r.text || r.comment || "";
     return `<div class="hrc-slide">
       <div class="hero-review-card" style="margin:0;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
           <div style="display:flex;align-items:center;gap:0.5rem;">
-            <div class="hero-review-avatar">${initials}</div>
-            <span class="hero-review-name">${name}</span>
+            <div class="hero-review-avatar">${av}</div>
+            <span class="hero-review-name">${nm}</span>
           </div>
           <span class="hero-review-stars">${stars}</span>
         </div>
-        <p class="hero-review-text">${r.text || r.comment || ""}</p>
+        <p class="hero-review-text">${msg}</p>
       </div>
     </div>`;
   }).join("");
 
-  dotsEl.innerHTML = reviews.map((_, i) =>
-    `<div class="hrc-dot${i===0?' active':''}" onclick="goSlide(${i})"></div>`
-  ).join("");
-
-  goSlide(0);
-  _sliderTimer = setInterval(() => goSlide((_sliderIdx + 1) % _sliderItems.length), 3500);
+  if (dotsEl) {
+    dotsEl.innerHTML = reviews.map((_, i) =>
+      `<button class="hrc-dot${i===0?' active':''}" onclick="gSlide(${i})"></button>`
+    ).join("");
+  }
+  gSlide(0);
+  clearInterval(_sTimer);
+  _sTimer = setInterval(() => gSlide((_sIdx + 1) % _sItems.length), 3800);
 }
 
-function goSlide(idx) {
+window.gSlide = function(idx) {
   const track = document.getElementById("hrc-slider-track");
-  const dots = document.querySelectorAll(".hrc-dot");
   if (!track) return;
-  _sliderIdx = idx;
+  _sIdx = idx;
   track.style.transform = `translateX(-${idx * 100}%)`;
-  dots.forEach((d, i) => d.classList.toggle("active", i === idx));
-}
+  document.querySelectorAll(".hrc-dot").forEach((d,i) => d.classList.toggle("active", i===idx));
+};
 
-// Patch global renderHeroReviews from app.js
-window._sliderReady = false;
-const _origRender = window.renderHeroReviews;
-// Override after app.js loads
-window.addEventListener("load", () => {
-  // app.js'deki review render'ı yakala
-  const origFetch = window.fetch;
-  // Fallback: observe hrc-slider-track for data injected by app.js
+// app.js, hero-reviews-list'e innerHTML yazar → MutationObserver yakalar
+document.addEventListener("DOMContentLoaded", () => {
+  const list = document.getElementById("hero-reviews-list");
+  if (!list) return;
+  let _done = false;
   const obs = new MutationObserver(() => {
-    const track = document.getElementById("hrc-slider-track");
-    // if app.js wrote review cards into hrc-list (old id), migrate them
-    const oldList = document.getElementById("hero-reviews-list");
-    if (oldList && oldList.children.length) {
-      const cards = Array.from(oldList.querySelectorAll(".hero-review-card"));
-      if (cards.length > 0 && !window._sliderReady) {
-        window._sliderReady = true;
-        // Extract data and build slides
-        const fakeReviews = cards.map(c => ({
-          name: c.querySelector(".hero-review-name")?.textContent || "Kullanıcı",
-          rating: (c.querySelector(".hero-review-stars")?.textContent || "★★★★★").length,
-          text: c.querySelector(".hero-review-text")?.textContent || ""
-        }));
-        oldList.style.display = "none";
-        initReviewsSlider(fakeReviews);
-      }
-    }
+    if (_done) return;
+    const cards = list.querySelectorAll(".hero-review-card");
+    if (!cards.length) return;
+    _done = true;
+    obs.disconnect();
+    const reviews = Array.from(cards).map(c => ({
+      username: c.querySelector(".hero-review-name")?.textContent?.trim() || "Kullanıcı",
+      avatar:   c.querySelector(".hero-review-avatar")?.textContent?.trim() || "😊",
+      rating:   (c.querySelector(".hero-review-stars")?.textContent || "★★★★★").replace(/[^★]/g,"").length,
+      message:  c.querySelector(".hero-review-text")?.textContent?.trim() || ""
+    }));
+    buildSlider(reviews);
   });
-  const reviewsCard = document.getElementById("hero-reviews");
-  if (reviewsCard) obs.observe(reviewsCard, { childList: true, subtree: true });
+  obs.observe(list, { childList: true, subtree: true });
+
+  // Timeout: API başarısız olursa slider'ı gizle
+  setTimeout(() => {
+    if (!_done) {
+      const section = document.getElementById("hero-reviews");
+      if (section) section.style.display = "none";
+    }
+  }, 8000);
 });
 </script>
 
