@@ -74,7 +74,7 @@
     <button class="overlay-close" onclick="closeOverlay('code-overlay')">✕</button>
     <div class="overlay-logo">◈ Gearly</div>
     <h2>🔑 Kodunu Gir</h2>
-    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun satın al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
+    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:1.25rem;">Erişim kodunu girerek oyun kodunu al <em>veya</em> daha önce aldığın oyunu görüntüle.</p>
     <div class="field-group">
       <label>Erişim Kodu</label>
       <input type="text" id="redeem-code-input" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="35" style="text-transform:uppercase;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
@@ -148,7 +148,7 @@
 <main class="games-page-main">
   <div class="games-page-header">
     <h1>🎮 Tüm Oyunlar</h1>
-    <p>Gearly kütüphanesindeki tüm oyunları keşfet ve satın al</p>
+    <p>Gearly kütüphanesindeki tüm oyunları keşfet ve doğrula.</p>
   </div>
 
   <div class="games-page-top">
@@ -349,7 +349,7 @@ function renderGamesPage(games) {
         <div class="game-platform">${g.platform || 'PC / Steam'}</div>
         <div class="game-name">${g.name}</div>
         <div class="game-price">${g.price || 'Hesap'}</div>
-        <div class="game-buy-btn">Satın Al →</div>
+        <div class="game-buy-btn">Kodu Doğrula→</div>
       </div>
     </div>
   `;
