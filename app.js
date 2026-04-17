@@ -69,7 +69,7 @@ async function loadHeroReviews() {
     const list = document.getElementById("hero-reviews-list");
     if (!list) return;
     if (data.success && data.reviews && data.reviews.length) {
-      const visible = data.reviews.slice(0, 3);
+      const visible = data.reviews.slice(0, 9);
       list.innerHTML = visible.map((r, i) => `
         <div class="hero-review-card" style="animation-delay:${i*0.15}s">
           <div class="hero-review-avatar">${r.avatar||'😊'}</div>
@@ -101,8 +101,8 @@ function showIntroAnimation() {
   const overlay = document.createElement("div");
   overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:#06080f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;";
   overlay.innerHTML = `
-    <div style="font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#00d2ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:introIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0;">⬡ GameVault</div>
-    <div style="font-size:0.85rem;color:#3a4560;letter-spacing:3px;text-transform:uppercase;animation:introIn 0.8s 0.3s forwards;opacity:0;">Dijital Oyun Mağazası</div>
+    <div style="font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#00d2ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:introIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0;">◈ Gearly.com.tr</div>
+    <div style="font-size:0.85rem;color:#3a4560;letter-spacing:3px;text-transform:uppercase;animation:introIn 0.8s 0.3s forwards;opacity:0;">Dijital Oyun Doğrulama Sitesi</div>
     <style>@keyframes introIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}#intro-overlay{animation:introFade 0.6s 2s forwards}@keyframes introFade{to{opacity:0;pointer-events:none}}</style>
   `;
   overlay.id = "intro-overlay";
@@ -852,7 +852,7 @@ async function loadSupportData() {
             <div class="sri-header">
               <div class="sri-avatar">GV</div>
               <div class="sri-meta">
-                <span class="sri-name">GameVault Destek</span>
+                <span class="sri-name">Gearly.com.tr Destek</span>
                 <span class="sri-time">${formatDate(t.repliedAt || t.createdAt)}</span>
               </div>
               ${t.extraGranted ? '<span class="sri-grant-badge">+3 Hak Verildi ✓</span>' : ''}
