@@ -2462,3 +2462,8 @@ body.has-sel-banner .games-page-main {
   .hf-icon { font-size: 1.3rem; }
   .hf-label { font-size: 10px; }
 }
+.aaah4{
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 900; color: var(--text);
+}
